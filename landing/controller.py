@@ -4,4 +4,4 @@ landing = Blueprint("landing", __name__)
 
 @landing.route('/')
 def index():
-    return "lol"
+    return "May the twenty fourth be with you! :)"
