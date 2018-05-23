@@ -19,8 +19,16 @@ class ProductionConfig(Config):
 
     DEBUG = False
 
+class LocalServerConfig(Config):
+    """
+    Local server instance configurations
+    """
+
+    DEBUG = False
+
 
 app_config = {
     'development': DevelopmentConfig,
-    'production': ProductionConfig
+    'production': ProductionConfig,
+    'local': LocalServerConfig
 }

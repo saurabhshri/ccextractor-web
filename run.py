@@ -5,14 +5,20 @@ from flask import Flask
 
 # modules and internal imports
 from config import app_config
+from database import db
+
 from landing.controller import landing
+from mod_auth.controller import mod_auth
 
 #creating Flask app object
 app = Flask(__name__, instance_relative_config=True)
+db.init_app(app)
 
+#creating flask-sqlaclchemy (db) object
 
 # Registering blueprint for all modules
 app.register_blueprint(landing)
+app.register_blueprint(mod_auth)
 
 #creating configuration : pass 'development' or 'production' as parameter while running app
 def createConfig():
@@ -29,6 +35,9 @@ def createConfig():
     app.config.from_object(app_config[configuration_environment])
     app.config.from_pyfile('config.py') # secret configurations
 
+@app.before_first_request
+def before_first_request():
+    db.create_all()
 
 if __name__ == '__main__':
     createConfig()
