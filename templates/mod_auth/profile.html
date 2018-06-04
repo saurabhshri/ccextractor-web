@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %} Profile {{ super() }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <br />
+    <div class="">
+
+        {{ macros.display_flash_messages() }}
+
+        <h1> {{ user.username }}'s Profile</h1>
+
+        <div class="">
+            <div class="">
+                Username : {{ user.username }}
+            </div>
+            <div class="">
+                Name : {{ user.name }}
+            </div>
+            <div class="">
+                Email : {{ user.email }}
+            </div>
+            <div class="">
+                Account Type : {{ user.account_type }}
+            </div>
+            <div class="">
+                Registered On : {{ user.sign_up_timestamp }}
+            </div>
+            <div class="">
+                <p><a href="{{ url_for('.logout') }}">Log out.</a>.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
