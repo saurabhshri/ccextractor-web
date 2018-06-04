@@ -2,6 +2,8 @@ class Config(object):
     """
     Common configurations
     """
+    CONFIG_READING_TEST = "May the 24th be with you!"
+    TEMP_UPLOAD_FOLDER = "files/"
 
     # Put any configurations here that are common across all environments
 
