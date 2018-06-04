@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {{ super() }}
+    <div class="">
+        <div class="">
+            <p>Signup</p>
+        </div>
+    </div>
+    <form method="post" name="registrationForm" id="registrationForm" action="{{ url_for('.signup') }}">
+        {{ form.csrf_token }}
+        {{ macros.display_flash_messages() }}
+
+        <div class="">
+            <div class="medium-12 columns">
+                {{ macros.render_field(form.name) }}
+            </div>
+            <div class="medium-12 columns">
+                {{ macros.render_field(form.email) }}
+            </div>
+            <div class="medium-6 columns">
+                {{ macros.render_field(form.password) }}
+            </div>
+            <div class="medium-6 columns">
+                {{ macros.render_field(form.password_repeat) }}
+            </div>
+            <div class="medium-12 columns">
+                {{ macros.render_field(form.submit) }}
+            </div>
+             <div class="medium-12 columns">
+                <p>Existing account? <a href="{{ url_for('.login') }}">Log in here</a>.</p>
+            </div>
+        </div>
+    </form>
+{% endblock %}

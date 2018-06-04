@@ -1,0 +1,55 @@
+{%- import '_formHelper.html' as macros -%}
+
+<!DOCTYPE html>
+<html lang="en">
+
+{% block head %}
+<head>
+
+    <title>{% block title %} {% endblock %} - CCExtractor<sup>Web</sup></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{% block meta_description %}{% endblock %}">
+    <meta name="author" content="{% block meta_content %}{% endblock %}">
+
+    {% block css %}
+    <!-- Bootstrap core CSS -->
+    <link href=" {{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href=" {{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href=" {{ url_for('static', filename='css/button.css') }}" rel="stylesheet">
+    {% endblock %}
+
+</head>
+{% endblock %}
+
+
+<body>
+
+    <!-- Navigation Bar -->
+    {%- include 'navbar.html' -%}
+
+    <!-- Page Content -->
+    {% block body %}
+
+    {% endblock %}
+
+    <!-- Footer
+    {% block footer %}
+    <footer class="py-5 bg-dark footer">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy;</p>
+      </div>
+    </footer>
+    {% endblock %}
+    -->
+
+    <!-- Scripts -->
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% endblock %}
+</body>
+</html>

@@ -5,3 +5,9 @@ Jinja2==2.10
 MarkupSafe==1.0
 Werkzeug==0.14.1
 Flask-SQLAlchemy==2.3.1
+PyMySQL
+pytz
+tzlocal
+flask-wtf
+email_validator
+python-magic
