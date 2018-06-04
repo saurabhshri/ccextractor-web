@@ -16,5 +16,5 @@ class TestRunningApp(unittest.TestCase):
         app.run()
 
     def test_flask_application_is_up_and_running(self):
-        response = requests.get('http://localhost:5000')
+        response = app.test_client().get('/')
         self.assertEqual(response.status_code, 200)
