@@ -2,8 +2,8 @@
 ccextractor-web | forms.py
 
 Author   : Saurabh Shrivastava
-Email    : saurabh.shrivastava54@gmail.com
-Link     : https://github.com/saurabhshr
+Email    : saurabh.shrivastava54+ccextractorweb[at]gmail.com
+Link     : https://github.com/saurabhshri
 
 """
 import os

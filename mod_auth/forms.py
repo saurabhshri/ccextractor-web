@@ -2,13 +2,10 @@
 ccextractor-web | mod_auth/forms.py
 
 Author   : Saurabh Shrivastava
-Email    : saurabh.shrivastava54@gmail.com
-Link     : https://github.com/saurabhshr
+Email    : saurabh.shrivastava54+ccextractorweb[at]gmail.com
+Link     : https://github.com/saurabhshri
 
 Based on https://github.com/CCExtractor/sample-platform/blob/master/mod_auth/forms.py
-Author   : Willem Van Iseghem
-Email    : github@canihavesome.coffee
-Link     : https://github.com/canihavesomecoffee
 """
 
 from flask_wtf import FlaskForm
