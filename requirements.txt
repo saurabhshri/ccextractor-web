@@ -11,3 +11,4 @@ tzlocal
 flask-wtf
 email_validator
 python-magic
+blinker

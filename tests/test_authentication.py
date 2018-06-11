@@ -8,15 +8,19 @@ Link     : https://github.com/saurabhshri
 """
 import unittest
 from run import app, createConfig
-
+from tests.template_test_helper import captured_templates
 
 class TestSignUp(unittest.TestCase):
     def setUp(self):
         createConfig()
 
     def test_if_signup_form_renders(self):
-        response = app.test_client().get('/signup')
-        self.assertEqual(response.status_code, 200)
+        with captured_templates(app) as templates:
+            response = app.test_client().get('/signup')
+            self.assertEqual(response.status_code, 200)
+            assert len(templates) == 1
+            template, context = templates[0]
+            assert template.name == 'mod_auth/signup.html'
 
     def test_blank_email(self):
 
@@ -84,8 +88,12 @@ class TestLogIn(unittest.TestCase):
         createConfig()
 
     def test_if_login_form_renders(self):
-        response = app.test_client().get('/login')
-        self.assertEqual(response.status_code, 200)
+        with captured_templates(app) as templates:
+            response = app.test_client().get('/login')
+            self.assertEqual(response.status_code, 200)
+            assert len(templates) == 1
+            template, context = templates[0]
+            assert template.name == 'mod_auth/login.html'
 
     def test_blank_email(self):
 
