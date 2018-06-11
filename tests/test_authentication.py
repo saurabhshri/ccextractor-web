@@ -7,6 +7,7 @@ Link     : https://github.com/saurabhshri
 
 """
 import unittest
+import random, string
 from run import app, createConfig
 from tests.template_test_helper import captured_templates
 
@@ -67,6 +68,29 @@ class TestSignUp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Password is not filled in.', response.data)
         self.assertIn(b'Repeated password is not filled in.', response.data)
+
+    def test_invalid_password_length(self):
+
+        min_pwd_len = app.config['MIN_PWD_LEN']
+        if min_pwd_len is not 0:
+            password = ''.join(random.choice(string.ascii_letters) for x in range(min_pwd_len-1))
+
+            response = self.signup(name='Valid Name',
+                                     email = 'someone@example.com',
+                                     password=password,
+                                     password_repeat=password)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Password needs to be between', response.data)
+
+        max_pwd_len = app.config['MAX_PWD_LEN']
+        password = ''.join(random.choice(string.ascii_letters) for x in range(max_pwd_len+1))
+
+        response = self.signup(name='Valid Name',
+                               email='someone@example.com',
+                               password=password,
+                               password_repeat=password)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Password needs to be between', response.data)
 
     def test_repeat_password_not_matching(self):
 
