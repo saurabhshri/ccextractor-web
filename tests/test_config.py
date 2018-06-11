@@ -11,9 +11,10 @@ import unittest
 from run import app, createConfig
 
 class TestConfig(unittest.TestCase):
-    def test_if_config_is_being_read(self):
+    def setUp(self):
         createConfig()
 
+    def test_if_config_is_being_read(self):
         #config.py
         self.assertEqual(app.config['CONFIG_READING_TEST'], 'May the 24th be with you!')
 

@@ -11,7 +11,8 @@ from run import app, createConfig
 
 
 class TestSignUp(unittest.TestCase):
-    createConfig()
+    def setUp(self):
+        createConfig()
 
     def test_if_signup_form_renders(self):
         response = app.test_client().get('/signup')
@@ -79,7 +80,8 @@ class TestSignUp(unittest.TestCase):
                                                            password_repeat=password_repeat), follow_redirects=True)
 
 class TestLogIn(unittest.TestCase):
-    createConfig()
+    def setUp(self):
+        createConfig()
 
     def test_if_login_form_renders(self):
         response = app.test_client().get('/login')
@@ -109,14 +111,16 @@ class TestLogIn(unittest.TestCase):
                                                           password=password, submit=submit), follow_redirects=True)
 
 class TestLogOut(unittest.TestCase):
-    createConfig()
+    def setUp(self):
+        createConfig()
 
     def test_if_logout_redirects_to_login(self):
         response = app.test_client().get('/logout')
         self.assertEqual(response.status_code, 302)
 
 class TestProfile(unittest.TestCase):
-    createConfig()
+    def setUp(self):
+        createConfig()
 
     def test_if_access_denied_without_login(self):
         response = app.test_client().get('/profile')
