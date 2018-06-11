@@ -34,7 +34,7 @@ def generate_username(email):
             count_suffix += 1
         else:
             break
-            
+
     return username
 
 def login_required(f):
@@ -53,14 +53,12 @@ def login_required(f):
 def signup():
 
     if g.user is not None:
-        print(g.user.username)
         flash('Currently logged in as ' + g.user.username, 'success')
         return redirect(url_for('.profile'))
 
     form = SignupForm()
     received_email_address = form.email.data
     if form.validate_on_submit():
-        print(received_email_address)
         try:
             v = validate_email(received_email_address)
             email = v["email"]  # replace with normalized forms
@@ -79,7 +77,7 @@ def signup():
             return redirect(url_for('.login'))
 
         except EmailNotValidError as e:
-            flash('Invalid email address! ' + str(e), 'error')
+            flash('Entered value is not a valid email address. ' + str(e), 'error')
 
     return render_template("mod_auth/signup.html", form=form)
 
