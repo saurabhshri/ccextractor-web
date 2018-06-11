@@ -24,7 +24,17 @@ def before_app_request():
     g.user = Users.query.filter(Users.id == user_id).first()
 
 def generate_username(email):
-    username = email.split('@')[0]
+    #TODO : Disallow a set of usernames such as 'admin'
+    base_username = username = email.split('@')[0]
+    count_suffix = 1
+    while True:
+        user = Users.query.filter_by(username=username).first()
+        if user is not None:
+            username = '{base_username}-{count_suffix}'.format(base_username=base_username, count_suffix=str(count_suffix))
+            count_suffix += 1
+        else:
+            break
+            
     return username
 
 def login_required(f):

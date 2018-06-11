@@ -17,9 +17,9 @@ def valid_password(form, field):
     pass_size = len(field.data)
     if pass_size == 0:
         raise ValidationError('The password can not be empty!')
-    if pass_size < 8 or pass_size > 50:
+    if pass_size < 8 or pass_size > 128:
         raise ValidationError(
-            'Password needs to be between 8 and 50 characters long (you entered {char})'.format(char=pass_size)
+            'Password needs to be between 8 and 128 characters long (you entered {char})'.format(char=pass_size)
         )
 
 class SignupForm(FlaskForm):
