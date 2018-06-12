@@ -4,6 +4,8 @@ class Config(object):
     """
     CONFIG_READING_TEST = "May the 24th be with you!"
     TEMP_UPLOAD_FOLDER = "files/"
+    MIN_PWD_LEN = 8
+    MAX_PWD_LEN = 128
 
     # Put any configurations here that are common across all environments
 

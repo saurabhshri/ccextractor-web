@@ -2,12 +2,12 @@
 ccextractor-web | run.py
 
 Author   : Saurabh Shrivastava
-Email    : saurabh.shrivastava54@gmail.com
-Link     : https://github.com/saurabhshr
+Email    : saurabh.shrivastava54+ccextractorweb[at]gmail.com
+Link     : https://github.com/saurabhshri
 
 """
 
-import sys
+import sys, os
 
 # 3rd party imports
 from flask import Flask
@@ -31,16 +31,13 @@ app.register_blueprint(landing)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_dashboard)
 
-#creating configuration : pass 'development' / 'production' / 'local' as parameter while running app
+#creating configuration : set FLASK_ENV as 'development' / 'production' / 'local'
 def createConfig():
 
-    configuration_environment = "development"
-
-    if len(sys.argv) > 1:
-        configuration_environment = sys.argv[1]
+    configuration_environment = os.environ.get('FLASK_ENV', 'development')
 
     if configuration_environment not in app_config:
-        #print("Invalid Configuration, Possible Values : development/production. Setting to development.")
+        #print("Invalid Configuration, Possible Values : development/production/local. Setting to development.")
         configuration_environment = "development"
 
     app.config.from_object(app_config[configuration_environment])

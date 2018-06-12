@@ -2,8 +2,8 @@
 ccextractor-web | mod_auth/controller.py
 
 Author   : Saurabh Shrivastava
-Email    : saurabh.shrivastava54@gmail.com
-Link     : https://github.com/saurabhshr
+Email    : saurabh.shrivastava54+ccextractorweb[at]gmail.com
+Link     : https://github.com/saurabhshri
 
 """
 
@@ -24,7 +24,17 @@ def before_app_request():
     g.user = Users.query.filter(Users.id == user_id).first()
 
 def generate_username(email):
-    username = email.split('@')[0]
+    #TODO : Disallow a set of usernames such as 'admin'
+    base_username = username = email.split('@')[0]
+    count_suffix = 1
+    while True:
+        user = Users.query.filter_by(username=username).first()
+        if user is not None:
+            username = '{base_username}-{count_suffix}'.format(base_username=base_username, count_suffix=str(count_suffix))
+            count_suffix += 1
+        else:
+            break
+
     return username
 
 def login_required(f):
@@ -43,14 +53,12 @@ def login_required(f):
 def signup():
 
     if g.user is not None:
-        print(g.user.username)
         flash('Currently logged in as ' + g.user.username, 'success')
         return redirect(url_for('.profile'))
 
     form = SignupForm()
     received_email_address = form.email.data
     if form.validate_on_submit():
-        print(received_email_address)
         try:
             v = validate_email(received_email_address)
             email = v["email"]  # replace with normalized forms
@@ -69,7 +77,7 @@ def signup():
             return redirect(url_for('.login'))
 
         except EmailNotValidError as e:
-            flash('Invalid email address! ' + str(e), 'error')
+            flash('Entered value is not a valid email address. ' + str(e), 'error')
 
     return render_template("mod_auth/signup.html", form=form)
 
