@@ -161,3 +161,17 @@ class TestProfile(unittest.TestCase):
     def test_if_without_login_redirected_to_login_page(self):
         response = app.test_client().get('/profile')
         self.assertIn(b'<a href="/login?next=mod_auth.profile">/login?next=mod_auth.profile</a>', response.data)
+
+class TestVerify(unittest.TestCase):
+    def setUp(self):
+        createConfig()
+
+    def test_if_verifying_using_wrong_information(self):
+        response = app.test_client().get('/verify/invalid@email.com/incorrect-code')
+        self.assertIn(b'Verification failed!', response.data)
+
+        response = app.test_client().get('/verify/')
+        self.assertEqual(response.status_code, 404)
+
+        response = app.test_client().get('/verify/email@email.com/')
+        self.assertEqual(response.status_code, 404)
