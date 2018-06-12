@@ -58,27 +58,23 @@ def signup():
 
     form = SignupForm()
     if form.validate_on_submit():
-        try:
-            user = Users.query.filter_by(email=form.email.data).first()
-            if user is None:
-                user = Users(username=generate_username(form.email.data),
-                             email=form.email.data,
-                             password=form.password.data,
-                             name=form.name.data)
-                db.session.add(user)
-                db.session.commit()
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Users(username=generate_username(form.email.data),
+                         email=form.email.data,
+                         password=form.password.data,
+                         name=form.name.data)
+            db.session.add(user)
+            db.session.commit()
 
-                send_verification_mail(user.email, user.verification_code)
+            send_verification_mail(user.email, user.verification_code)
 
-                flash('Signup Complete! Please verify your email address to activate your account!', 'success')
+            flash('Signup Complete! Please verify your email address to activate your account!', 'success')
 
-            else:
-                flash('Email is already registered!', 'error')
+        else:
+            flash('Email is already registered!', 'error')
 
-            return redirect(url_for('.login'))
-
-        except EmailNotValidError as e:
-            flash('Entered value is not a valid email address. ' + str(e), 'error')
+        return redirect(url_for('.login'))
 
     return render_template("mod_auth/signup.html", form=form)
 
