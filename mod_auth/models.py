@@ -11,6 +11,8 @@ import enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import pytz
+import time
+import hashlib
 from tzlocal import get_localzone
 from database import db
 
@@ -30,6 +32,8 @@ class Users(db.Model):
     account_type = db.Column(db.Enum(AccountType))
     files = db.relationship('Files', backref='uploader', lazy=True)
     sign_up_timestamp = db.Column(db.DateTime(timezone=True))
+    verified = db.Column(db.Boolean, nullable=False)
+    verification_code = db.Column(db.String(255), unique=True)
 
     def __init__(self, username, email, password, name = None, account_type = AccountType.user, sign_up_timestamp = None):
         self.name = name
@@ -48,6 +52,12 @@ class Users(db.Model):
             sign_up_timestamp = pytz.utc.localize(sign_up_timestamp, is_dst=None)
 
         self.sign_up_timestamp = sign_up_timestamp
+        self.verified = False
+
+        hash = hashlib.sha256()
+        hash.update(('{email}{salt}'.format(email=email, salt=time.time().hex()).encode('utf-8')))
+
+        self.verification_code = hash.hexdigest()
 
     def __repr__(self):
         return '<User {username}>'.format(username=self.username)
@@ -97,6 +107,18 @@ class Users(db.Model):
 
     def has_role(self, account_type):
         return self.account_type == account_type or self.is_admin
+
+    def is_verified(self):
+        return self.verified
+
+    def verify(self, verification_code):
+        if verification_code == self.verification_code:
+            if self.verified is True:
+                return 'duplicate'
+            else:
+                self.verified = True
+                return 'success'
+        return 'fail'
 
     @db.reconstructor
     def may_the_timezone_be_with_it(self):

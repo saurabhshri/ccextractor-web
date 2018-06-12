@@ -9,9 +9,9 @@ Link     : https://github.com/saurabhshri
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g, abort
 from email_validator import validate_email, EmailNotValidError
+from mail import send_simple_message
 
 from database import db
-
 from functools import wraps
 
 from mod_auth.models import Users
@@ -57,19 +57,20 @@ def signup():
         return redirect(url_for('.profile'))
 
     form = SignupForm()
-    received_email_address = form.email.data
     if form.validate_on_submit():
         try:
-            v = validate_email(received_email_address)
-            email = v["email"]  # replace with normalized forms
             user = Users.query.filter_by(email=form.email.data).first()
             if user is None:
-
-                user = Users(username=generate_username(email), email=email, password=form.password.data,
+                user = Users(username=generate_username(form.email.data),
+                             email=form.email.data,
+                             password=form.password.data,
                              name=form.name.data)
                 db.session.add(user)
                 db.session.commit()
-                flash('Signup Complete! Please Login!', 'success')
+
+                send_verification_mail(user.email, user.verification_code)
+
+                flash('Signup Complete! Please verify your email address to activate your account!', 'success')
 
             else:
                 flash('Email is already registered!', 'error')
@@ -80,6 +81,16 @@ def signup():
             flash('Entered value is not a valid email address. ' + str(e), 'error')
 
     return render_template("mod_auth/signup.html", form=form)
+
+def send_verification_mail(email, verification_code):
+
+    from flask import current_app as app
+
+    verification_url = app.config['ROOT_URL'] + '/verify'
+    subject = "Please verify your email address for account activation."
+    body = render_template('mod_auth/verification_mail.html', url=verification_url, email=email, verification_code=verification_code)
+    print(send_simple_message(email, subject, str(body)))
+
 
 @mod_auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -102,15 +113,32 @@ def login():
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user and user.is_password_valid(form.password.data):
-            session['user_id'] = user.id
-            if len(redirect_location) == 0:
-                return redirect(url_for('.profile'))
-            else:
-                return redirect(url_for(redirect_location))
+            if user.is_verified():
+                session['user_id'] = user.id
+                if len(redirect_location) == 0:
+                    return redirect(url_for('.profile'))
+                else:
+                    return redirect(url_for(redirect_location))
 
-        flash('Wrong username or password', 'error')
+            else:
+                flash('Please verify your email and activate account first. Check your registered email.', 'error')
+        else:
+            flash('Wrong username or password', 'error')
+        return redirect(url_for('.login'))
 
     return render_template("mod_auth/login.html", form=form, next=redirect_location)
+
+
+@mod_auth.route('/verify/<string:email>/<string:verification_code>', methods=['GET', 'POST'])
+def verify_account(email, verification_code):
+    user = Users.query.filter_by(email=email).first()
+    if user is not None:
+        verification_status = user.verify(verification_code)
+        db.session.add(user)
+        db.session.commit()
+    else:
+        verification_status = 'fail'
+    return render_template('mod_auth/verify.html', verification_status=verification_status)
 
 @mod_auth.route('/profile', methods=['GET', 'POST'])
 @login_required

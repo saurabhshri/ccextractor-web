@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {{ super() }}
+    <div class="">
+        <div class="">
+            {% if verification_status == 'fail' %}
+                <div class="alert alert-danger fade in" style="display: inline; border: none;">
+                    <strong>Verification failed!</strong> Incorrect email address/verification code.
+
+            {% elif verification_status == 'duplicate' %}
+                <div class="alert alert-warning fade in" style="display: inline; border: none;">
+                    <strong>Duplicate attempt!</strong> Email address is already verified.
+
+            {% elif verification_status == 'success' %}
+                <div class="alert alert-success fade in" style="display: inline; border: none;">
+                    <strong>Verification successful: </strong> Email address is verified. Please log in.
+
+            {% else %}
+                <div class="alert alert-info fade in" style="display: inline; border: none;">
+                    <strong>Opps: </strong> Something went wrong while processing this request.
+
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('.login') }}">Log in here</a>
+
+{% endblock %}
