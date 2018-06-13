@@ -92,7 +92,7 @@ def send_verification_mail(email, verification_code, expires):
     subject = "Please verify your email address for account activation."
     body = render_template('mod_auth/verification_mail.html', url=verification_url, email=email,
                            verification_code=verification_code, expires=expires)
-    print(send_simple_message(email, subject, str(body)))
+    return send_simple_message(email, subject, str(body))
 
 @mod_auth.route('/verify/<string:email>/<string:received_verification_code>/<int:expires>', methods=['GET', 'POST'])
 def verify_account(email, received_verification_code, expires):
@@ -106,6 +106,7 @@ def verify_account(email, received_verification_code, expires):
         expected_verification_code = generate_verification_code("{email}{expires}".format(email=email, expires=expires))
 
         if hmac.compare_digest(expected_verification_code, received_verification_code):
+            flash('Verification complete! Proceed to signup.', 'success')
             user = Users.query.filter_by(email=email).first()
             if user is None:
                 form = SignupForm()
@@ -119,7 +120,7 @@ def verify_account(email, received_verification_code, expires):
 
                     send_signup_confirmation_mail(user.email)
 
-                    flash('Signup Complete! Please Logisn to continue.', 'success')
+                    flash('Signup Complete! Please Login to continue.', 'success')
                 else:
                     return render_template("mod_auth/verify.html", form=form, email=email)
             else:
@@ -136,7 +137,7 @@ def verify_account(email, received_verification_code, expires):
 def send_signup_confirmation_mail(email):
     subject = "Account creation successful!"
     body = render_template('mod_auth/signup_confirmation.html')
-    print(send_simple_message(email, subject, str(body)))
+    return send_simple_message(email, subject, str(body))
 
 @mod_auth.route('/login', methods=['GET', 'POST'])
 def login():

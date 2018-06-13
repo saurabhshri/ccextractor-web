@@ -7,15 +7,17 @@ Link     : https://github.com/saurabhshri
 
 """
 import unittest
-import random, string
+import time
 from run import app, createConfig
 from tests.template_test_helper import captured_templates
 
-class TestSignUp(unittest.TestCase):
+from mod_auth.controller import generate_verification_code, send_verification_mail, send_signup_confirmation_mail
+
+class TestEmailSignUp(unittest.TestCase):
     def setUp(self):
         createConfig()
 
-    def test_if_signup_form_renders(self):
+    def test_if_email_signup_form_renders(self):
         with captured_templates(app) as templates:
             response = app.test_client().get('/signup')
             self.assertEqual(response.status_code, 200)
@@ -24,17 +26,11 @@ class TestSignUp(unittest.TestCase):
             assert template.name == 'mod_auth/signup.html'
 
     def test_blank_email(self):
-
-        response = self.signup(name='Valid Name',
-                                 email = '',
-                                 password='somepassword',
-                                 password_repeat='differentpassword')
+        response = self.signup_email(email = '')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Email address is not filled in', response.data)
 
-
     def test_invalid_email_address(self):
-
         invalid_email_address = ['plainaddress',
                                  '#@%^%#$@#$@#.com',
                                  '@domain.com',
@@ -46,60 +42,67 @@ class TestSignUp(unittest.TestCase):
                                  'email@111.222.333.44444']
 
         for email in invalid_email_address:
-            response = self.signup(name='Valid Name',
-                                   email=email,
-                                   password='somepassword',
-                                   password_repeat='somepassword')
+            response = self.signup_email(email)
             self.assertEqual(response.status_code, 200)
             self.assertIn(b'Entered value is not a valid email address.', response.data)
 
-    def test_blank_password(self):
+    def test_sending_verification_mail(self):
+        with app.app_context():
+            email = 'someone@example.com'
+            expires = int(time.time()) + 86400
+            verification_code = generate_verification_code("{email}{expires}".format(email=email, expires=expires))
+            response = send_verification_mail(email, verification_code, expires)
+            self.assertEqual(response.status_code, 401)
 
-        response = self.signup(name='Valid Name',
-                                 email = 'someone@example.com',
-                                 password='',
-                                 password_repeat='')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Password is not filled in.', response.data)
-        self.assertIn(b'Repeated password is not filled in.', response.data)
+    def signup_email(self, email):
+        return app.test_client().post('/signup', data=dict(email=email), follow_redirects=True)
 
-    def test_invalid_password_length(self):
+class TestVerify(unittest.TestCase):
+    def setUp(self):
+        createConfig()
 
-        min_pwd_len = app.config['MIN_PWD_LEN']
-        if min_pwd_len is not 0:
-            password = ''.join(random.choice(string.ascii_letters) for x in range(min_pwd_len-1))
+    def test_if_verifying_using_empty_information(self):
+        response = app.test_client().get('/verify/')
+        self.assertEqual(response.status_code, 404)
 
-            response = self.signup(name='Valid Name',
-                                     email = 'someone@example.com',
-                                     password=password,
-                                     password_repeat=password)
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b'Password needs to be between', response.data)
+        response = app.test_client().get('/verify/email@email.com/')
+        self.assertEqual(response.status_code, 404)
 
-        max_pwd_len = app.config['MAX_PWD_LEN']
-        password = ''.join(random.choice(string.ascii_letters) for x in range(max_pwd_len+1))
+    def test_if_verification_link_expired(self):
+        now = int(time.time())
+        link_expired_at = now - 3600
+        response = app.test_client().get('/verify/someone@example.com/verificationcode/{expires}'.format(expires=link_expired_at), follow_redirects=True)
+        self.assertIn(b'verification link is expired', response.data)
 
-        response = self.signup(name='Valid Name',
-                               email='someone@example.com',
-                               password=password,
-                               password_repeat=password)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Password needs to be between', response.data)
+    def test_if_verification_unssuccessul(self):
+        with app.app_context():
+            email = 'someone@example.com'
+            expires = int(time.time()) + 86400
+            fake_expire = int(time.time()) + 3600
+            verification_code = generate_verification_code("{email}{expires}".format(email=email, expires=expires))
 
-    def test_repeat_password_not_matching(self):
+            response = app.test_client().get('/verify/{email}/{verification_code}/{expires}'.format(email='wrong@email.com', verification_code=verification_code, expires=expires), follow_redirects=True)
+            self.assertIn(b'Verification failed!', response.data)
 
-        response = self.signup(name='Valid Name',
-                                 email='someone@example.com',
-                                 password='somepassword',
-                                 password_repeat='differentpassword')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'The password needs to match the new password.', response.data)
+            response = app.test_client().get('/verify/{email}/{verification_code}/{expires}'.format(email=email, verification_code='wrong-code', expires=expires), follow_redirects=True)
+            self.assertIn(b'Verification failed!', response.data)
 
-    def signup(self, name, email, password, password_repeat):
-        return app.test_client().post('/signup', data=dict(name=name,
-                                                           email=email,
-                                                           password=password,
-                                                           password_repeat=password_repeat), follow_redirects=True)
+            response = app.test_client().get('/verify/{email}/{verification_code}/{expires}'.format(email=email, verification_code=verification_code, expires=fake_expire), follow_redirects=True)
+            self.assertIn(b'Verification failed!', response.data)
+
+    def test_if_verification_successful(self):
+        with app.app_context():
+            email = 'someone@example.com'
+            expires = int(time.time()) + 86400
+            verification_code = generate_verification_code("{email}{expires}".format(email=email, expires=expires))
+            response = app.test_client().get('/verify/{email}/{verification_code}/{expires}'.format(email=email, verification_code=verification_code, expires=expires), follow_redirects=True)
+            self.assertIn(b'Signing up using email', response.data)
+
+    def test_sending_confirmation_mail(self):
+        with app.app_context():
+            email = 'someone@example.com'
+            response = send_signup_confirmation_mail(email)
+            self.assertEqual(response.status_code, 401)
 
 class TestLogIn(unittest.TestCase):
     def setUp(self):
@@ -148,17 +151,3 @@ class TestProfile(unittest.TestCase):
     def test_if_without_login_redirected_to_login_page(self):
         response = app.test_client().get('/profile')
         self.assertIn(b'<a href="/login?next=mod_auth.profile">/login?next=mod_auth.profile</a>', response.data)
-
-class TestVerify(unittest.TestCase):
-    def setUp(self):
-        createConfig()
-
-    def test_if_verifying_using_wrong_information(self):
-        response = app.test_client().get('/verify/invalid@email.com/incorrect-code')
-        self.assertIn(b'Verification failed!', response.data)
-
-        response = app.test_client().get('/verify/')
-        self.assertEqual(response.status_code, 404)
-
-        response = app.test_client().get('/verify/email@email.com/')
-        self.assertEqual(response.status_code, 404)
