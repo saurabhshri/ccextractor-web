@@ -27,13 +27,16 @@ def valid_password(form, field):
             (min_pwd_len=min_pwd_len, max_pwd_len=max_pwd_len, char=pass_size)
         )
 
-class SignupForm(FlaskForm):
-    name = StringField('Name', [DataRequired(message='Name is not filled in.')])
+class SignupEmailForm(FlaskForm):
     email = EmailField('Email', [DataRequired(message='Email address is not filled in.'),
                                  Email(message='Entered value is not a valid email address.')])
+    submit = SubmitField('Register')
+
+class SignupForm(FlaskForm):
+    name = StringField('Name', [DataRequired(message='Name is not filled in.')])
     password = PasswordField('Password', [DataRequired(message='Password is not filled in.'), valid_password])
     password_repeat = PasswordField('Repeat password', [DataRequired(message='Repeated password is not filled in.')])
-    submit = SubmitField('Register')
+    submit = SubmitField('Complete Signup.')
 
     @staticmethod
     def validate_password_repeat(form, field):
