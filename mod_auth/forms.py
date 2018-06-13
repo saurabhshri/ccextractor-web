@@ -12,7 +12,6 @@ from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, Email, ValidationError
-from email_validator import validate_email, EmailNotValidError
 
 
 def valid_password(form, field):
@@ -28,18 +27,16 @@ def valid_password(form, field):
             (min_pwd_len=min_pwd_len, max_pwd_len=max_pwd_len, char=pass_size)
         )
 
-def valid_email(form, field):
-    try:
-        v = validate_email(field.data)
-    except EmailNotValidError as e:
-            raise ValidationError('Entered value is not a valid email address. ' + str(e))
+class SignupEmailForm(FlaskForm):
+    email = EmailField('Email', [DataRequired(message='Email address is not filled in.'),
+                                 Email(message='Entered value is not a valid email address.')])
+    submit = SubmitField('Register')
 
 class SignupForm(FlaskForm):
     name = StringField('Name', [DataRequired(message='Name is not filled in.')])
-    email = EmailField('Email', [DataRequired(message='Email address is not filled in'), valid_email])
     password = PasswordField('Password', [DataRequired(message='Password is not filled in.'), valid_password])
     password_repeat = PasswordField('Repeat password', [DataRequired(message='Repeated password is not filled in.')])
-    submit = SubmitField('Register')
+    submit = SubmitField('Complete Signup.')
 
     @staticmethod
     def validate_password_repeat(form, field):
@@ -47,7 +44,8 @@ class SignupForm(FlaskForm):
             raise ValidationError('The password needs to match the new password.')
 
 class LoginForm(FlaskForm):
-    email = EmailField('Email', [DataRequired(message='Email address is not filled in.'), valid_email])
+    email = EmailField('Email', [DataRequired(message='Email address is not filled in.'),
+                                 Email(message='Entered value is not a valid email address.')])
     password = PasswordField('Password', [DataRequired(message='Password cannot be empty.')])
     submit = SubmitField('Login')
 

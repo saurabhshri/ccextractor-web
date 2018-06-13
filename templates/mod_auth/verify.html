@@ -2,18 +2,30 @@
 
 {% block body %}
     {{ super() }}
+
+
     <div class="">
         <div class="">
-            <p>Signup</p>
+            <p>Complete Signup</p>
         </div>
     </div>
-    <form method="post" name="emailRegistrationForm" id="emailRegistrationForm" action="{{ url_for('.signup') }}">
+
+    <span>
+        <p> Signing up using email : {{ email }}</p>
+    </span>
+    <form method="post" name="registrationForm" id="registrationForm">
         {{ form.csrf_token }}
         {{ macros.display_flash_messages() }}
 
         <div class="">
             <div class="medium-12 columns">
-                {{ macros.render_field(form.email) }}
+                {{ macros.render_field(form.name) }}
+            </div>
+            <div class="medium-6 columns">
+                {{ macros.render_field(form.password) }}
+            </div>
+            <div class="medium-6 columns">
+                {{ macros.render_field(form.password_repeat) }}
             </div>
             <div class="medium-12 columns">
                 {{ macros.render_field(form.submit) }}
@@ -23,4 +35,5 @@
             </div>
         </div>
     </form>
+
 {% endblock %}
