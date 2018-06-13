@@ -139,9 +139,8 @@ def verify_account(email, verification_code):
 @mod_auth.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    user_id = session.get('user_id', 0)
-    g.user = Users.query.filter(Users.id == user_id).first()
-    return render_template("mod_auth/profile.html", user=g.user)
+    files = g.user.files
+    return render_template("mod_auth/profile.html", user=g.user, files=files)
 
 @mod_auth.route('/logout')
 def logout():

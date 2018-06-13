@@ -47,6 +47,9 @@ def createConfig():
 def before_first_request():
     db.create_all()
 
+    #create directories if they don't exist
+    os.makedirs(os.path.dirname(os.path.join(app.config['TEMP_UPLOAD_FOLDER'])), exist_ok=True)
+
 if __name__ == '__main__':
     createConfig()
     app.run()

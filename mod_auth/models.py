@@ -16,11 +16,18 @@ import hashlib
 from tzlocal import get_localzone
 from database import db
 
+
 class AccountType(enum.Enum):
     admin = "admin",
     moderator = "moderator"
     user = "user"
     bot = "bot"
+
+
+file_access = db.Table('file_access',
+    db.Column('file_id', db.Integer, db.ForeignKey('uploaded_files.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+)
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -30,7 +37,7 @@ class Users(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     account_type = db.Column(db.Enum(AccountType))
-    files = db.relationship('Files', backref='uploader', lazy=True)
+    files = db.relationship('UploadedFiles', secondary='file_access', backref=db.backref('user', lazy='dynamic'))
     sign_up_timestamp = db.Column(db.DateTime(timezone=True))
     verified = db.Column(db.Boolean, nullable=False)
     verification_code = db.Column(db.String(255), unique=True)

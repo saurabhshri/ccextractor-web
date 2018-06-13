@@ -26,6 +26,13 @@
             <div class="">
                 Registered On : {{ user.sign_up_timestamp }}
             </div>
+
+            {% for file in files %}
+                <div class="">
+                    {{ file.original_name }} | {{ file.filename }} | {{   (file.size|int)/1000000 }} MB
+                </div>
+            {% endfor %}
+
             <div class="">
                 <p><a href="{{ url_for('.logout') }}">Log out.</a>.</p>
             </div>

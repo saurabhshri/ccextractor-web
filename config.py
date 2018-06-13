@@ -8,8 +8,6 @@ class Config(object):
     MIN_PWD_LEN = 8
     MAX_PWD_LEN = 128
 
-    # Put any configurations here that are common across all environments
-
 class DevelopmentConfig(Config):
     """
     Development configurations
