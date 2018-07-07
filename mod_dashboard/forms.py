@@ -11,14 +11,9 @@ import enum
 import magic
 import mimetypes
 
-
 from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField, TextAreaField, SelectField
+from wtforms import FileField, SubmitField, TextAreaField, SelectField, BooleanField
 from wtforms.validators import DataRequired, ValidationError
-
-class Parameters(enum.Enum):
-    version = "-v", "--v"
-    output = "-o"
 
 ALLOWED_EXTENSIONS = set(['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
 '.aet', '.aetx', '.ajp', '.ale', '.am', '.amc', '.amv', '.amx', '.anim', '.aqt', '.arcut', '.arf', '.asf', '.asx', '.avb',
@@ -53,13 +48,12 @@ class UploadForm(FlaskForm):
     accept = 'video/mp4, video/x-m4v, video/*, .bin, .raw'
 
     file = FileField('Select your file', [DataRequired(message='No file selected.')], render_kw={'accept': accept})
-    parameters = SelectField(
-        'Parameters',
-        [DataRequired(message='Select parameters')],
-        coerce=str,
-        choices=[(p.value) for p in Parameters]
-    )
+
+    parameters = SelectField('Parameters', [DataRequired(message='Select parameters')],coerce=str)
+    ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
+    platforms = SelectField('Platform', [DataRequired(message='Select platform')], coerce=str)
     remark = TextAreaField('Remark')
+    start_processing = BooleanField('Start Processing')
     submit = SubmitField('Upload file')
 
     @staticmethod

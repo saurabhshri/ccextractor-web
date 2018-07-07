@@ -16,7 +16,7 @@ from database import db
 
 
 class AccountType(enum.Enum):
-    admin = "admin",
+    admin = "admin"
     moderator = "moderator"
     user = "user"
     bot = "bot"
@@ -38,7 +38,7 @@ class Users(db.Model):
     files = db.relationship('UploadedFiles', secondary='file_access', backref=db.backref('user', lazy='dynamic'))
     sign_up_timestamp = db.Column(db.DateTime(timezone=True))
 
-    def __init__(self, username, email, password, name = None, account_type = AccountType.user, sign_up_timestamp = None):
+    def __init__(self, username, email, password, name=None, account_type=AccountType.user, sign_up_timestamp=None):
         self.name = name
         self.username = username
         self.email = email

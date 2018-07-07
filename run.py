@@ -10,7 +10,7 @@ Link     : https://github.com/saurabhshri
 import sys, os
 
 # 3rd party imports
-from flask import Flask
+from flask import Flask, g
 
 # modules and internal imports
 from config import app_config
@@ -43,9 +43,18 @@ def createConfig():
     app.config.from_object(app_config[configuration_environment])
     app.config.from_pyfile('config.py') # secret configurations
 
+def init_db():
+    from mod_dashboard.models import CCExtractorVersions
+    ccextractor = CCExtractorVersions.query.all()
+    if ccextractor is None:
+        ccextractor = CCExtractorVersions('20', '22222', 'lol/lol/lol', 'lol/lol/lol', 'lol/lol/lol')
+        db.session.add(ccextractor)
+        db.session.commit()
+
 @app.before_first_request
 def before_first_request():
     db.create_all()
+    init_db()
 
     #create directories if they don't exist
     os.makedirs(os.path.dirname(os.path.join(app.config['TEMP_UPLOAD_FOLDER'])), exist_ok=True)

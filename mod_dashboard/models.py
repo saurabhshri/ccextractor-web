@@ -7,11 +7,21 @@ Link     : https://github.com/saurabhshri
 
 """
 from database import db
+import enum
 
 from datetime import datetime
 import pytz
 from tzlocal import get_localzone
 
+class ProcessStauts(enum.Enum):
+    pending = 'pending'
+    processing = 'processing'
+    completed = 'completed'
+
+class Platforms(enum.Enum):
+    linux = 'linux'
+    windows = 'windows'
+    mac = 'mac'
 
 class UploadedFiles(db.Model):
     __tablename__ = 'uploaded_files'
@@ -22,18 +32,13 @@ class UploadedFiles(db.Model):
     filename = db.Column(db.String(140), nullable=False)
     size = db.Column(db.String(20))
     original_uploader = db.Column(db.Integer, nullable=False)
-    #user = db.relationship('Users', secondary='file_access', lazy='subquery', backref=db.backref('files', lazy=True)),
     upload_timestamp = db.Column(db.DateTime(timezone=True))
-    parameters = db.Column(db.Text())
-    remark = db.Column(db.Text(), nullable=False)
 
-    def __init__(self, original_name, hash, original_uploader, extension='', size='', parameters='', remark='', upload_timestamp=None):
+    def __init__(self, original_name, hash, original_uploader, extension='', size='', upload_timestamp=None):
         self.original_name = original_name
         self.hash = hash
         self.extension = extension
         self.original_uploader = original_uploader
-        self.parameters = parameters
-        self.remark = remark
         self.size = size
 
         tz = get_localzone()
@@ -50,4 +55,83 @@ class UploadedFiles(db.Model):
         self.filename = hash + extension
 
     def __repr__(self):
-        return '<Upload {id}>'.format(id=self.id)
+        return '<UploadedFile {id}>'.format(id=self.id)
+
+    @db.reconstructor
+    def may_the_timezone_be_with_it(self):
+        """
+        Localize the timestamp to utc
+        """
+        self.upload_timestamp = pytz.utc.localize(self.upload_timestamp, is_dst=None)
+
+
+class ProcessQueue(db.Model):
+    __tablename__ = 'process_queue'
+    id = db.Column(db.Integer, primary_key=True)
+    added_by_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    filename = db.Column(db.String(140), nullable=False)
+    ccexractor_version = db.Column(db.String(100), nullable=False)
+    platform = db.Column(db.Enum(Platforms))
+    parameters = db.Column(db.Text())
+    remarks = db.Column(db.Text())
+    queue_timestamp = db.Column(db.DateTime(timezone=True))
+    status = db.Column(db.Enum(ProcessStauts))
+
+    def __init__(self, added_by_user, filename, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, queue_timestamp=None):
+        self.added_by_user = added_by_user
+        self.filename = filename
+        self.parameters = parameters
+        self.remarks = remarks
+        self.status = status
+        self.platform = platform
+
+        tz = get_localzone()
+
+        if queue_timestamp is None:
+            queue_timestamp = tz.localize(datetime.now(), is_dst=None)
+            queue_timestamp = queue_timestamp.astimezone(pytz.UTC)
+
+        if queue_timestamp.tzinfo is None:
+            queue_timestamp = pytz.utc.localize(queue_timestamp, is_dst=None)
+
+        self.queue_timestamp = queue_timestamp
+
+        if ccextractor_version is None:
+            if platform is Platforms.linux:
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.linux_executable_path != None).order_by('-id').first()
+            elif platform is Platforms.windows:
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.windows_executable_path != None).order_by('-id').first()
+            else:
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.mac_executable_path != None).order_by('-id').first()
+            self.ccexractor_version = ccextractor_version.version
+        else:
+            self.ccexractor_version = ccextractor_version
+
+    def __repr__(self):
+        return '<ProcessQueue {id}>'.format(id=self.id)
+
+    @db.reconstructor
+    def may_the_timezone_be_with_it(self):
+        """
+        Localize the timestamp to utc
+        """
+        self.queue_timestamp = pytz.utc.localize(self.queue_timestamp, is_dst=None)
+
+class CCExtractorVersions(db.Model):
+    __tablename__ = 'ccextractor_version'
+    id = db.Column(db.Integer, primary_key=True)
+    version = db.Column(db.String(100), nullable=False)
+    commit = db.Column(db.String(64), nullable=False)
+    linux_executable_path = db.Column(db.Text())
+    windows_executable_path = db.Column(db.Text())
+    mac_executable_path = db.Column(db.Text())
+
+    def __init__(self, version, commit, linux_executable_path=None, windows_executable_path=None, mac_executable_path=None):
+        self.version = version
+        self.commit = commit
+        self.linux_executable_path = linux_executable_path
+        self.windows_executable_path = windows_executable_path
+        self.mac_executable_path = mac_executable_path
+
+    def __repr__(self):
+        return '<CExtractorVersion {id}>'.format(id=self.id)
