@@ -46,8 +46,9 @@ def createConfig():
 def init_db():
     from mod_dashboard.models import CCExtractorVersions
     ccextractor = CCExtractorVersions.query.all()
-    if ccextractor is None:
-        ccextractor = CCExtractorVersions('20', '22222', 'lol/lol/lol', 'lol/lol/lol', 'lol/lol/lol')
+    print(ccextractor)
+    if not ccextractor:
+        ccextractor = CCExtractorVersions('1', '22222', 'build/ccextractor', 'build/ccextractor', 'build/ccextractor')
         db.session.add(ccextractor)
         db.session.commit()
 

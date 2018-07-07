@@ -7,6 +7,8 @@ Link     : https://github.com/saurabhshri
 
 """
 import os
+import shutil
+import json
 import hashlib
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
 from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms
@@ -20,6 +22,41 @@ mod_dashboard = Blueprint("mod_dashboard", __name__)
 
 
 BUF_SIZE = 65536  # reading file in 64kb chunks
+
+@mod_dashboard.route('/report_progress', methods=['GET', 'POST'])
+def progress():
+    from flask import current_app as app
+
+    job_number = request.form['job_number']
+    queued_file = ProcessQueue.query.filter(ProcessQueue.id == job_number).first()
+    if queued_file is not None:
+        if request.form['token'] == queued_file.token:
+
+            if request.form['report_type'] == 'queue_status':
+                queued_file.status = request.form['status']
+                db.session.add(queued_file)
+                db.session.commit()
+
+            elif request.form['report_type'] == 'log':
+                uploaded_file = request.files['file']
+                if uploaded_file:
+                    filename = secure_filename(uploaded_file.filename)
+                    temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
+                    uploaded_file.save(temp_path)
+                    shutil.move(temp_path, os.path.join(app.config['LOGS_DIR']))
+
+            elif request.form['report_type'] == 'output':
+                uploaded_file = request.files['file']
+                if uploaded_file:
+                    filename = secure_filename(uploaded_file.filename)
+                    temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
+                    uploaded_file.save(temp_path)
+                    shutil.move(temp_path, os.path.join(app.config['OUTPUT_DIR']))
+
+        else:
+            return "Invalid token!"
+
+    return "Invalid request."
 
 @mod_dashboard.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -62,18 +99,23 @@ def upload():
                 db.session.commit()
                 file_db.user.append(g.user)
                 db.session.commit()
-                os.rename(temp_path, os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file_db.filename))
+
+                #TODO: Process video to get media info and store in an xml file
+
+                os.rename(temp_path, os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename))
                 flash('File uploaded.', 'success')
 
 
             file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
 
+            #TODO:Process parameters before adding to queue
+            paramters = form.parameters.data
             if form.start_processing.data is True:
                 rv = add_file_to_queue(added_by_user=g.user.id,
                                   filename=file.filename,
                                   ccextractor_version=form.ccextractor_version.data,
                                   platform=form.platforms.data,
-                                  parameters=form.parameters.data,
+                                  parameters=paramters,
                                   remarks=form.remark.data)
 
                 if rv['status'] == 'duplicate':
@@ -81,7 +123,8 @@ def upload():
                 else:
                     flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
 
-    return render_template('mod_dashboard/upload.html', form=form, accept=form.accept)
+    queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
+    return render_template('mod_dashboard/upload.html', form=form, accept=form.accept, queued_files=queued_files)
 
 def create_file_hash(path):
     hash = hashlib.sha256()
@@ -101,6 +144,7 @@ def file_exist(file_hash):
         return True
 
 def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, parameters, remarks):
+    from flask import current_app as app
     queued_file = ProcessQueue.query.filter((ProcessQueue.filename == filename) &
                                             (ProcessQueue.added_by_user == added_by_user) &
                                             (ProcessQueue.platform == platform) &
@@ -110,6 +154,26 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         queued_file = ProcessQueue(added_by_user, filename, ccextractor_version, platform, parameters, remarks)
         db.session.add(queued_file)
         db.session.commit()
+
+        job_file_path = app.config['JOBS_DIR'] + str(queued_file.id) + '.json'
+
+        ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.id == ccextractor_version).first()
+
+        queue_dict = { 'job_number': str(queued_file.id),
+                       'filename': filename,
+                       'parameters': parameters,
+                       'token': queued_file.token,
+                       'platform': platform,
+                       'executable_path': ccextractor.linux_executable_path
+        }
+
+        video_file_path = app.config['VIDEO_REPOSITORY'] + filename
+        rc = shutil.copy(video_file_path, app.config['JOBS_DIR'])
+        print(rc)
+        with open(job_file_path, 'w', encoding='utf8') as job_file:
+            content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+            job_file.write(content)
+
         return {'status': 'success', 'job_number': queued_file.id}
     else:
-        return {'status': 'duplicate', 'job_number': queued_file.id }
+        return {'status': 'duplicate', 'job_number': queued_file.id}

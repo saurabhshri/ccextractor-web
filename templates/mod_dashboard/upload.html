@@ -33,5 +33,10 @@
                 {{ macros.render_field(form.submit) }}
             </div>
         </div>
+
+        {% for job in queued_files %}
+            {{ job.id }} | {{ job.status.value }} | {{ job.filename }} <br>
+        {% endfor %}
+        </div>
     </form>
 {% endblock %}

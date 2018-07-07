@@ -13,6 +13,8 @@ from datetime import datetime
 import pytz
 from tzlocal import get_localzone
 
+from mod_auth.controller import generate_verification_code
+
 class ProcessStauts(enum.Enum):
     pending = 'pending'
     processing = 'processing'
@@ -76,6 +78,7 @@ class ProcessQueue(db.Model):
     remarks = db.Column(db.Text())
     queue_timestamp = db.Column(db.DateTime(timezone=True))
     status = db.Column(db.Enum(ProcessStauts))
+    token = db.Column(db.String(128), unique=True)
 
     def __init__(self, added_by_user, filename, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, queue_timestamp=None):
         self.added_by_user = added_by_user
@@ -106,6 +109,10 @@ class ProcessQueue(db.Model):
             self.ccexractor_version = ccextractor_version.version
         else:
             self.ccexractor_version = ccextractor_version
+
+        token = '{id}{timestamp}'.format(id=self.id, timestamp=self.queue_timestamp)
+
+        self.token = generate_verification_code(token)
 
     def __repr__(self):
         return '<ProcessQueue {id}>'.format(id=self.id)
