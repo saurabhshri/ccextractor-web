@@ -12,7 +12,7 @@ import magic
 import mimetypes
 
 from flask_wtf import FlaskForm
-from wtforms import FileField, SubmitField, TextAreaField, SelectField, BooleanField
+from wtforms import FileField, SubmitField, TextAreaField, SelectField, BooleanField, StringField
 from wtforms.validators import DataRequired, ValidationError
 
 ALLOWED_EXTENSIONS = set(['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
@@ -67,3 +67,12 @@ class UploadForm(FlaskForm):
         if len(extension) > 0 or guessed_extension is not None:
             if extension not in ALLOWED_EXTENSIONS or guessed_extension not in ALLOWED_EXTENSIONS:
                 raise ValidationError('Extension not allowed')
+
+
+class NewCCExtractorVersionForm(FlaskForm):
+    version = StringField('Version', [DataRequired(message='Version is not filled in.')])
+    commit = StringField('Commit', [DataRequired(message='Commit is not filled in.')])
+    linux_executable_path = StringField('Path to Linux executable file')
+    windows_executable_path = StringField('Path to Windows executable file')
+    mac_executable_path = StringField('Path to macOS executable file')
+    submit = SubmitField('Submit')

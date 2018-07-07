@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <div class="">
+        <div class="">
+            <p>KVM</p>
+        </div>
+    </div>
+
+
+    <div>
+
+    {% for vm in kvm %}
+        {{ vm.name }} | {{ vm.status }} | {{ vm.start_timestamp }} |
+
+        {% if vm.status != kvm_status.running%}
+            <a href="kvm-cmd/start/{{ vm.name }}">start</a>
+        {% elif vm.status == kvm_status.running %}
+            <a href="kvm-cmd/shutdown/{{ vm.name }}">shutdown</a> |
+            <a href="kvm-cmd/stop/{{ vm.name }}">stop</a>
+        {% endif %}
+
+        <br>
+
+    {% endfor %}
+    </div>
+
+{% endblock %}

@@ -52,6 +52,17 @@ def login_required(f):
 
     return decorated_function
 
+def check_account_type(account_types=None, parent_route=None):
+    def access_decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if g.user.account_type in account_types:
+                return f(*args, **kwargs)
+            flash('Your account does not have enough privileges to access this functionality.', 'error')
+            return redirect(url_for('mod_auth.profile'))
+        return decorated_function
+    return access_decorator
+
 
 @mod_auth.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -147,7 +158,6 @@ def login():
     redirect_location = request.args.get('next', '')
 
     if g.user is not None:
-        print(g.user.username)
         flash('Logged in as ' + g.user.username, 'success')
         if len(redirect_location) == 0:
             return redirect(url_for('.profile'))
@@ -178,6 +188,7 @@ def login():
 def profile():
     files = g.user.files
     return render_template("mod_auth/profile.html", user=g.user, files=files)
+
 
 @mod_auth.route('/logout')
 def logout():

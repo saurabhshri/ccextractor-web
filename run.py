@@ -19,6 +19,7 @@ from database import db
 from landing.controller import landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
+from mod_kvm.controller import mod_kvm
 
 #creating Flask app object
 app = Flask(__name__, instance_relative_config=True)
@@ -30,6 +31,8 @@ db.init_app(app)
 app.register_blueprint(landing)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_dashboard)
+app.register_blueprint(mod_kvm)
+
 
 #creating configuration : set FLASK_ENV as 'development' / 'production' / 'local'
 def createConfig():

@@ -12,9 +12,9 @@ import json
 import hashlib
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
 from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms
-from mod_dashboard.forms import UploadForm
-from mod_auth.controller import login_required
-from mod_auth.models import Users
+from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm
+from mod_auth.models import Users, AccountType
+from mod_auth.controller import login_required, check_account_type
 from werkzeug import secure_filename
 from database import db
 
@@ -58,9 +58,9 @@ def progress():
 
     return "Invalid request."
 
-@mod_dashboard.route('/upload', methods=['GET', 'POST'])
+@mod_dashboard.route('/dashboard', methods=['GET', 'POST'])
 @login_required
-def upload():
+def dashboard():
     from flask import current_app as app
     ccextractor = CCExtractorVersions.query.all()
     form = UploadForm()
@@ -125,6 +125,29 @@ def upload():
 
     queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
     return render_template('mod_dashboard/upload.html', form=form, accept=form.accept, queued_files=queued_files)
+
+@mod_dashboard.route('/admin', methods=['GET', 'POST'])
+@mod_dashboard.route('/admin-dashboard', methods=['GET', 'POST'])
+@login_required
+@check_account_type(account_types=[AccountType.admin])
+def admin():
+    ccextractor_form = NewCCExtractorVersionForm()
+    if ccextractor_form.validate_on_submit():
+        ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.commit == ccextractor_form.commit.data).first()
+        if ccextractor is not None:
+            flash('CCExtractor version with the commit already exists.', 'error')
+
+        else:
+            ccextractor = CCExtractorVersions(ccextractor_form.version.data, ccextractor_form.commit.data, ccextractor_form.linux_executable_path.data, ccextractor_form.windows_executable_path.data, ccextractor_form.mac_executable_path.data)
+            db.session.add(ccextractor)
+            db.session.commit()
+            flash('CCExtractor version added!', 'success')
+
+    ccextractor = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
+    queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
+    users = Users.query.order_by(db.desc(Users.id)).all()
+    return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form, ccextractor=ccextractor, queue=queue, users=users)
+
 
 def create_file_hash(path):
     hash = hashlib.sha256()

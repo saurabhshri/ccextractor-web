@@ -6,7 +6,7 @@
             <p>Upload File</p>
         </div>
     </div>
-    <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.upload', next=next) }}">
+    <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.dashboard', next=next) }}">
         {{ form.csrf_token }}
         {{ macros.display_flash_messages() }}
 

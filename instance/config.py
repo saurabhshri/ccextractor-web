@@ -10,4 +10,6 @@ VIDEO_REPOSITORY = "files/repository/"
 JOBS_DIR = 'files/mount/jobs/'
 LOGS_DIR = 'files/mount/logs/'
 OUTPUT_DIR = 'files/mount/output/'
-
+KVM_LINUX_NAME = 'ubuntu'
+KVM_WINDOWS_NAME = ''
+KVM_MAC_NAME = ''
