@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <div class="">
+        <div class="">
+            <p>Dashboard</p>
+        </div>
+    </div>
+
+    {%- include 'mod_dashboard/upload.html' -%}
+
+    {%- include 'mod_dashboard/job_queue.html'-%}
+
+    {%- include 'mod_dashboard/user_files.html'-%}
+{% endblock %}

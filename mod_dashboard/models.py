@@ -19,6 +19,8 @@ class ProcessStauts(enum.Enum):
     pending = 'pending'
     processing = 'processing'
     completed = 'completed'
+    error = 'error'
+    missing_file = 'file not found'
 
 class Platforms(enum.Enum):
     linux = 'linux'
@@ -116,6 +118,9 @@ class ProcessQueue(db.Model):
 
     def __repr__(self):
         return '<ProcessQueue {id}>'.format(id=self.id)
+
+    def get_output_extension(self):
+        return 'srt'
 
     @db.reconstructor
     def may_the_timezone_be_with_it(self):

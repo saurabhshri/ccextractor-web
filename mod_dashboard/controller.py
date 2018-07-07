@@ -10,9 +10,10 @@ import os
 import shutil
 import json
 import hashlib
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
+import collections
+from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms
-from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm
+from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
 from werkzeug import secure_filename
@@ -27,6 +28,7 @@ BUF_SIZE = 65536  # reading file in 64kb chunks
 def progress():
     from flask import current_app as app
 
+    #Resp = collections.namedtuple('Resp', ['stat', 'reason'])
     job_number = request.form['job_number']
     queued_file = ProcessQueue.query.filter(ProcessQueue.id == job_number).first()
     if queued_file is not None:
@@ -36,6 +38,8 @@ def progress():
                 queued_file.status = request.form['status']
                 db.session.add(queued_file)
                 db.session.commit()
+                #return Resp(stat='success', reason='')
+
 
             elif request.form['report_type'] == 'log':
                 uploaded_file = request.files['file']
@@ -44,6 +48,8 @@ def progress():
                     temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['LOGS_DIR']))
+                #return Resp(stat='success', reason='')
+
 
             elif request.form['report_type'] == 'output':
                 uploaded_file = request.files['file']
@@ -52,12 +58,56 @@ def progress():
                     temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['OUTPUT_DIR']))
+                #return Resp(stat='success', reason='')
+
 
         else:
-            return "Invalid token!"
+            return "Invalid Token"
+            #return Resp(stat='failed', reason='Invalid token')
 
-    return "Invalid request."
+    return "Invalid Request"
+    #return Resp(stat='failed', reason='Invalid request')
 
+@mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
+@login_required
+def new_job(filename):
+    file = UploadedFiles.query.filter(UploadedFiles.filename==filename).first()
+    if file is not None:
+        users_with_file_access = Users.query.filter(Users.files.any(id=file.id)).all()
+        if g.user in users_with_file_access:
+            form = NewJobForm()
+            ccextractor = CCExtractorVersions.query.all()
+            form.ccextractor_version.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
+            form.parameters.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
+            form.platforms.choices = [(str(p.value), str(Platforms(p.value).name)) for p in Platforms]
+
+            # TODO:Process parameters before adding to queue
+            paramters = form.parameters.data
+
+            if form.validate_on_submit():
+                rv = add_file_to_queue(added_by_user=g.user.id,
+                                       filename=file.filename,
+                                       ccextractor_version=form.ccextractor_version.data,
+                                       platform=form.platforms.data,
+                                       parameters=paramters,
+                                       remarks=form.remark.data)
+
+                if rv['status'] == 'duplicate':
+                    flash('Job with same conifguration already in the queue. Job #{job_number}'.format(
+                        job_number=rv['job_number']), 'warning')
+                elif rv['status'] == 'failed':
+                    flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
+                else:
+                    flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
+            else:
+                return render_template('mod_dashboard/newjob.html', filename=filename, form=form)
+        else:
+            flash('Invalid new job request!', 'error')
+    else:
+        flash('Invalid new job request!', 'error')
+    return redirect(url_for('mod_dashboard.dashboard'))
+
+@mod_dashboard.route('/upload', methods=['GET', 'POST'])
 @mod_dashboard.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
@@ -120,11 +170,14 @@ def dashboard():
 
                 if rv['status'] == 'duplicate':
                     flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
+                elif rv['status'] == 'failed':
+                    flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
                 else:
                     flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
 
     queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
-    return render_template('mod_dashboard/upload.html', form=form, accept=form.accept, queued_files=queued_files)
+    uploaded_files = g.user.files
+    return render_template('mod_dashboard/dashboard.html', form=form, accept=form.accept, queued_files=queued_files, uploaded_files=uploaded_files)
 
 @mod_dashboard.route('/admin', methods=['GET', 'POST'])
 @mod_dashboard.route('/admin-dashboard', methods=['GET', 'POST'])
@@ -148,6 +201,41 @@ def admin():
     users = Users.query.order_by(db.desc(Users.id)).all()
     return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form, ccextractor=ccextractor, queue=queue, users=users)
 
+@mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
+@mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
+@login_required
+def serve(type, job_no, view=None):
+    from flask import current_app as app
+
+    job = ProcessQueue.query.filter(ProcessQueue.id == job_no).first()
+    if job is not None:
+        if job.added_by_user == g.user.id:
+            if type == 'log':
+                return serve_file_download(file_name='{id}.log'.format(id=job.id), folder=app.config['LOGS_DIR'], as_attachment=(True if view is None else False))
+            if type is 'output':
+                return serve_file_download(file_name='{id}.{extension}'.format(id=job.id, extension=job.get_output_extension()), folder=app.config['OUTPUT_DIR'], as_attachment=(True if view is None else False))
+
+    flash('Illegal request.', 'error')
+    return redirect(request.referrer)
+
+def serve_file_download(file_name, folder='', as_attachment=True, content_type='application/octet-stream'):
+
+    return send_from_directory(os.path.join(folder, ''), file_name, as_attachment=as_attachment)
+
+    """
+    file_path = os.path.join(folder, file_name)
+    print(file_path)
+    print(os.path.getsize(file_path))
+    response = make_response()
+    response.headers['Content-Description'] = 'File Transfer'
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Content-Type'] = content_type
+    response.headers['Content-Disposition'] = 'attachment; filename={file_name}'.format(file_name=file_name)
+    response.headers['Content-Length'] = os.path.getsize(file_path)
+    response.headers['X-Accel-Redirect'] = '/' + os.path.join('media-download', folder, file_name)
+    print(response.headers)
+    return response
+    """
 
 def create_file_hash(path):
     hash = hashlib.sha256()
@@ -191,12 +279,14 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         }
 
         video_file_path = app.config['VIDEO_REPOSITORY'] + filename
-        rc = shutil.copy(video_file_path, app.config['JOBS_DIR'])
-        print(rc)
-        with open(job_file_path, 'w', encoding='utf8') as job_file:
-            content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
-            job_file.write(content)
+        if os.path.exists(video_file_path):
+            rc = shutil.copy(video_file_path, app.config['JOBS_DIR'])
+            with open(job_file_path, 'w', encoding='utf8') as job_file:
+                content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+                job_file.write(content)
 
-        return {'status': 'success', 'job_number': queued_file.id}
+            return {'status': 'success', 'job_number': queued_file.id}
+        else:
+            return {'status': 'failed', 'reason': 'file does not exist on server'}
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}

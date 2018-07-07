@@ -69,6 +69,14 @@ class UploadForm(FlaskForm):
                 raise ValidationError('Extension not allowed')
 
 
+class NewJobForm(FlaskForm):
+    parameters = SelectField('Parameters', [DataRequired(message='Select parameters')],coerce=str)
+    ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
+    platforms = SelectField('Platform', [DataRequired(message='Select platform')], coerce=str)
+    remark = TextAreaField('Remark')
+    submit = SubmitField('Submit')
+
+
 class NewCCExtractorVersionForm(FlaskForm):
     version = StringField('Version', [DataRequired(message='Version is not filled in.')])
     commit = StringField('Commit', [DataRequired(message='Commit is not filled in.')])

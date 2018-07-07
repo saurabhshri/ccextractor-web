@@ -1,0 +1,18 @@
+{% block body %}
+    <div class="">
+        <div class="">
+            <p>Uploaded Files</p>
+        </div>
+    </div>
+
+    {% for file in uploaded_files %}
+        <div class="">
+            {{ file.original_name }} | {{ file.filename }} | {{   (file.size|int)/1000000 }} MB | {{ file.status }} <a href="new/{{ file.filename }}">New Job</a>
+        <br>
+        </div>
+    {% endfor %}
+
+{% endblock %}
+
+
+

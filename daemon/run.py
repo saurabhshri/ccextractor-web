@@ -54,7 +54,6 @@ while True:
     job_list = [f for f in os.listdir(parameters.job_dir) if f.endswith(".json")]
     job_list.sort()
 
-
     if job_list:
         job_config_file = parameters.job_dir + job_list[0]
         job_config = ParseJob(job_config_file)
@@ -64,7 +63,6 @@ while True:
         rv = report_progress(job_config, 'processing')
         print("Setting status to 'processing' , response : " + str(rv))
 
-
         cmd = get_cmd(job_config)
 
         log_path = parameters.log_dir + job_config.job_number + config.LOG_FILE_EXTENSION
@@ -73,7 +71,6 @@ while True:
             with open(log_path, "w") as log_file:
                 popen = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=log_file, universal_newlines=True)
                 popen.communicate()
-
                 print("Processing complete , return code : " + str(popen.returncode))
 
             # TODO: https://github.com/CCExtractor/ccextractor/blob/f37829bb46e046d8914bb2a42937020add5d84bc/src/lib_ccx/ccx_common_common.h#L13
@@ -83,24 +80,21 @@ while True:
 
             video_file_path = parameters.job_dir + job_config.filename
             os.remove(video_file_path)
-            shutil.copy(job_config_file, parameters.archive_dir)
-            os.remove(job_config_file)
+
+        except FileNotFoundError:
+            rv = report_progress(job_config, 'missing_file')
+            print("Setting status to 'missing_file' , response : " + str(rv))
 
         except Exception as e:
             print(e)
             #skipping for now
-            shutil.copy(job_config_file, parameters.archive_dir)
-            os.remove(job_config_file)
+            rv = report_progress(job_config, 'error')
+            print("Setting status to 'error' , response : " + str(rv))
+
+        shutil.copy(job_config_file, parameters.archive_dir)
+        os.remove(job_config_file)
 
         upload_log_file(job_config, log_path)
 
-
-
     else:
         time.sleep(config.RETRY_TIME)
-
-
-
-
-
-

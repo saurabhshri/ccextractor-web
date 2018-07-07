@@ -1,17 +1,18 @@
+{% extends "layout.html" %}
+
 {% block body %}
     <div class="">
         <div class="">
             <p>Upload File</p>
         </div>
     </div>
-    <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.dashboard', next=next) }}">
+    <form method="post" name="newJobForm" id="newJobForm" enctype=multipart/form-data">
         {{ form.csrf_token }}
         {{ macros.display_flash_messages() }}
 
+        {{ filename }}
+
         <div class="">
-            <div class="">
-                {{ macros.render_field(form.file) }}
-            </div>
             <div class="">
                 {{ macros.render_field(form.parameters) }}
             </div>
@@ -20,9 +21,6 @@
             </div>
             <div class="">
                 {{ macros.render_field(form.platforms) }}
-            </div>
-            <div class="">
-                {{ macros.render_field(form.start_processing) }}
             </div>
             <div class="">
                 {{ macros.render_field(form.remark) }}
