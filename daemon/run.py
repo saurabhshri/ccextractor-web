@@ -23,7 +23,8 @@ def get_cmd(job_config):
     ccextractor_executable = parameters.ccextractor_binaries_dir + job_config.ccextractor_executable
     params = job_config.parameters
 
-    return [ccextractor_executable, video_file_path] #, params]
+    #TODO: srt -> params.output_format
+    return [ccextractor_executable, video_file_path, '-o', '{path}/{name}.srt'.format(path=parameters.output_dir, name=job_config.job_number)] #, params]
 
 def report_progress(job_config, status = None, return_code = None):
     payload = {'job_number': job_config.job_number,
@@ -33,22 +34,20 @@ def report_progress(job_config, status = None, return_code = None):
                'status': status}
     return requests.post(parameters.report_url, data=payload)
 
-
-
 def upload_log_file(job_config, filename):
     payload = {'job_number': job_config.job_number,
                'token': job_config.token,
-               'report_type' : 'log'}
-    files = {'file': open(filename)}
+               'report_type': 'log'}
+    files = {'file': open(filename, encoding='utf-8')}
 
     return requests.post(parameters.report_url, files=files, data=payload)
 
 def upload_output_file(job_config, filename):
     payload = {'job_number': job_config.job_number,
                'token': job_config.token,
-               'report_type': 'output',
-               'status': status}
-    return requests.post(parameters.report_url, files=files, data=json.dumps(payload))
+               'report_type': 'output'}
+    files = {'file': open(filename, encoding='utf-8')}
+    return requests.post(parameters.report_url, files=files, data=payload)
 
 while True:
     job_list = [f for f in os.listdir(parameters.job_dir) if f.endswith(".json")]
@@ -95,6 +94,10 @@ while True:
         os.remove(job_config_file)
 
         upload_log_file(job_config, log_path)
+
+        # TODO: srt -> params.output_format
+        output_file = '{path}/{name}.srt'.format(path=parameters.output_dir, name=job_config.job_number)
+        upload_output_file(job_config, output_file)
 
     else:
         time.sleep(config.RETRY_TIME)
