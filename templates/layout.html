@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
-{% block head %}
 <head>
+{% block head %}
 
     <title>{% block title %} {% endblock %} - CCExtractor<sup>Web</sup></title>
 
@@ -19,20 +19,20 @@
 
     <!-- Custom styles for this template -->
     {% endblock %}
-
-</head>
 {% endblock %}
+</head>
 
 
 <body>
+{% block body %}
 
     <!-- Navigation Bar -->
     {%- include 'navbar.html' -%}
 
     <!-- Page Content -->
-    {% block body %}
-
+    {% block content %}
     {% endblock %}
+
 
     <!-- Footer
     {% block footer %}
@@ -49,5 +49,7 @@
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     {% endblock %}
+
+{% endblock %}
 </body>
 </html>

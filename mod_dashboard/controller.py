@@ -174,6 +174,7 @@ def dashboard():
                     flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
                 else:
                     flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
+        return redirect(url_for('mod_dashboard.dashboard'))
 
     queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
     uploaded_files = g.user.files
@@ -201,8 +202,8 @@ def admin():
     users = Users.query.order_by(db.desc(Users.id)).all()
     return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form, ccextractor=ccextractor, queue=queue, users=users)
 
-@mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
+@mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
 @login_required
 def serve(type, job_no, view=None):
     from flask import current_app as app
@@ -212,14 +213,44 @@ def serve(type, job_no, view=None):
         if job.added_by_user == g.user.id:
             if type == 'log':
                 return serve_file_download(file_name='{id}.log'.format(id=job.id), folder=app.config['LOGS_DIR'], as_attachment=(True if view is None else False))
-            if type is 'output':
+            elif type == 'output':
                 return serve_file_download(file_name='{id}.{extension}'.format(id=job.id, extension=job.get_output_extension()), folder=app.config['OUTPUT_DIR'], as_attachment=(True if view is None else False))
-
-    flash('Illegal request.', 'error')
+            else:
+                flash('Invalid filetype.', 'error')
+        else:
+            flash('Forbidden.', 'error')
+    else:
+        flash('Illegal request. Job not found', 'error')
     return redirect(request.referrer)
 
-def serve_file_download(file_name, folder='', as_attachment=True, content_type='application/octet-stream'):
+@mod_dashboard.route('/delete/<filename>', methods=['GET', 'POST'])
+@login_required
+def delete(filename):
+    from flask import current_app as app
+    file = UploadedFiles.query.filter(UploadedFiles.filename == filename).first()
+    print(filename)
+    if file is not None:
+        users_with_file_access = Users.query.filter(Users.files.any(id=file.id)).all()
+        if g.user in users_with_file_access:
+            if len(users_with_file_access) > 1:
+                file.user.remove(g.user)
+            else:
+                video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
+                if os.path.exists(video_file_path):
+                    os.remove(video_file_path)
+                db.session.delete(file)
+            db.session.commit()
+            flash('{filename} deleted.'.format(filename=filename), 'success')
+        else:
+            flash('Forbidden.'.format(filename=filename), 'error')
+            # returnjson.dumps({'status': 'success'}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+    else:
+        flash('{filename} not found.'.format(filename=filename), 'error')
+        # return #json.dumps({'status': 'failed', 'message': 'forbidden'}, indent=4, separators=(',', ': '), ensure_ascii=False)
+    return redirect(request.referrer) #json.dumps({'status': 'failed', 'message': 'file not found'}, indent=4, separators=(',', ': '), ensure_ascii=False)
 
+
+def serve_file_download(file_name, folder='', as_attachment=True, content_type='application/octet-stream'):
     return send_from_directory(os.path.join(folder, ''), file_name, as_attachment=as_attachment)
 
     """
@@ -266,21 +297,24 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         db.session.add(queued_file)
         db.session.commit()
 
-        job_file_path = app.config['JOBS_DIR'] + str(queued_file.id) + '.json'
+        job_file_path = os.path.join(app.config['JOBS_DIR'], '{job_id}.json'.format(job_id=queued_file.id))
+        name, extension = os.path.splitext(filename)
+        video_file_name = '{job_id}{extension}'.format(job_id=queued_file.id, extension=extension)
+
 
         ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.id == ccextractor_version).first()
 
         queue_dict = { 'job_number': str(queued_file.id),
-                       'filename': filename,
+                       'filename': video_file_name,
                        'parameters': parameters,
                        'token': queued_file.token,
                        'platform': platform,
                        'executable_path': ccextractor.linux_executable_path
         }
 
-        video_file_path = app.config['VIDEO_REPOSITORY'] + filename
+        video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
         if os.path.exists(video_file_path):
-            rc = shutil.copy(video_file_path, app.config['JOBS_DIR'])
+            rc = shutil.copy(video_file_path, '{job_dir}/{video_file_name}'.format(job_dir=app.config['JOBS_DIR'], video_file_name=video_file_name))
             with open(job_file_path, 'w', encoding='utf8') as job_file:
                 content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
                 job_file.write(content)
