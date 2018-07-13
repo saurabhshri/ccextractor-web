@@ -11,7 +11,6 @@
     {%  if type == 'new' %}
     <form method="post" name="ccextractorForm" id="ccextractorForm" enctype=multipart/form-data action="{{ url_for('.admin', next=next) }}">
         {{ ccextractor_form.csrf_token }}
-        {{ macros.display_flash_messages() }}
 
         <div class="">
             <div class="">
@@ -46,7 +45,6 @@
     {% if type == 'update' %}
         <form method="post" name="ccextractorUpdateForm" id="ccextractorUpdateForm" enctype=multipart/form-data action="{{ url_for('.admin', next=next) }}">
         {{ ccextractor_update_form.csrf_token }}
-        {{ macros.display_flash_messages() }}
 
         <div class="">
             <div class="">
@@ -84,4 +82,8 @@
         {{ user.id }} | {{ user.username }} | {{ user.email }} | {{ user.account_type }}<br>
     {% endfor %}
     </div>
+
+
+    {%- include 'mod_dashboard/ccextractor_paramters.html' -%}
+
 {% endblock %}

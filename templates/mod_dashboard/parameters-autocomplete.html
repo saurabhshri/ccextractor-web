@@ -1,0 +1,14 @@
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/jquery.autocomplete.min.js') }}"></script>
+    <script>
+        $.getJSON("{{url_for('static', filename='commands.json')}}", function(json) {
+            $('#parameters').autocomplete({
+                lookup: json['suggestions'],
+                onSelect: function (suggestion) {
+                var p = document.getElementById('selected-parameters');
+                p.innerHTML += suggestion.value;
+                },
+            });
+        });
+    </script>
+{% endblock %}

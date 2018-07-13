@@ -12,8 +12,9 @@ import json
 import hashlib
 import collections
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms
-from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm
+import flask
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters
+from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
 from werkzeug import secure_filename
@@ -78,7 +79,6 @@ def new_job(filename):
             form = NewJobForm()
             ccextractor = CCExtractorVersions.query.all()
             form.ccextractor_version.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
-            form.parameters.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
             form.platforms.choices = [(str(p.value), str(Platforms(p.value).name)) for p in Platforms]
 
             # TODO:Process parameters before adding to queue
@@ -115,7 +115,6 @@ def dashboard():
     ccextractor = CCExtractorVersions.query.all()
     form = UploadForm()
     form.ccextractor_version.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
-    form.parameters.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
     form.platforms.choices = [(str(p.value), str(Platforms(p.value).name)) for p in Platforms]
     if form.validate_on_submit():
         uploaded_file = request.files[form.file.name]
@@ -178,7 +177,11 @@ def dashboard():
 
     queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
     uploaded_files = g.user.files
-    return render_template('mod_dashboard/dashboard.html', form=form, accept=form.accept, queued_files=queued_files, uploaded_files=uploaded_files)
+    return render_template('mod_dashboard/dashboard.html',
+                           form=form, accept=form.accept,
+                           queued_files=queued_files,
+                           uploaded_files=uploaded_files,
+                           commands_json=app.config['COMMANDS_JSON_PATH'])
 
 @mod_dashboard.route('/admin', methods=['GET', 'POST'])
 @mod_dashboard.route('/admin-dashboard', methods=['GET', 'POST'])
@@ -186,7 +189,9 @@ def dashboard():
 @check_account_type(account_types=[AccountType.admin])
 def admin():
     ccextractor_form = NewCCExtractorVersionForm()
-    if ccextractor_form.validate_on_submit():
+    ccextractor_parameters_form = NewCCExtractorParameterForm()
+
+    if ccextractor_form.validate_on_submit() and ccextractor_form.submit.data:
         ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.commit == ccextractor_form.commit.data).first()
         if ccextractor is not None:
             flash('CCExtractor version with the commit already exists.', 'error')
@@ -197,10 +202,34 @@ def admin():
             db.session.commit()
             flash('CCExtractor version added!', 'success')
 
+    if ccextractor_parameters_form.validate_on_submit() and ccextractor_parameters_form.submit.data:
+        parameter = CCExtractorParameters.query.filter(CCExtractorParameters.parameter == ccextractor_parameters_form.parameter.data).first()
+        if parameter is not None:
+            flash('CCExtractor parameter with the commit already exists. Id = {id}'.format(id=parameter.id), 'error')
+        else:
+            parameter = CCExtractorParameters(ccextractor_parameters_form.parameter.data,
+                                              ccextractor_parameters_form.description.data,
+                                              ccextractor_parameters_form.requires_value.data,
+                                              ccextractor_parameters_form.enabled.data)
+            db.session.add(parameter)
+            db.session.commit()
+
+            update_cmd_json(parameter, "new")
+
+            flash('CCExtractor parameter added!', 'success')
+
+
+
     ccextractor = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
     queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
     users = Users.query.order_by(db.desc(Users.id)).all()
-    return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form, ccextractor=ccextractor, queue=queue, users=users)
+    parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
+    print(parameters)
+    return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form,
+                           ccextractor=ccextractor, queue=queue, users=users,
+                           ccextractor_parameters_form=ccextractor_parameters_form, parameters=parameters)
+
+
 
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
 @mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
@@ -248,6 +277,66 @@ def delete(filename):
         flash('{filename} not found.'.format(filename=filename), 'error')
         # return #json.dumps({'status': 'failed', 'message': 'forbidden'}, indent=4, separators=(',', ': '), ensure_ascii=False)
     return redirect(request.referrer) #json.dumps({'status': 'failed', 'message': 'file not found'}, indent=4, separators=(',', ': '), ensure_ascii=False)
+
+@mod_dashboard.route('/parameters/<function>/<id>', methods=['GET', 'POST'])
+@login_required
+@check_account_type(account_types=[AccountType.admin])
+def manage_parameter(function, id):
+    parameter = CCExtractorParameters.query.filter(CCExtractorParameters.id == id).first()
+    if parameter is not None:
+        if function == 'toggle':
+            parameter.toggle_enable()
+            db.session.commit()
+            update_cmd_json(parameter, 'update')
+            flash('Enable status toggled!', 'success')
+            enabled = "False"
+
+            if parameter.enabled:
+                enabled = "True"
+            return json.dumps({'status': 'success', 'enabled': enabled}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+
+        elif function == "delete":
+            db.session.delete(parameter)
+            db.session.commit()
+            update_cmd_json(parameter, 'delete')
+            flash('Parameter deleted!', 'success')
+            return redirect(request.referrer)
+
+    return json.dumps({'status': 'failed'}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+
+def update_cmd_json(parameter, type="new"):
+    from flask import current_app as app
+    cmd_json_file = os.path.join(app.config['COMMANDS_JSON_PATH'])
+
+    with open(cmd_json_file) as cmd:
+        commands = json.load(cmd)
+
+    index = 0;
+    for param in commands['suggestions']:
+        if parameter.parameter in param['parameter']:
+            if type == 'new':
+                flash('Parameter already exists in JSON file!', 'error')
+                return
+            elif type == 'delete' or type == 'update':
+                flash('Updating parameter in JSON file!', 'warning')
+                print(index)
+                print(commands['suggestions'][index])
+                del commands['suggestions'][index]
+                print(commands['suggestions'])
+        index += 1;
+
+    if type != 'delete':
+        new_command = {"data": parameter.parameter,
+                       "value": parameter.parameter,
+                       "parameter": parameter.parameter,
+                       "description": parameter.description,
+                       "requires_value": parameter.requires_value,
+                       "enabled": parameter.enabled
+                       }
+        commands['suggestions'].append(new_command)
+
+    with open("static/commands.json", 'w', encoding='utf-8') as cmd:
+        json.dump(commands, cmd, indent=4, separators=(',', ': '), ensure_ascii=False)
 
 
 def serve_file_download(file_name, folder='', as_attachment=True, content_type='application/octet-stream'):
@@ -324,3 +413,23 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
             return {'status': 'failed', 'reason': 'file does not exist on server'}
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}
+
+@mod_dashboard.route("/search/<string:box>")
+def process(box):
+    query = request.args.get('query')
+    if box == 'params':
+        # do some stuff to open your names text file
+        # do some other stuff to filter
+        # put suggestions in this format...
+        suggestions = [{'value': '-of','data': '-of'}, {'value': '-pn','data': '-pn'}]
+    if box == 'songs':
+        # do some stuff to open your songs text file
+        # do some other stuff to filter
+        # put suggestions in this format...
+        suggestions = [{'value': 'song1','data': '123'}, {'value': 'song2','data': '234'}]
+        #suggestions = ['lol', 'rofl', 'lmao']
+    return flask.jsonify({"suggestions":suggestions})
+
+@mod_dashboard.route("/test")
+def test():
+    return render_template('test.html')

@@ -6,7 +6,6 @@
     </div>
     <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.dashboard', next=next) }}">
         {{ form.csrf_token }}
-        {{ macros.display_flash_messages() }}
 
         <div class="">
             <div class="">
@@ -14,6 +13,10 @@
             </div>
             <div class="">
                 {{ macros.render_field(form.parameters) }}
+            </div>
+            <div>
+                <p id="selected-parameters">Parameters : </p>
+
             </div>
             <div class="">
                 {{ macros.render_field(form.ccextractor_version) }}
@@ -34,3 +37,5 @@
 
     </form>
 {% endblock %}
+
+{%- include 'mod_dashboard/parameters-autocomplete.html' -%}

@@ -1,20 +1,23 @@
 {% extends "layout.html" %}
 
 {% block body %}
+    {{ super() }}
     <div class="">
         <div class="">
-            <p>Upload File</p>
+            <p>New Job</p>
         </div>
     </div>
     <form method="post" name="newJobForm" id="newJobForm" enctype=multipart/form-data">
         {{ form.csrf_token }}
-        {{ macros.display_flash_messages() }}
 
         {{ filename }}
 
         <div class="">
             <div class="">
                 {{ macros.render_field(form.parameters) }}
+            </div>
+            <div>
+                <p id="selected-parameters">Parameters : </p>
             </div>
             <div class="">
                 {{ macros.render_field(form.ccextractor_version) }}
@@ -31,4 +34,7 @@
         </div>
 
     </form>
+
+{%- include 'mod_dashboard/parameters-autocomplete.html' -%}
+
 {% endblock %}

@@ -147,3 +147,23 @@ class CCExtractorVersions(db.Model):
 
     def __repr__(self):
         return '<CExtractorVersion {id}>'.format(id=self.id)
+
+class CCExtractorParameters(db.Model):
+    __tablename__ = 'ccextractor_parameters'
+    id = db.Column(db.Integer, primary_key=True)
+    parameter = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text())
+    requires_value = db.Column(db.Boolean())
+    enabled = db.Column(db.Boolean())
+
+    def __init__(self, parameter, description, requires_value=False, enabled=True):
+        self.parameter = parameter
+        self.description = description
+        self.requires_value = requires_value
+        self.enabled = enabled
+
+    def toggle_enable(self):
+        self.enabled = not self.enabled
+
+    def __repr__(self):
+        return '<CExtractorParamter {id}>'.format(id=self.id)

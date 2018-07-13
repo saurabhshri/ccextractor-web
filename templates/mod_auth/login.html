@@ -9,7 +9,6 @@
     </div>
     <form method="post" name="loginForm" id="loginForm" action="{{ url_for('.login', next=next) }}">
         {{ form.csrf_token }}
-        {{ macros.display_flash_messages() }}
 
         <div class="">
             <div class="">

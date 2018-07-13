@@ -49,7 +49,7 @@ class UploadForm(FlaskForm):
 
     file = FileField('Select your file', [DataRequired(message='No file selected.')], render_kw={'accept': accept})
 
-    parameters = SelectField('Parameters', [DataRequired(message='Select parameters')],coerce=str)
+    parameters = TextAreaField('Parameters', [DataRequired(message='Select parameters')])
     ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
     platforms = SelectField('Platform', [DataRequired(message='Select platform')], coerce=str)
     remark = TextAreaField('Remark')
@@ -70,7 +70,7 @@ class UploadForm(FlaskForm):
 
 
 class NewJobForm(FlaskForm):
-    parameters = SelectField('Parameters', [DataRequired(message='Select parameters')],coerce=str)
+    parameters = TextAreaField('Parameters', [DataRequired(message='Select parameters')])
     ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
     platforms = SelectField('Platform', [DataRequired(message='Select platform')], coerce=str)
     remark = TextAreaField('Remark')
@@ -83,4 +83,12 @@ class NewCCExtractorVersionForm(FlaskForm):
     linux_executable_path = StringField('Path to Linux executable file')
     windows_executable_path = StringField('Path to Windows executable file')
     mac_executable_path = StringField('Path to macOS executable file')
+    submit = SubmitField('Add')
+
+class NewCCExtractorParameterForm(FlaskForm):
+    parameter = StringField('parameter', [DataRequired(message='Parameter is not filled in.')])
+    description = StringField('Description', [DataRequired(message='Description is not filled in.')])
+    requires_value = BooleanField('Requires Value?', [DataRequired(message='Requires Value is not filled in.')])
+    enabled = BooleanField('Enable this parameter?')
     submit = SubmitField('Submit')
+

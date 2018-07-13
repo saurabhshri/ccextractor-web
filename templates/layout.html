@@ -29,6 +29,8 @@
     <!-- Navigation Bar -->
     {%- include 'navbar.html' -%}
 
+    {{ macros.display_flash_messages() }}
+
     <!-- Page Content -->
     {% block content %}
     {% endblock %}

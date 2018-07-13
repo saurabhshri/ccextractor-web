@@ -1,0 +1,75 @@
+{% block body %}
+    <div class="">
+        <div class="">
+            <p>CCExtractor Paramters</p>
+        </div>
+    </div>
+
+    <div>
+        <form method="post" name="ccextractorParametersForm" id="ccextractorParametersForm" enctype=multipart/form-data action="{{ url_for('.admin', next=next) }}">
+            {{ ccextractor_parameters_form.csrf_token }}
+
+            <div class="">
+                <div class="">
+                    {{ macros.render_field(ccextractor_parameters_form.parameter) }}
+                </div>
+                <div class="">
+                    {{ macros.render_field(ccextractor_parameters_form.description) }}
+                </div>
+                <div class="">
+                    {{ macros.render_field(ccextractor_parameters_form.requires_value) }}
+                </div>
+                <div class="">
+                    {{ macros.render_field(ccextractor_parameters_form.enabled) }}
+                </div>
+                <div class="">
+                    {{ macros.render_field(ccextractor_parameters_form.submit) }}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% for p in parameters %}
+        <param class="">
+            {{ p.id }} | {{ p.parameter }} | {{ p.description }} | {{   p.requires_value }} | <cust id="cust_{{ p.id }}"> {{ p.enabled }} </cust> |
+             <button id="tgl-btn-{{ p.id }}" parameter_id="{{ p.id }}">Toggle</button> | <a href="parameters/delete/{{ p.id }}">Delete</a>
+        <br>
+        </div>
+    {% endfor %}
+
+    {% block scripts %}
+
+        <script>
+            var toggle_buttons = document.querySelectorAll("button[parameter_id]");
+
+            toggle_buttons.forEach(function(btn) {
+                btn.addEventListener("click", function() {
+
+                    var paramter_id = btn.getAttribute("parameter_id");
+                    toggle_status(paramter_id)
+
+                    function toggle_status(paramter_id) {
+                        var req = new XMLHttpRequest();
+                        req.open('GET', 'parameters/toggle/' + paramter_id);
+                        req.onload = function () {
+                            if (req.status >= 200 && req.status < 400) {
+                                var resp = JSON.parse(req.responseText);
+
+                                if(resp['status'] == 'success'){
+                                    var ebl = document.getElementById("cust_" + paramter_id);
+                                    ebl.innerHTML = resp['enabled']
+                                }
+                            }
+                        }
+                        req.send();
+                    }
+                });
+            });
+        </script>
+
+    {% endblock %}
+{% endblock %}
+
+
+
+
