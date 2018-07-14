@@ -1,14 +1,57 @@
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/jquery.autocomplete.min.js') }}"></script>
+    <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
     <script>
-        $.getJSON("{{url_for('static', filename='commands.json')}}", function(json) {
-            $('#parameters').autocomplete({
-                lookup: json['suggestions'],
-                onSelect: function (suggestion) {
-                var p = document.getElementById('selected-parameters');
-                p.innerHTML += suggestion.value;
-                },
-            });
+        $.getJSON("{{url_for('static', filename='commands.json')}}", function(commands) {
+            var availableTags = commands['commands'];
+
+            function split( val ) {
+                return val.split( / \s*/ );
+            }
+
+            function extractLast( term ) {
+                return split( term ).pop();
+            }
+
+            $( "#parameters" )
+                // don't navigate away from the field on tab when selecting an item
+                .on( "keydown", function( event ) {
+                if ( event.keyCode === $.ui.keyCode.TAB && $( this ).autocomplete( "instance" ).menu.active ) {
+                      event.preventDefault();
+                    }
+                })
+
+                .autocomplete({
+                    minLength: 1, delay: 0,
+                    autoFocus: true,
+                    source: function( request, response ) {
+                        // delegate back to autocomplete, but extract the last term
+                        response( $.ui.autocomplete.filter(
+                        availableTags, extractLast( request.term ) ) );
+                    },
+
+                    focus: function(event, ui) {
+                        var p =  document.getElementById('parameter-description');
+                        p.innerHTML = ui.item.description ;
+                      return false;
+                    },
+                    select: function( event, ui ) {
+                        var terms = split( this.value );
+                        // remove the current input
+                        terms.pop();
+                        // add the selected item
+                        terms.push( ui.item.value );
+                        // add placeholder to get the comma-and-space at the end
+                        terms.push( "" );
+                        this.value = terms.join( " " );
+
+                        if (ui.item.requires_value){
+                            var p =  document.getElementById('requires_value');
+                            p.innerHTML = "Parameter Requires a Value!" ;
+                        }
+
+                        return false;
+                    }
+              });
         });
     </script>
 {% endblock %}

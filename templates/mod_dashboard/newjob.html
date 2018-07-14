@@ -14,10 +14,10 @@
 
         <div class="">
             <div class="">
-                {{ macros.render_field(form.parameters) }}
+                {{ macros.render_field(form.parameters) }} <p id="requires_value"></p>
             </div>
             <div>
-                <p id="selected-parameters">Parameters : </p>
+                Description: <p id="parameter-description"></p>
             </div>
             <div class="">
                 {{ macros.render_field(form.ccextractor_version) }}

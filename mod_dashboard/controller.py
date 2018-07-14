@@ -310,14 +310,14 @@ def update_cmd_json(parameter, type="new"):
         commands = json.load(cmd)
 
     index = 0;
-    for param in commands['suggestions']:
+    for param in commands['commands']:
         if parameter.parameter in param['parameter']:
             if type == 'new':
                 flash('Parameter already exists in JSON file!', 'error')
                 return
             elif type == 'delete' or type == 'update':
                 flash('Updating parameter in JSON file!', 'warning')
-                del commands['suggestions'][index]
+                del commands['commands'][index]
         index += 1;
 
     if type != 'delete':
@@ -328,7 +328,7 @@ def update_cmd_json(parameter, type="new"):
                        "requires_value": parameter.requires_value,
                        "enabled": parameter.enabled
                        }
-        commands['suggestions'].append(new_command)
+        commands['commands'].append(new_command)
 
     with open("static/commands.json", 'w', encoding='utf-8') as cmd:
         json.dump(commands, cmd, indent=4, separators=(',', ': '), ensure_ascii=False)

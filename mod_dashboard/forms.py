@@ -88,7 +88,7 @@ class NewCCExtractorVersionForm(FlaskForm):
 class NewCCExtractorParameterForm(FlaskForm):
     parameter = StringField('parameter', [DataRequired(message='Parameter is not filled in.')])
     description = StringField('Description', [DataRequired(message='Description is not filled in.')])
-    requires_value = BooleanField('Requires Value?', [DataRequired(message='Requires Value is not filled in.')])
+    requires_value = BooleanField('Requires Value?')
     enabled = BooleanField('Enable this parameter?')
     submit = SubmitField('Submit')
 
