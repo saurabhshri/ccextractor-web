@@ -31,14 +31,14 @@
 
     {% for p in parameters %}
         <param class="">
-            {{ p.id }} | {{ p.parameter }} | {{ p.description }} | {{   p.requires_value }} | <cust id="cust_{{ p.id }}"> {{ p.enabled }} </cust> |
-             <button id="tgl-btn-{{ p.id }}" parameter_id="{{ p.id }}">Toggle</button> | <a href="parameters/delete/{{ p.id }}">Delete</a>
+            {{ p.id }} | {{ p.parameter }} | {{ p.description }} | {{   p.requires_value }} | <cust id="cust_{{ p.id }}"> {{ p.enabled }} </cust> <a href="parameters/toggle/{{ p.id }}">(Toggle)</a> |
+             <!-- <button id="tgl-btn-{{ p.id }}" parameter_id="{{ p.id }}">Toggle</button> --> | <a href="parameters/delete/{{ p.id }}">Delete</a>
         <br>
         </div>
     {% endfor %}
 
     {% block scripts %}
-
+    <!--
         <script>
             var toggle_buttons = document.querySelectorAll("button[parameter_id]");
 
@@ -66,7 +66,7 @@
                 });
             });
         </script>
-
+    -->
     {% endblock %}
 {% endblock %}
 

@@ -190,7 +190,6 @@ def dashboard():
 def admin():
     ccextractor_form = NewCCExtractorVersionForm()
     ccextractor_parameters_form = NewCCExtractorParameterForm()
-
     if ccextractor_form.validate_on_submit() and ccextractor_form.submit.data:
         ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.commit == ccextractor_form.commit.data).first()
         if ccextractor is not None:
@@ -213,12 +212,8 @@ def admin():
                                               ccextractor_parameters_form.enabled.data)
             db.session.add(parameter)
             db.session.commit()
-
             update_cmd_json(parameter, "new")
-
             flash('CCExtractor parameter added!', 'success')
-
-
 
     ccextractor = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
     queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
@@ -289,18 +284,21 @@ def manage_parameter(function, id):
             db.session.commit()
             update_cmd_json(parameter, 'update')
             flash('Enable status toggled!', 'success')
-            enabled = "False"
 
+            """
+            enabled = "False"
             if parameter.enabled:
                 enabled = "True"
             return json.dumps({'status': 'success', 'enabled': enabled}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+            """
 
         elif function == "delete":
             db.session.delete(parameter)
             db.session.commit()
             update_cmd_json(parameter, 'delete')
             flash('Parameter deleted!', 'success')
-            return redirect(request.referrer)
+
+        return redirect(request.referrer)
 
     return json.dumps({'status': 'failed'}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
 
@@ -319,10 +317,7 @@ def update_cmd_json(parameter, type="new"):
                 return
             elif type == 'delete' or type == 'update':
                 flash('Updating parameter in JSON file!', 'warning')
-                print(index)
-                print(commands['suggestions'][index])
                 del commands['suggestions'][index]
-                print(commands['suggestions'])
         index += 1;
 
     if type != 'delete':
@@ -413,23 +408,3 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
             return {'status': 'failed', 'reason': 'file does not exist on server'}
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}
-
-@mod_dashboard.route("/search/<string:box>")
-def process(box):
-    query = request.args.get('query')
-    if box == 'params':
-        # do some stuff to open your names text file
-        # do some other stuff to filter
-        # put suggestions in this format...
-        suggestions = [{'value': '-of','data': '-of'}, {'value': '-pn','data': '-pn'}]
-    if box == 'songs':
-        # do some stuff to open your songs text file
-        # do some other stuff to filter
-        # put suggestions in this format...
-        suggestions = [{'value': 'song1','data': '123'}, {'value': 'song2','data': '234'}]
-        #suggestions = ['lol', 'rofl', 'lmao']
-    return flask.jsonify({"suggestions":suggestions})
-
-@mod_dashboard.route("/test")
-def test():
-    return render_template('test.html')
