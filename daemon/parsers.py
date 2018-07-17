@@ -45,3 +45,21 @@ class ParseParameters():
 
     def get_raw_parameters(self):
         return self.paramters
+
+class ParseCCExtractorParameters():
+    def __init__(self, params):
+        params = json.loads(params)
+        self.output_file_extension = 'srt'
+        self.params_list = []
+
+        for key, value in params.items():
+            if "-out=" in key:
+                self.output_file_extension = key[5:]
+
+            if key in ['-xml', '-srt', '-dvdraw', '-sami', '-smi', '-webvtt', '--transcript', '-txt', '--timedtranscript', '-ttxt', '-null']:
+                self.output_file_extension = key
+
+            self.params_list.append(key)
+            self.params_list.append(value)
+
+

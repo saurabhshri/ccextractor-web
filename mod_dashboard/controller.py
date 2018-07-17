@@ -81,24 +81,25 @@ def new_job(filename):
             form.ccextractor_version.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
             form.platforms.choices = [(str(p.value), str(Platforms(p.value).name)) for p in Platforms]
 
-            # TODO:Process parameters before adding to queue
-            paramters = form.parameters.data
-
             if form.validate_on_submit():
-                rv = add_file_to_queue(added_by_user=g.user.id,
-                                       filename=file.filename,
-                                       ccextractor_version=form.ccextractor_version.data,
-                                       platform=form.platforms.data,
-                                       parameters=paramters,
-                                       remarks=form.remark.data)
+                # TODO:Process parameters before adding to queue
+                resp = json.loads(parse_ccextractor_parameters(form.parameters.data))
+                if resp['status'] == 'success':
+                    parameters = json.dumps(resp['parameters'])
+                    rv = add_file_to_queue(added_by_user=g.user.id,
+                                           filename=file.filename,
+                                           ccextractor_version=form.ccextractor_version.data,
+                                           platform=form.platforms.data,
+                                           parameters=parameters,
+                                           remarks=form.remark.data)
 
-                if rv['status'] == 'duplicate':
-                    flash('Job with same conifguration already in the queue. Job #{job_number}'.format(
-                        job_number=rv['job_number']), 'warning')
-                elif rv['status'] == 'failed':
-                    flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
-                else:
-                    flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
+                    if rv['status'] == 'duplicate':
+                        flash('Job with same conifguration already in the queue. Job #{job_number}'.format(
+                            job_number=rv['job_number']), 'warning')
+                    elif rv['status'] == 'failed':
+                        flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
+                    else:
+                        flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
             else:
                 return render_template('mod_dashboard/newjob.html', filename=filename, form=form)
         else:
@@ -158,21 +159,23 @@ def dashboard():
             file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
 
             #TODO:Process parameters before adding to queue
-            paramters = form.parameters.data
-            if form.start_processing.data is True:
-                rv = add_file_to_queue(added_by_user=g.user.id,
-                                  filename=file.filename,
-                                  ccextractor_version=form.ccextractor_version.data,
-                                  platform=form.platforms.data,
-                                  parameters=paramters,
-                                  remarks=form.remark.data)
+            resp = json.loads(parse_ccextractor_parameters(form.parameters.data))
+            if resp['status'] == 'success':
+                parameters = json.dumps(resp['parameters'])
+                if form.start_processing.data is True:
+                    rv = add_file_to_queue(added_by_user=g.user.id,
+                                      filename=file.filename,
+                                      ccextractor_version=form.ccextractor_version.data,
+                                      platform=form.platforms.data,
+                                      parameters=parameters,
+                                      remarks=form.remark.data)
 
-                if rv['status'] == 'duplicate':
-                    flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
-                elif rv['status'] == 'failed':
-                    flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
-                else:
-                    flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
+                    if rv['status'] == 'duplicate':
+                        flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
+                    elif rv['status'] == 'failed':
+                        flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
+                    else:
+                        flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
         return redirect(url_for('mod_dashboard.dashboard'))
 
     queued_files = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).all()
@@ -408,3 +411,86 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
             return {'status': 'failed', 'reason': 'file does not exist on server'}
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}
+
+@mod_dashboard.route('/test/<params>')
+def parse_ccextractor_parameters(params):
+    from flask import current_app as app
+    params = params.split()
+    cmd_json_file = os.path.join(app.config['COMMANDS_JSON_PATH'])
+
+    with open(cmd_json_file) as cmd:
+        commands = json.load(cmd)
+
+    parameters = {}
+    invalid_parameters = {}
+    disabled_parameters = {}
+    parameters_missing_values = {}
+
+    param_count = 0
+    is_value = False
+
+    for param in params:
+        param_count += 1;
+
+        if is_value:
+            is_value = False
+            continue
+
+        param_exist = False
+        for command in commands['commands']:
+            if param == command['parameter']:
+                param_exist = True
+                if command['requires_value']:
+                    if param_count >= len(params):
+                        entry = {'{parameter}'.format(parameter=command['parameter']): '{value}'.format(value="")}
+                        parameters_missing_values.update(entry)
+                        break
+                    else:
+                        entry = {'{parameter}'.format(parameter=command['parameter']):'{value}'.format(value=params[param_count])}
+                        is_value = True
+                else:
+                    entry = {'{parameter}'.format(parameter=command['parameter']):'{value}'.format(value="")}
+
+                if command['enabled']:
+                    parameters.update(entry)
+                else:
+                    disabled_parameters.update(entry)
+                break
+
+        if not param_exist:
+            entry = {'{parameter}'.format(parameter=param): '{value}'.format(value="")}
+            invalid_parameters.update(entry)
+
+    if invalid_parameters or disabled_parameters or parameters_missing_values:
+        status = "failed"
+
+        if invalid_parameters:
+            invalid_params_list = []
+            for key, value in invalid_parameters.items():
+                invalid_params_list.append(key)
+            flash("Invalid Parameters + {invalid_params_list}".format(invalid_params_list=invalid_params_list), 'error')
+
+        if disabled_parameters:
+            disabled_params_list = []
+            for key, value in disabled_parameters.items():
+                disabled_params_list.append(key)
+            flash("Disabled Parameters + {disabled_params_list}".format(disabled_params_list=disabled_params_list), 'error')
+
+        if parameters_missing_values:
+            parameters_missing_values_list = []
+            for key, value in parameters_missing_values.items():
+                parameters_missing_values_list.append(key)
+            flash("Parameters missing values : + {parameters_missing_values_list}".format(parameters_missing_values_list=parameters_missing_values_list), 'error')
+
+    else:
+        status = "success"
+
+
+    resp = {'status': status,
+            'invalid_params': invalid_parameters,
+            'disabled_params': disabled_parameters,
+            'parameters_missing_values': parameters_missing_values,
+            'parameters': parameters
+            }
+
+    return json.dumps(resp)
