@@ -91,7 +91,8 @@ def new_job(filename):
                                            ccextractor_version=form.ccextractor_version.data,
                                            platform=form.platforms.data,
                                            parameters=parameters,
-                                           remarks=form.remark.data)
+                                           remarks=form.remark.data,
+                                           output_file_extension=resp['output_file_extension'])
 
                     if rv['status'] == 'duplicate':
                         flash('Job with same conifguration already in the queue. Job #{job_number}'.format(
@@ -164,11 +165,12 @@ def dashboard():
                 parameters = json.dumps(resp['parameters'])
                 if form.start_processing.data is True:
                     rv = add_file_to_queue(added_by_user=g.user.id,
-                                      filename=file.filename,
-                                      ccextractor_version=form.ccextractor_version.data,
-                                      platform=form.platforms.data,
-                                      parameters=parameters,
-                                      remarks=form.remark.data)
+                                           filename=file.filename,
+                                           ccextractor_version=form.ccextractor_version.data,
+                                           platform=form.platforms.data,
+                                           parameters=parameters,
+                                           remarks=form.remark.data,
+                                           output_file_extension=resp['output_file_extension'])
 
                     if rv['status'] == 'duplicate':
                         flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
@@ -372,7 +374,7 @@ def file_exist(file_hash):
     else:
         return True
 
-def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, parameters, remarks):
+def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, parameters, remarks, output_file_extension='srt'):
     from flask import current_app as app
     queued_file = ProcessQueue.query.filter((ProcessQueue.filename == filename) &
                                             (ProcessQueue.added_by_user == added_by_user) &
@@ -380,7 +382,13 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
                                             (ProcessQueue.parameters == parameters) &
                                             (ProcessQueue.ccexractor_version == ccextractor_version)).first()
     if queued_file is None:
-        queued_file = ProcessQueue(added_by_user, filename, ccextractor_version, platform, parameters, remarks)
+        queued_file = ProcessQueue(added_by_user=added_by_user,
+                                   filename=filename,
+                                   ccextractor_version=ccextractor_version,
+                                   platform=platform,
+                                   parameters=parameters,
+                                   remarks=remarks,
+                                   output_file_extension=output_file_extension)
         db.session.add(queued_file)
         db.session.commit()
 
@@ -396,7 +404,8 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
                        'parameters': parameters,
                        'token': queued_file.token,
                        'platform': platform,
-                       'executable_path': ccextractor.linux_executable_path
+                       'executable_path': ccextractor.linux_executable_path,
+                       'output_file_extension': queued_file.output_file_extension
         }
 
         video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
@@ -429,6 +438,7 @@ def parse_ccextractor_parameters(params):
     param_count = 0
     is_value = False
 
+    #TODO: Optimise the whole process, prepare lists and output extension while parsing
     for param in params:
         param_count += 1;
 
@@ -461,6 +471,7 @@ def parse_ccextractor_parameters(params):
             entry = {'{parameter}'.format(parameter=param): '{value}'.format(value="")}
             invalid_parameters.update(entry)
 
+    status = "success"
     if invalid_parameters or disabled_parameters or parameters_missing_values:
         status = "failed"
 
@@ -482,15 +493,21 @@ def parse_ccextractor_parameters(params):
                 parameters_missing_values_list.append(key)
             flash("Parameters missing values : + {parameters_missing_values_list}".format(parameters_missing_values_list=parameters_missing_values_list), 'error')
 
-    else:
-        status = "success"
+    output_file_extension = 'srt'
+    for key, value in parameters.items():
+        if "-out=" in key:
+            output_file_extension = key[5:]
 
+        elif key in ['-xml', '-srt', '-dvdraw', '-sami', '-smi', '-webvtt', '--transcript', '-txt', '--timedtranscript',
+                   '-ttxt', '-null']:
+            output_file_extension = key[1:]
 
     resp = {'status': status,
             'invalid_params': invalid_parameters,
             'disabled_params': disabled_parameters,
             'parameters_missing_values': parameters_missing_values,
-            'parameters': parameters
+            'parameters': parameters,
+            'output_file_extension': output_file_extension
             }
 
     return json.dumps(resp)

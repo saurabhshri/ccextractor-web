@@ -77,18 +77,20 @@ class ProcessQueue(db.Model):
     ccexractor_version = db.Column(db.String(100), nullable=False)
     platform = db.Column(db.Enum(Platforms))
     parameters = db.Column(db.Text())
+    output_file_extension = db.Column(db.String(10))
     remarks = db.Column(db.Text())
     queue_timestamp = db.Column(db.DateTime(timezone=True))
     status = db.Column(db.Enum(ProcessStauts))
     token = db.Column(db.String(128), unique=True)
 
-    def __init__(self, added_by_user, filename, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, queue_timestamp=None):
+    def __init__(self, added_by_user, filename, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, output_file_extension='srt', queue_timestamp=None):
         self.added_by_user = added_by_user
         self.filename = filename
         self.parameters = parameters
         self.remarks = remarks
         self.status = status
         self.platform = platform
+        self.output_file_extension = output_file_extension
 
         tz = get_localzone()
 
@@ -120,7 +122,7 @@ class ProcessQueue(db.Model):
         return '<ProcessQueue {id}>'.format(id=self.id)
 
     def get_output_extension(self):
-        return 'srt'
+        return self.output_file_extension
 
     @db.reconstructor
     def may_the_timezone_be_with_it(self):

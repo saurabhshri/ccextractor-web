@@ -23,14 +23,12 @@ def get_cmd(job_config):
     ccextractor_executable = parameters.ccextractor_binaries_dir + job_config.ccextractor_executable
     ccx_params = ParseCCExtractorParameters(job_config.parameters)
 
-    params_list = [ccextractor_executable, video_file_path]
-    params_list.extend(ccx_params.params_list)
-    params_list.extend(['-o', '{path}{name}.{output_file_extension}'.format(path=parameters.output_dir, name=job_config.job_number, output_file_extension=ccx_params.output_file_extension)])
+    ccx_params.params_list = [ccextractor_executable, video_file_path] + ccx_params.params_list
+    ccx_params.params_list.extend(['-o', '{path}{name}.{output_file_extension}'.format(path=parameters.output_dir,
+                                                                                       name=job_config.job_number,
+                                                                                       output_file_extension=job_config.output_file_extension)])
 
-    print(params_list)
-
-    #TODO: srt -> params.output_format
-    return params_list
+    return ccx_params.params_list
 
 def report_progress(job_config, status = None, return_code = None):
     payload = {'job_number': job_config.job_number,
@@ -102,7 +100,10 @@ while True:
         upload_log_file(job_config, log_path)
 
         # TODO: srt -> params.output_format
-        output_file = '{path}/{name}.srt'.format(path=parameters.output_dir, name=job_config.job_number)
+        output_file = '{path}{name}.{output_file_extension}'.format(path=parameters.output_dir,
+                                                                    name=job_config.job_number,
+                                                                    output_file_extension=job_config.output_file_extension)
+
         upload_output_file(job_config, output_file)
 
     else:

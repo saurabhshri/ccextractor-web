@@ -11,10 +11,10 @@ import json
 import argparse
 
 class ParseJob():
-    def __init__(self, job_number):
+    def __init__(self, job_file):
         self.job_config = {}
 
-        with open(job_number, 'r', encoding="utf-8") as f:
+        with open(job_file, 'r', encoding="utf-8") as f:
             self.job_config = json.load(f)
 
         self.ccextractor_executable = self.job_config['executable_path']
@@ -23,6 +23,7 @@ class ParseJob():
         self.parameters = self.job_config['parameters']
         self.platform = self.job_config['platform']
         self.token = self.job_config['token']
+        self.output_file_extension = self.job_config['output_file_extension']
 
     def get_job_config(self):
         return self.job_config
@@ -49,17 +50,11 @@ class ParseParameters():
 class ParseCCExtractorParameters():
     def __init__(self, params):
         params = json.loads(params)
-        self.output_file_extension = 'srt'
         self.params_list = []
 
         for key, value in params.items():
-            if "-out=" in key:
-                self.output_file_extension = key[5:]
-
-            if key in ['-xml', '-srt', '-dvdraw', '-sami', '-smi', '-webvtt', '--transcript', '-txt', '--timedtranscript', '-ttxt', '-null']:
-                self.output_file_extension = key
-
             self.params_list.append(key)
-            self.params_list.append(value)
+            if value:
+                self.params_list.append(value)
 
 
