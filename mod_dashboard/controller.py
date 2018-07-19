@@ -10,17 +10,20 @@ import os
 import shutil
 import json
 import hashlib
-import collections
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
-import flask
+
 from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
 from werkzeug import secure_filename
+
 from database import db
 
 mod_dashboard = Blueprint("mod_dashboard", __name__)
+
+from run import log
 
 
 BUF_SIZE = 65536  # reading file in 64kb chunks

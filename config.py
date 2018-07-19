@@ -8,6 +8,20 @@ class Config(object):
     MIN_PWD_LEN = 8
     MAX_PWD_LEN = 128
 
+    """
+    LOG_LEVEL possible values :
+    
+    CRITICAL
+    ERROR
+    WARNING
+    INFO
+    DEBUG
+    NOTSET
+    """
+
+    LOG_LEVEL = "DEBUG"
+    LOG_FILE_DIR = "logs/"
+
 class DevelopmentConfig(Config):
     """
     Development configurations

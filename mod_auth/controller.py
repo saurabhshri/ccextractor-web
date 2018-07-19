@@ -14,13 +14,15 @@ import hmac
 import hashlib
 import time
 
-from database import db
 from functools import wraps
+
+from database import db
 
 from mod_auth.models import Users
 from mod_auth.forms import SignupEmailForm, SignupForm, LoginForm
 
 mod_auth = Blueprint("mod_auth", __name__)
+
 
 @mod_auth.before_app_request
 def before_app_request():
@@ -152,6 +154,8 @@ def send_signup_confirmation_mail(email):
 
 @mod_auth.route('/login', methods=['GET', 'POST'])
 def login():
+    from run import log
+    log.debug(request.remote_addr)
     user_id = session.get('user_id', 0)
     g.user = Users.query.filter(Users.id == user_id).first()
 
