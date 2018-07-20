@@ -17,9 +17,18 @@ import time
 from functools import wraps
 
 from database import db
+from logger import Logger
 
 from mod_auth.models import Users
 from mod_auth.forms import SignupEmailForm, SignupForm, LoginForm
+
+from config_parser import general_config
+
+
+user_logger = Logger(log_level=general_config['LOG_LEVEL'],
+                     dir=general_config['LOG_FILE_DIR'],
+                     filename="users")
+user_log = user_logger.get_logger("users")
 
 mod_auth = Blueprint("mod_auth", __name__)
 
@@ -47,6 +56,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if g.user is None:
+            user_log.debug('[IP: {ip}] tried to access {endpoint} without logging in.'.format(ip=request.remote_addr, endpoint=request.endpoint))
             flash('You need to login first.', 'error')
             return redirect(url_for('mod_auth.login', next=request.endpoint))
 
@@ -60,6 +70,7 @@ def check_account_type(account_types=None, parent_route=None):
         def decorated_function(*args, **kwargs):
             if g.user.account_type in account_types:
                 return f(*args, **kwargs)
+            user_log.debug('[User: {user_id}] account type : {user_acc_type} tried to access {endpoint} without {req_acc_types} privilege(s).'.format(user_id=g.user.id, user_acc_type=g.user.account_type, endpoint=request.endpoint, req_acc_types=account_types))
             flash('Your account does not have enough privileges to access this functionality.', 'error')
             return redirect(url_for('mod_auth.profile'))
         return decorated_function
@@ -68,7 +79,6 @@ def check_account_type(account_types=None, parent_route=None):
 
 @mod_auth.route('/signup', methods=['GET', 'POST'])
 def signup():
-
     if g.user is not None:
         flash('Currently logged in as ' + g.user.username, 'success')
         return redirect(url_for('.profile'))
@@ -78,13 +88,22 @@ def signup():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is not None:
             flash('Email is already registered!', 'error')
+            user_log.debug('Duplicate registration attempt for : {email}, registered with user : {user}'.format(email=form.email.data, user=user.id))
             return redirect(url_for('.login'))
         else:
             expires = int(time.time()) + 86400
             verification_code = generate_verification_code(
                 "{email}{expires}".format(email=form.email.data, expires=expires))
-            send_verification_mail(form.email.data, verification_code, expires)
-            flash('Please check your email for verification and further instructions.', 'success')
+            resp = send_verification_mail(form.email.data, verification_code, expires)
+
+            if resp.status_code is not 200:
+                flash('Unable to send verification email. Please get in touch.')
+                from run import log
+                log.debug("Mail sending failed. Check mail logs.")
+
+            else:
+                user_log.debug('Received registration request for : {email}'.format(email=form.email.data))
+                flash('Please check your email for verification and further instructions.', 'success')
     return render_template("mod_auth/signup.html", form=form)
 
 
@@ -92,7 +111,7 @@ def generate_verification_code(data):
     from flask import current_app as app
     key = app.config.get('HMAC_KEY')
 
-    key_bytes= bytes(key, 'latin-1')
+    key_bytes = bytes(key, 'latin-1')
     data_bytes = bytes(data, 'latin-1')
 
     return hmac.new(key_bytes, data_bytes , hashlib.sha256).hexdigest()
@@ -131,8 +150,12 @@ def verify_account(email, received_verification_code, expires):
                     db.session.add(user)
                     db.session.commit()
 
-                    send_signup_confirmation_mail(user.email)
+                    resp = send_signup_confirmation_mail(user.email)
+                    if resp.status_code is not 200:
+                        from run import log
+                        log.debug("Mail sending failed. Check mail logs.")
 
+                    user_log.debug("Sign Up Complete for : {email} | User ID: {user_id}".format(email=user.email, user_id=user.id))
                     flash('Signup Complete! Please Login to continue.', 'success')
                 else:
                     return render_template("mod_auth/verify.html", form=form, email=email)
@@ -154,8 +177,6 @@ def send_signup_confirmation_mail(email):
 
 @mod_auth.route('/login', methods=['GET', 'POST'])
 def login():
-    from run import log
-    log.debug(request.remote_addr)
     user_id = session.get('user_id', 0)
     g.user = Users.query.filter(Users.id == user_id).first()
 
@@ -165,7 +186,6 @@ def login():
         flash('Logged in as ' + g.user.username, 'success')
         if len(redirect_location) == 0:
             return redirect(url_for('.profile'))
-
         else:
             return redirect(url_for(redirect_location))
 
@@ -175,6 +195,7 @@ def login():
         user = Users.query.filter_by(email=form.email.data).first()
         if user and user.is_password_valid(form.password.data):
             session['user_id'] = user.id
+            user_log.debug('[User: {user_id}] logged in from IP: {ip}'.format(user_id=user.id, ip=request.remote_addr))
             if len(redirect_location) == 0:
                 return redirect(url_for('.profile'))
             else:
@@ -196,6 +217,7 @@ def profile():
 
 @mod_auth.route('/logout')
 def logout():
+    user_log.debug('{user_id} logged out from IP: {ip}'.format(user_id=g.user.id, ip=request.remote_addr))
     session.pop('user_id', None)
     flash('You have been logged out', 'success')
     return redirect(url_for('.login'))
