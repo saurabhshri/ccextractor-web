@@ -12,18 +12,30 @@ import os
 
 
 class Logger:
-    def __init__(self, log_level, dir, filename):
+    def __init__(self, log_level, dir, filename, format=None, console_level="", file_level=""):
+        if not console_level:
+            console_level = log_level
+        if not file_level:
+            file_level = log_level
+
         self.log_level = logging.getLevelName(log_level)
-        format = logging.Formatter('[%(asctime)s] [%(levelname)s] | %(message)s | [file : %(pathname)s#L%(lineno)d] > [function: %(funcName)s]')
+        self.console_level = logging.getLevelName(console_level)
+        self.file_level = logging.getLevelName(file_level)
+
+
+        if format is None:
+            format = '[%(asctime)s] [%(name)s] [%(levelname)s] [%(pathname)s#L%(lineno)d] | "%(message)s"'
+        format = logging.Formatter(format)
+
 
         self.log_to_console = logging.StreamHandler()
         self.log_to_console.setFormatter(format)
-        self.log_to_console.setLevel(self.log_level)
+        self.log_to_console.setLevel(logging.getLevelName(self.console_level))
 
         path = os.path.join(dir, '{name}.log'.format(name=filename))
         self.log_to_file = logging.FileHandler(path)
         self.log_to_file.setFormatter(format)
-        self.log_to_file.setLevel(self.log_level)
+        self.log_to_file.setLevel(self.file_level)
 
     def get_logger(self, name):
         logger = logging.getLogger(name)
