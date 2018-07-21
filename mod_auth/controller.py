@@ -202,6 +202,7 @@ def login():
                 return redirect(url_for(redirect_location))
         else:
             flash('Wrong username or password', 'error')
+            user_log.debug('Invalid login attempt from IP: {ip} for email :{email}'.format(email=form.email.data, ip=request.remote_addr))
 
         return redirect(url_for('.login'))
 
@@ -217,7 +218,7 @@ def profile():
 
 @mod_auth.route('/logout')
 def logout():
-    user_log.debug('{user_id} logged out from IP: {ip}'.format(user_id=g.user.id, ip=request.remote_addr))
+    user_log.debug('[User: {user_id}] logged out from IP: {ip}'.format(user_id=g.user.id, ip=request.remote_addr))
     session.pop('user_id', None)
     flash('You have been logged out', 'success')
     return redirect(url_for('.login'))

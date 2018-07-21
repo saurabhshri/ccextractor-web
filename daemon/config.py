@@ -1,2 +1,16 @@
 LOG_FILE_EXTENSION = '.log'
 RETRY_TIME = 5
+
+"""
+LOG_LEVEL possible values :
+
+CRITICAL
+ERROR
+WARNING
+INFO
+DEBUG
+NOTSET
+"""
+
+LOG_LEVEL = "DEBUG"
+LOG_FILE_DIR = "logs/"
