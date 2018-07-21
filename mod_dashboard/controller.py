@@ -23,27 +23,24 @@ from database import db
 
 mod_dashboard = Blueprint("mod_dashboard", __name__)
 
-from run import log
-
 
 BUF_SIZE = 65536  # reading file in 64kb chunks
 
 @mod_dashboard.route('/report_progress', methods=['GET', 'POST'])
 def progress():
     from flask import current_app as app
-
-    #Resp = collections.namedtuple('Resp', ['stat', 'reason'])
+    from run import log
     job_number = request.form['job_number']
     queued_file = ProcessQueue.query.filter(ProcessQueue.id == job_number).first()
     if queued_file is not None:
         if request.form['token'] == queued_file.token:
-
             if request.form['report_type'] == 'queue_status':
                 queued_file.status = request.form['status']
                 db.session.add(queued_file)
                 db.session.commit()
+                log.debug('[Job Number: {queued_file_id}] > Updating status to [{status}].'.format(queued_file_id=queued_file.id,
+                                                                                                   status=queued_file.status))
                 #return Resp(stat='success', reason='')
-
 
             elif request.form['report_type'] == 'log':
                 uploaded_file = request.files['file']
@@ -52,8 +49,8 @@ def progress():
                     temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['LOGS_DIR']))
-                #return Resp(stat='success', reason='')
-
+                    log.debug('[Job Number: {queued_file_id}] > Uploaded log file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
+                    #return Resp(stat='success', reason='')
 
             elif request.form['report_type'] == 'output':
                 uploaded_file = request.files['file']
@@ -62,20 +59,23 @@ def progress():
                     temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['OUTPUT_DIR']))
+                    log.debug('[Job Number: {queued_file_id}] > Uploaded Output file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
                 #return Resp(stat='success', reason='')
 
-
         else:
+            log.debug('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
             return "Invalid Token"
             #return Resp(stat='failed', reason='Invalid token')
 
+    log.debug('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token= request.form['token']))
     return "Invalid Request"
     #return Resp(stat='failed', reason='Invalid request')
 
 @mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
 @login_required
 def new_job(filename):
-    file = UploadedFiles.query.filter(UploadedFiles.filename==filename).first()
+    from run import log
+    file = UploadedFiles.query.filter(UploadedFiles.filename == filename).first()
     if file is not None:
         users_with_file_access = Users.query.filter(Users.files.any(id=file.id)).all()
         if g.user in users_with_file_access:
@@ -98,12 +98,16 @@ def new_job(filename):
                                            output_file_extension=resp['output_file_extension'])
 
                     if rv['status'] == 'duplicate':
-                        flash('Job with same conifguration already in the queue. Job #{job_number}'.format(
-                            job_number=rv['job_number']), 'warning')
+                        flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
+                        log.debug('Duplicate job configuration for job number: {job_number} '.format(job_number=rv['job_number']))
+
                     elif rv['status'] == 'failed':
                         flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
+                        log.debug('Failed to add job! Reason : {reason}'.format(reason=rv['reason']))
+
                     else:
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
+                        log.debug('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']))
             else:
                 return render_template('mod_dashboard/newjob.html', filename=filename, form=form)
         else:
@@ -117,6 +121,7 @@ def new_job(filename):
 @login_required
 def dashboard():
     from flask import current_app as app
+    from run import log
     ccextractor = CCExtractorVersions.query.all()
     form = UploadForm()
     form.ccextractor_version.choices = [(str(cc.id), str(cc.version)) for cc in ccextractor]
@@ -127,6 +132,7 @@ def dashboard():
             filename = secure_filename(uploaded_file.filename)
             temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
             uploaded_file.save(temp_path)
+            log.debug('Saving as temporary file : {path} by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
             file_hash = create_file_hash(temp_path)
             if file_exist(file_hash):
                 file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
@@ -134,21 +140,23 @@ def dashboard():
                 if g.user not in users_with_file_access:
                     file.user.append(g.user)
                     db.session.commit()
-                    flash(
-                        'File with same hash already uploaded, the file has been made available to you for processing in your dashboard.',
-                        'warning')
+                    flash('File with same hash already uploaded, the file has been made available to you for processing in your dashboard.', 'warning')
+                    log.debug('File with the hash already exist. Original uploader: {og_uploader}. Access granted to user: {user_id}'.format(og_uploader=file.original_uploader, user_id=g.user.id))
                 else:
-                    flash('File already uploaded by you. If you want to re-process it(say, with different parameters, head to your dashboard',
-                        'warning')
+                    flash('File already uploaded by you. If you want to re-process it(say, with different parameters, head to your dashboard', 'warning')
+                    log.debug('Duplicate file : {file} uploaded by user: {user_id}'.format(file=file.id, user_id=g.user.id))
+
                 os.remove(temp_path)
+                log.debug('Deleting temporary file : {path}'.format(path=temp_path))
+
             else:
                 size = os.path.getsize(temp_path)
                 filename, extension = os.path.splitext(filename)
                 file_db = UploadedFiles(original_name=filename,
-                                hash=file_hash,
-                                original_uploader=g.user.id,
-                                extension=extension,
-                                size=size)
+                                        hash=file_hash,
+                                        original_uploader=g.user.id,
+                                        extension=extension,
+                                        size=size)
                 db.session.add(file_db)
                 db.session.commit()
                 file_db.user.append(g.user)
@@ -158,7 +166,7 @@ def dashboard():
 
                 os.rename(temp_path, os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename))
                 flash('File uploaded.', 'success')
-
+                log.debug('File {file_id} uploaded by: {user_id}'.format(file_id=file_db.id, user_id=g.user.id))
 
             file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
 
@@ -196,6 +204,7 @@ def dashboard():
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def admin():
+    from run import log
     ccextractor_form = NewCCExtractorVersionForm()
     ccextractor_parameters_form = NewCCExtractorParameterForm()
     if ccextractor_form.validate_on_submit() and ccextractor_form.submit.data:
@@ -208,6 +217,7 @@ def admin():
             db.session.add(ccextractor)
             db.session.commit()
             flash('CCExtractor version added!', 'success')
+            log.debug('New CCExtractor version added. [{ccx}]'.format(ccx=ccextractor.id))
 
     if ccextractor_parameters_form.validate_on_submit() and ccextractor_parameters_form.submit.data:
         parameter = CCExtractorParameters.query.filter(CCExtractorParameters.parameter == ccextractor_parameters_form.parameter.data).first()
@@ -221,37 +231,39 @@ def admin():
             db.session.add(parameter)
             db.session.commit()
             update_cmd_json(parameter, "new")
+            log.debug('New CCExtractor parameter added. [{ccx}]'.format(ccx=parameter.id))
             flash('CCExtractor parameter added!', 'success')
 
     ccextractor = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
     queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
     users = Users.query.order_by(db.desc(Users.id)).all()
     parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
-    print(parameters)
     return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form,
                            ccextractor=ccextractor, queue=queue, users=users,
                            ccextractor_parameters_form=ccextractor_parameters_form, parameters=parameters)
-
-
 
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
 @mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
 @login_required
 def serve(type, job_no, view=None):
     from flask import current_app as app
-
+    from run import log
     job = ProcessQueue.query.filter(ProcessQueue.id == job_no).first()
     if job is not None:
         if job.added_by_user == g.user.id:
             if type == 'log':
+                log.debug('Serving log file for job number: {job_no} to user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
                 return serve_file_download(file_name='{id}.log'.format(id=job.id), folder=app.config['LOGS_DIR'], as_attachment=(True if view is None else False))
             elif type == 'output':
+                log.debug('Serving output file for job number: {job_no} to user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
                 return serve_file_download(file_name='{id}.{extension}'.format(id=job.id, extension=job.get_output_extension()), folder=app.config['OUTPUT_DIR'], as_attachment=(True if view is None else False))
             else:
                 flash('Invalid filetype.', 'error')
         else:
+            log.debug('Forbidden download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
             flash('Forbidden.', 'error')
     else:
+        log.debug('Invalid download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
         flash('Illegal request. Job not found', 'error')
     return redirect(request.referrer)
 
@@ -259,32 +271,35 @@ def serve(type, job_no, view=None):
 @login_required
 def delete(filename):
     from flask import current_app as app
+    from run import log
     file = UploadedFiles.query.filter(UploadedFiles.filename == filename).first()
-    print(filename)
     if file is not None:
         users_with_file_access = Users.query.filter(Users.files.any(id=file.id)).all()
         if g.user in users_with_file_access:
             if len(users_with_file_access) > 1:
+                log.debug('Access tp file: {file_id} revoked for user : {user_id}'.format(file_id=file.id, user_id=g.user.id))
                 file.user.remove(g.user)
             else:
                 video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
                 if os.path.exists(video_file_path):
                     os.remove(video_file_path)
+                    log.debug('File: {file_id} deleted by user : {user_id}'.format(file_id=file.id, user_id=g.user.id))
                 db.session.delete(file)
             db.session.commit()
             flash('{filename} deleted.'.format(filename=filename), 'success')
         else:
+            log.debug('Forbidden delete request for file: {file_id} by user : {user_id}'.format(file_id=file.id, user_id=g.user.id))
             flash('Forbidden.'.format(filename=filename), 'error')
-            # returnjson.dumps({'status': 'success'}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
     else:
+        log.debug('Invalid delete request for file: {filename} by user : {user_id}'.format(filename=filename, user_id=g.user.id))
         flash('{filename} not found.'.format(filename=filename), 'error')
-        # return #json.dumps({'status': 'failed', 'message': 'forbidden'}, indent=4, separators=(',', ': '), ensure_ascii=False)
-    return redirect(request.referrer) #json.dumps({'status': 'failed', 'message': 'file not found'}, indent=4, separators=(',', ': '), ensure_ascii=False)
+    return redirect(request.referrer)
 
 @mod_dashboard.route('/parameters/<function>/<id>', methods=['GET', 'POST'])
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def manage_parameter(function, id):
+    from run import log
     parameter = CCExtractorParameters.query.filter(CCExtractorParameters.id == id).first()
     if parameter is not None:
         if function == 'toggle':
@@ -292,6 +307,7 @@ def manage_parameter(function, id):
             db.session.commit()
             update_cmd_json(parameter, 'update')
             flash('Enable status toggled!', 'success')
+            log.debug('Toggled enable status for parameter: {param_id} by user : {user_id}'.format(param_id=parameter.id, user_id=g.user.id))
 
             """
             enabled = "False"
@@ -305,13 +321,17 @@ def manage_parameter(function, id):
             db.session.commit()
             update_cmd_json(parameter, 'delete')
             flash('Parameter deleted!', 'success')
+            log.debug('Deleted parameter: {param_id} by user : {user_id}'.format(param_id=parameter.id, user_id=g.user.id))
+
 
         return redirect(request.referrer)
 
+    log.debug('Invalid parameter manipulation request: {function} for parameter:{parameter_id} by user: {user_id}'.format(function=function, param_id=id, user_id=g.user.id))
     return json.dumps({'status': 'failed'}, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
 
 def update_cmd_json(parameter, type="new"):
     from flask import current_app as app
+    from run import log
     cmd_json_file = os.path.join(app.config['COMMANDS_JSON_PATH'])
 
     with open(cmd_json_file) as cmd:
@@ -322,10 +342,13 @@ def update_cmd_json(parameter, type="new"):
         if parameter.parameter in param['parameter']:
             if type == 'new':
                 flash('Parameter already exists in JSON file!', 'error')
+                log.debug('Parameter: {param} already exists in JSON file'.format(param=param))
                 return
             elif type == 'delete' or type == 'update':
                 flash('Updating parameter in JSON file!', 'warning')
                 del commands['commands'][index]
+                log.debug('Removing parameter: {param} from JSON file'.format(param=param))
+
         index += 1;
 
     if type != 'delete':
@@ -337,6 +360,7 @@ def update_cmd_json(parameter, type="new"):
                        "enabled": parameter.enabled
                        }
         commands['commands'].append(new_command)
+        log.debug('Adding parameter: {param} to JSON file'.format(param=parameter.parameter))
 
     with open("static/commands.json", 'w', encoding='utf-8') as cmd:
         json.dump(commands, cmd, indent=4, separators=(',', ': '), ensure_ascii=False)
@@ -379,6 +403,7 @@ def file_exist(file_hash):
 
 def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, parameters, remarks, output_file_extension='srt'):
     from flask import current_app as app
+    from run import log
     queued_file = ProcessQueue.query.filter((ProcessQueue.filename == filename) &
                                             (ProcessQueue.added_by_user == added_by_user) &
                                             (ProcessQueue.platform == platform) &
@@ -395,36 +420,61 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         db.session.add(queued_file)
         db.session.commit()
 
-        job_file_path = os.path.join(app.config['JOBS_DIR'], '{job_id}.json'.format(job_id=queued_file.id))
+        log.debug('Job: {job_no} > Created by {user_id}.'.format(job_no=queued_file.id, user_id=added_by_user))
+        log.debug('Job: {job_no} > Platform : {platform}.'.format(job_no=queued_file.id, platform=platform))
+
+        job_dir = ""
+        if platform == Platforms.linux.value:
+            job_dir = app.config['LINUX_JOBS_DIR']
+        elif platform == Platforms.windows.value:
+            job_dir = app.config['WINDOWS_JOBS_DIR']
+        elif platform == Platforms.mac.value:
+            job_dir = app.config['MAC_JOBS_DIR']
+
+        job_file_path = os.path.join(job_dir, '{job_id}.json'.format(job_id=queued_file.id))
         name, extension = os.path.splitext(filename)
         video_file_name = '{job_id}{extension}'.format(job_id=queued_file.id, extension=extension)
 
+        log.debug('Job: {job_no} > Job Directory : {job_dir}'.format(job_no=queued_file.id, job_dir=job_dir))
+        log.debug('Job: {job_no} > Job File Path : {job_file}'.format(job_no=queued_file.id, job_file=job_file_path))
 
         ccextractor = CCExtractorVersions.query.filter(CCExtractorVersions.id == ccextractor_version).first()
 
-        queue_dict = { 'job_number': str(queued_file.id),
-                       'filename': video_file_name,
-                       'parameters': parameters,
-                       'token': queued_file.token,
-                       'platform': platform,
-                       'executable_path': ccextractor.linux_executable_path,
-                       'output_file_extension': queued_file.output_file_extension
-        }
+        queue_dict = {'job_number': str(queued_file.id),
+                      'filename': video_file_name,
+                      'parameters': parameters,
+                      'token': queued_file.token,
+                      'platform': platform,
+                      'executable_path': ccextractor.linux_executable_path,
+                      'output_file_extension': queued_file.output_file_extension}
 
         video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
         if os.path.exists(video_file_path):
-            rc = shutil.copy(video_file_path, '{job_dir}/{video_file_name}'.format(job_dir=app.config['JOBS_DIR'], video_file_name=video_file_name))
-            with open(job_file_path, 'w', encoding='utf8') as job_file:
-                content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
-                job_file.write(content)
+            try:
+                log.debug('Job: {job_no} > Copying video file to Jobs dir : {filename} > {video_file_name}'.format(job_no=queued_file.id, filename=filename, video_file_name=video_file_name))
+                shutil.copy(video_file_path, '{job_dir}/{video_file_name}'.format(job_dir=job_dir, video_file_name=video_file_name))
+                log.debug('Job: {job_no} > Video file copied.'.format(job_no=queued_file.id))
+
+            except Exception as e:
+                log.debug('Job: {job_no} > Error Copying video file to Jobs dir. : {exception}'.format(job_no=queued_file.id, exception=e))
+                return {'status': 'failed', 'reason': 'Unable to copy video file for processing.'}
+
+            try:
+                log.debug('Job: {job_no} > Creating job configuration file: {job_file_path}'.format(job_no=queued_file.id, job_file_path=job_file_path))
+                with open(job_file_path, 'w', encoding='utf8') as job_file:
+                    content = json.dumps(queue_dict, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+                    job_file.write(content)
+                    log.debug('Job: {job_no} > Created job configuration file: {job_file_path}'.format(job_no=queued_file.id, job_file_path=job_file_path))
+            except Exception as e:
+                log.debug('Job: {job_no} > Error creating job configuration file. : {exception}'.format(job_no=queued_file.id, exception=e))
+                return {'status': 'failed', 'reason': 'Unable to create job configuration file.'}
 
             return {'status': 'success', 'job_number': queued_file.id}
         else:
-            return {'status': 'failed', 'reason': 'file does not exist on server'}
+            return {'status': 'failed', 'reason': 'File does not exist on server.'}
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}
 
-@mod_dashboard.route('/test/<params>')
 def parse_ccextractor_parameters(params):
     from flask import current_app as app
     params = params.split()
@@ -459,10 +509,10 @@ def parse_ccextractor_parameters(params):
                         parameters_missing_values.update(entry)
                         break
                     else:
-                        entry = {'{parameter}'.format(parameter=command['parameter']):'{value}'.format(value=params[param_count])}
+                        entry = {'{parameter}'.format(parameter=command['parameter']): '{value}'.format(value=params[param_count])}
                         is_value = True
                 else:
-                    entry = {'{parameter}'.format(parameter=command['parameter']):'{value}'.format(value="")}
+                    entry = {'{parameter}'.format(parameter=command['parameter']): '{value}'.format(value="")}
 
                 if command['enabled']:
                     parameters.update(entry)
