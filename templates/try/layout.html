@@ -30,9 +30,10 @@
     <!-- Navigation-->
     {%- include 'try/navigation.html'-%}
 
+
     <div class="content-wrapper">
     {% block content %}
-
+    {{ macros.display_flash_messages() }}
     {% endblock %}
     </div>
 
