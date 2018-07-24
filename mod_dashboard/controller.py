@@ -14,13 +14,14 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate, LayoutHelper
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
 from werkzeug import secure_filename
 
 from database import db
+from template import LayoutHelper
 
 mod_dashboard = Blueprint("mod_dashboard", __name__)
 
