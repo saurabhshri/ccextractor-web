@@ -1,0 +1,41 @@
+{% block body %}
+    <div class="">
+        <div class="">
+            <p>Upload File</p>
+        </div>
+    </div>
+    <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.dashboard', next=next) }}">
+        {{ form.csrf_token }}
+
+        <div class="">
+            <div class="">
+                {{ macros.render_field(form.file) }}
+            </div>
+            <div class="">
+                {{ macros.render_field(form.parameters) }} <p id="requires_value"></p>
+            </div>
+            <div>
+               Description: <p id="parameter-description"></p>
+
+            </div>
+            <div class="">
+                {{ macros.render_field(form.ccextractor_version) }}
+            </div>
+            <div class="">
+                {{ macros.render_field(form.platforms) }}
+            </div>
+            <div class="">
+                {{ macros.render_field(form.start_processing) }}
+            </div>
+            <div class="">
+                {{ macros.render_field(form.remark) }}
+            </div>
+            <div class="">
+                {{ macros.render_field(form.submit) }}
+            </div>
+        </div>
+
+    </form>
+{% endblock %}
+
+{%- include 'mod_dashboard/parameters-autocomplete.html' -%}
