@@ -38,4 +38,18 @@
     </form>
 {% endblock %}
 
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $("#file-upload").fileinput({
+        showUpload: false,
+        showRemove: true,
+        required: true,
+        showClose: false,
+        browseOnZoneClick: true
+    });
+});
+</script>
+{% endblock %}
+
 {%- include 'mod_dashboard/parameters-autocomplete.html' -%}
