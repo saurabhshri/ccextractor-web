@@ -1,0 +1,84 @@
+{% block body %}
+    <div class="card mb-3" style="margin-left: 15px; margin-right: 15px;">
+        <div class="card-header">
+            <i class="fa fa-gear"></i> <a data-toggle="collapse" data-target="#new-job-panel">Add new job to queue <i class="fa fa-chevron-circle-down"></i></a>
+        </div>
+        <div id="new-job-panel" class="in">
+            <div class="card-body">
+                <form method="post" name="newJobForm" id="newJobForm" enctype=multipart/form-data>
+                    {{ form.csrf_token }}
+                    <div class="">
+                        <div>
+                            File : {{ file.original_name}} (Hash: {{ file.hash }})
+                        </div>
+
+                        <div class="panel-heading" style="float: left;">
+                          <p class="panel-title">
+                            <a data-toggle="collapse" href="#parameter-panel">Add Custom Parameters <i class="fa fa-chevron-circle-down"></i></a>
+                          </p>
+                        </div>
+
+                        <div id="parameter-tip" style="float: right;"></div>
+
+                        <div id="parameter-panel" class="panel-collapse">
+                            <div class="">
+                                {{ macros.render_field(form.parameters, class_="form-control") }}
+                            </div>
+
+                            <div class="row" style="margin-left: -15px; margin-right: -15px;">
+                                <div class="col-lg-5">
+                                    <div class="card mb-3">
+                                        <div class="card-footer small text-muted"> Suggestions : </div>
+                                        <div class="card-body">
+                                            <div id="suggestions"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-7">
+                                    <div class="card mb-3">
+                                        <div class="card-footer small text-muted"> Description :</div>
+                                        <div class="card-body">
+                                            <p id="parameter-description"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-heading" style="clear: both;">
+                          <p class="panel-title">
+                            <a data-toggle="collapse" href="#additional-parameter-panel">Additional Options <i class="fa fa-chevron-circle-down"></i></a>
+                          </p>
+                        </div>
+
+                        <div id="additional-parameter-panel" class="panel-collapse">
+                            <div class="row" style="margin-left: -15px; margin-right: -15px;">
+                                <div class="col-lg-4">
+                                    {{ form.ccextractor_version.label }}
+                                    {{ macros.render_field(form.ccextractor_version, class_="form-control") }}
+                                </div>
+                                <div class="col-lg-4">
+                                    {{ form.platforms.label }}
+                                    {{ macros.render_field(form.platforms, class_="form-control") }}
+                                </div>
+                                <div class="col-lg-4">
+                                    {{ form.remark.label }}
+                                    {{ macros.render_field(form.remark, class_="form-control", rows='1') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row float-right">
+                            <div class="col-lg-4">
+                                 {{ macros.render_field(form.submit, class_="btn-xs btn btn-outline-primary") }}
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{%- include 'mod_dashboard/parameters-autocomplete.html' -%}
