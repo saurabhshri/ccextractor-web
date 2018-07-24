@@ -42,7 +42,7 @@
       
         {% endif %}
         {% if field.errors %}
-            <div class="alert alert-danger fade in" style="display: inline; border: none;">
+            <div class="alert alert-danger alert-dismissible fade show" style="display: inline; border: none;">
             	<strong>Oops!</strong> {{ field.errors|join(', ') }}
                 <a href="#" class="close" data-dismiss="alert" style="float: none;">&times;</a>
             </div>
@@ -61,19 +61,19 @@
                     <ul class="">
                         {% for category, message in messages %}
                             {% if category == 'error' %}
-                                <div class="alert alert-danger fade in" style="display: inline; border: none;">
+                                <div class="alert alert-danger alert-dismissible fade show" style="display: inline; border: none;">
                                     <strong>Error: </strong>
 
                             {% elif category == 'warning' %}
-                                <div class="alert alert-warning fade in" style="display: inline; border: none;">
+                                <div class="alert alert-warning alert-dismissible fade show" style="display: inline; border: none;">
                                     <strong>Warning: </strong>
 
                             {% elif category == 'success' %}
-                                <div class="alert alert-success fade in" style="display: inline; border: none;">
+                                <div class="alert alert-success alert-dismissible fade show" style="display: inline; border: none;">
                                     <strong>Success: </strong>
 
                             {% elif category == 'info' %}
-                                <div class="alert alert-info fade in" style="display: inline; border: none;">
+                                <div class="alert alert-info alert-dismissible fade show" style="display: inline; border: none;">
                                     <strong>Note: </strong>
 
                             {% endif %}
