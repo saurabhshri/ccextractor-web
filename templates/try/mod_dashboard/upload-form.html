@@ -20,6 +20,24 @@
                 <div class="">
                     {{ macros.render_field(form.parameters, class_="form-control") }}
                 </div>
+                <div class="row">
+                    <div class="col-lg-5" style="float: left;">
+                        <div class="card mb-3">
+                            <div class="card-footer small text-muted"> Suggestions : </div>
+                            <div class="card-body">
+                                <div id="suggestions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card mb-3">
+                            <div class="card-footer small text-muted"> Description :</div>
+                            <div class="card-body">
+                                <p id="parameter-description"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div>
                Description: <p id="parameter-description"></p>
