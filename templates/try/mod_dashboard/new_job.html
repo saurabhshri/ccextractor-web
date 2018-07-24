@@ -1,0 +1,25 @@
+{% extends "try/layout.html" %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('mod_dashboard.dashboard') }}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active">New Job</li>
+        </ol>
+
+        <!-- Summary Cards-->
+        {%- include 'try/mod_dashboard/cards.html' -%}
+
+        <!-- File Upload Form -->
+        {%- include 'try/mod_dashboard/new-job-form.html' -%}
+
+        {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
+
+        {%- include 'try/mod_dashboard/recent-files.html' -%}
+
+    </div>
+{% endblock %}
