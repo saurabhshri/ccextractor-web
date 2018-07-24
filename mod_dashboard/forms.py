@@ -52,7 +52,7 @@ class UploadForm(FlaskForm):
     parameters = TextAreaField('Parameters', [DataRequired(message='Select parameters')])
     ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
     platforms = SelectField('Platform', [DataRequired(message='Select platform')], coerce=str)
-    remark = TextAreaField('Remark')
+    remark = TextAreaField('Remarks')
     start_processing = BooleanField('Start Processing')
     submit = SubmitField('Upload file')
 
