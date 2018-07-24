@@ -27,12 +27,17 @@
                         // delegate back to autocomplete, but extract the last term
                         response( $.ui.autocomplete.filter(
                         availableTags, extractLast( request.term ) ) );
+
+                        var p =  document.getElementById('parameter-tip');
+                        p.innerHTML = "<i class=\"fa fa-lightbulb-o\"></i> Quick Tip : Use tab to autocomplete parameters!"
                     },
+
+                    appendTo: "#suggestions",
 
                     focus: function(event, ui) {
                         var p =  document.getElementById('parameter-description');
                         p.innerHTML = ui.item.description ;
-                      return false;
+                        return false;
                     },
                     select: function( event, ui ) {
                         var terms = split( this.value );
@@ -45,8 +50,8 @@
                         this.value = terms.join( " " );
 
                         if (ui.item.requires_value){
-                            var p =  document.getElementById('requires_value');
-                            p.innerHTML = "Parameter Requires a Value!" ;
+                            var p =  document.getElementById('parameter-tip');
+                            p.innerHTML = "<i class=\"fa fa-exclamation\"></i> Parameter requires a value!" ;
                         }
 
                         return false;

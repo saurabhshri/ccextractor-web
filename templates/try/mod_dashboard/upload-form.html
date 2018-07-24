@@ -1,12 +1,6 @@
 {% block body %}
-    <div class="">
-        <div class="">
-            <p>Upload File</p>
-        </div>
-    </div>
     <form method="post" name="uploadForm" id="uploadForm" enctype=multipart/form-data action="{{ url_for('.dashboard', next=next) }}">
         {{ form.csrf_token }}
-
         <div class="">
             <div class="">
                 {{ macros.render_field(form.file, id="file-upload" ) }}
@@ -17,13 +11,13 @@
                 <a data-toggle="collapse" href="#parameter-panel">Add Custom Parameters <i class="fa fa-chevron-circle-down"></i></a>
               </p>
             </div>
-            
             <div id="parameter-tip" style="float: right;"></div>
 
             <div id="parameter-panel" class="panel-collapse collapse">
                 <div class="">
                     {{ macros.render_field(form.parameters, class_="form-control") }}
                 </div>
+
                 <div class="row">
                     <div class="col-lg-5" style="float: left;">
                         <div class="card mb-3">
@@ -43,12 +37,9 @@
                     </div>
                 </div>
             </div>
-            <div>
-               Description: <p id="parameter-description"></p>
 
-            </div>
-            <div class="">
-                {{ macros.render_field(form.ccextractor_version) }}
+            <div class="" style="clear: both;">
+                {{ macros.render_field(form.ccextractor_version, class_="btn btn-default", data_show_subtext="true", data_live_search="true") }}
             </div>
             <div class="">
                 {{ macros.render_field(form.platforms) }}
@@ -60,10 +51,9 @@
                 {{ macros.render_field(form.remark) }}
             </div>
             <div class="">
-                {{ macros.render_field(form.submit) }}
+                {{ macros.render_field(form.submit, class_="btn btn-success") }}
             </div>
         </div>
-
     </form>
 {% endblock %}
 
