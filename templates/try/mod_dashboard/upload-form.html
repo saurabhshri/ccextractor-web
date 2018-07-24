@@ -11,11 +11,15 @@
             <div class="">
                 {{ macros.render_field(form.file, id="file-upload" ) }}
             </div>
-            <div class="panel-heading">
+
+            <div class="panel-heading" style="float: left;">
               <p class="panel-title">
                 <a data-toggle="collapse" href="#parameter-panel">Add Custom Parameters <i class="fa fa-chevron-circle-down"></i></a>
               </p>
             </div>
+            
+            <div id="parameter-tip" style="float: right;"></div>
+
             <div id="parameter-panel" class="panel-collapse collapse">
                 <div class="">
                     {{ macros.render_field(form.parameters, class_="form-control") }}
