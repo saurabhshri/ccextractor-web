@@ -25,11 +25,19 @@
         </ul>
 
         <ul class="navbar-nav ml-auto">
+            {% if layout['logged_in'] != 'true' %}
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="modal" data-target="#loginModal">
+                    <i class="fa fa-fw fa-sign-out"></i>Login</a>
+            </li>
+
+            {% else %}
 
             <li class="nav-item">
                 <a class="nav-link" data-toggle="modal" data-target="#logoutModal">
                     <i class="fa fa-fw fa-sign-out"></i>Logout</a>
             </li>
+            {% endif %}
         </ul>
     </div>
 </nav>

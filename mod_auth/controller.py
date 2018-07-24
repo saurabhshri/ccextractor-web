@@ -18,6 +18,7 @@ from functools import wraps
 
 from database import db
 from logger import Logger
+from template import LayoutHelper
 
 from mod_auth.models import Users
 from mod_auth.forms import SignupEmailForm, SignupForm, LoginForm
@@ -72,7 +73,7 @@ def check_account_type(account_types=None, parent_route=None):
                 return f(*args, **kwargs)
             user_log.debug('[User: {user_id}] account type : {user_acc_type} tried to access {endpoint} without {req_acc_types} privilege(s).'.format(user_id=g.user.id, user_acc_type=g.user.account_type, endpoint=request.endpoint, req_acc_types=account_types))
             flash('Your account does not have enough privileges to access this functionality.', 'error')
-            return redirect(url_for('mod_auth.profile'))
+            return redirect(url_for('mod_dashboard.dashboard'))
         return decorated_function
     return access_decorator
 
@@ -81,7 +82,7 @@ def check_account_type(account_types=None, parent_route=None):
 def signup():
     if g.user is not None:
         flash('Currently logged in as ' + g.user.username, 'success')
-        return redirect(url_for('.profile'))
+        return redirect(url_for('mod_dashboard.dashboard'))
 
     form = SignupEmailForm()
     if form.validate_on_submit():
@@ -131,7 +132,7 @@ def verify_account(email, received_verification_code, expires):
 
     if g.user is not None:
         flash('Currently logged in as ' + g.user.username, 'success')
-        return redirect(url_for('.profile'))
+        return redirect(url_for('mod_dashboard.dashboard'))
 
     if time.time() <= expires:
 
@@ -185,7 +186,7 @@ def login():
     if g.user is not None:
         flash('Logged in as ' + g.user.username, 'success')
         if len(redirect_location) == 0:
-            return redirect(url_for('.profile'))
+            return redirect(url_for('mod_dashboard.dashboard'))
         else:
             return redirect(url_for(redirect_location))
 
@@ -197,7 +198,7 @@ def login():
             session['user_id'] = user.id
             user_log.debug('[User: {user_id}] logged in from IP: {ip}'.format(user_id=user.id, ip=request.remote_addr))
             if len(redirect_location) == 0:
-                return redirect(url_for('.profile'))
+                return redirect(url_for('mod_dashboard.dashboard'))
             else:
                 return redirect(url_for(redirect_location))
         else:
@@ -205,8 +206,8 @@ def login():
             user_log.debug('Invalid login attempt from IP: {ip} for email :{email}'.format(email=form.email.data, ip=request.remote_addr))
 
         return redirect(url_for('.login'))
-
-    return render_template("mod_auth/login.html", form=form, next=redirect_location)
+    layout = LayoutHelper(logged_in=False)
+    return render_template("try/mod_auth/login.html", form=form, layout=layout.get_entries(), next=redirect_location)
 
 
 @mod_auth.route('/profile', methods=['GET', 'POST'])
