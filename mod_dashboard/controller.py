@@ -13,7 +13,7 @@ import hashlib
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
@@ -101,21 +101,14 @@ def dashboard():
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
         return redirect(url_for('mod_dashboard.dashboard'))
 
-    queued_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == g.user.id) & (ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
-    processed_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == g.user.id) & (ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
-    errored_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == g.user.id) & (ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
-
-    queue = ProcessQueue.query.filter(ProcessQueue.added_by_user == g.user.id).order_by(db.desc(ProcessQueue.id)).all()
-
-    uploaded_files = g.user.files
+    user = UserDetailsForTemplate(g.user.id)
     return render_template('try/mod_dashboard/dashboard.html',
-                           form=form, accept=form.accept,
-                           queue=queue,
-                           queued_files=queued_files,
-                           processed_files=processed_files,
-                           errored_files=errored_files,
-                           uploaded_files=uploaded_files,
-                           commands_json=app.config['COMMANDS_JSON_PATH'])
+                           form=form,
+                           queue=user.queue,
+                           queued_files=user.queued_files,
+                           processed_files=user.processed_files,
+                           errored_files=user.errored_files,
+                           uploaded_files=user.uploaded_files)
 
 
 @mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
@@ -156,7 +149,15 @@ def new_job(filename):
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
                         log.debug('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']))
             else:
-                return render_template('mod_dashboard/newjob.html', filename=filename, form=form)
+                user = UserDetailsForTemplate(g.user.id)
+                return render_template('try/mod_dashboard/new_job.html',
+                                       file=file,
+                                       form=form,
+                                       queue=user.queue,
+                                       queued_files=user.queued_files,
+                                       processed_files=user.processed_files,
+                                       errored_files=user.errored_files,
+                                       uploaded_files=user.uploaded_files)
         else:
             flash('Invalid new job request!', 'error')
     else:
@@ -586,7 +587,7 @@ def parse_ccextractor_parameters(params):
 
 @mod_dashboard.route('/try', methods=['GET', 'POST'])
 def trying():
-    return render_template('try/try.html')
+    return render_template('try/mod_dashboard/new_job.html')
 
 @mod_dashboard.route('/test', methods=['GET', 'POST'])
 def test():

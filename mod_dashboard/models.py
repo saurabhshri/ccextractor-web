@@ -14,6 +14,7 @@ import pytz
 from tzlocal import get_localzone
 
 from mod_auth.controller import generate_verification_code
+from mod_auth.models import Users
 
 class ProcessStauts(enum.Enum):
     pending = 'pending'
@@ -171,3 +172,23 @@ class CCExtractorParameters(db.Model):
 
     def __repr__(self):
         return '<CExtractorParamter {id}>'.format(id=self.id)
+
+class UserDetailsForTemplate():
+    def __init__(self, user_id):
+        self.queued_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
+        self.processed_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
+        self.errored_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
+        self.queue = ProcessQueue.query.filter(ProcessQueue.added_by_user == user_id).order_by(db.desc(ProcessQueue.id)).all()
+        self.user = Users.query.filter(Users.id == user_id).first()
+        self.uploaded_files = self.user.files
+
+class MenuEntries():
+    def __init__(self, logged_in):
+        self.entries = []
+        if logged_in:
+            pass
+        else:
+            pass
+
+
+
