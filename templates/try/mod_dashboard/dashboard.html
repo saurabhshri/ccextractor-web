@@ -10,8 +10,18 @@
             <li class="breadcrumb-item active">My Dashboard</li>
         </ol>
 
-        <!-- Icon Cards-->
+        <!-- Summary Cards-->
         {%- include 'try/mod_dashboard/cards.html' -%}
+
+        <!-- File Upload Form -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-upload"></i> Upload New File
+            </div>
+            <div class="card-body">
+                {%- include 'try/mod_dashboard/upload-form.html' -%}
+            </div>
+        </div>
 
     </div>
 {% endblock %}
