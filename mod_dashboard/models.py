@@ -73,6 +73,7 @@ class ProcessQueue(db.Model):
     __tablename__ = 'process_queue'
     id = db.Column(db.Integer, primary_key=True)
     added_by_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    original_filename = db.Column(db.Text(), nullable=False)
     filename = db.Column(db.String(140), nullable=False)
     ccexractor_version = db.Column(db.String(100), nullable=False)
     platform = db.Column(db.Enum(Platforms))
@@ -83,9 +84,10 @@ class ProcessQueue(db.Model):
     status = db.Column(db.Enum(ProcessStauts))
     token = db.Column(db.String(128), unique=True)
 
-    def __init__(self, added_by_user, filename, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, output_file_extension='srt', queue_timestamp=None):
+    def __init__(self, added_by_user, filename, original_filename=None, ccextractor_version=None, platform=Platforms.linux, parameters=None, remarks=None, status=ProcessStauts.pending, output_file_extension='srt', queue_timestamp=None):
         self.added_by_user = added_by_user
         self.filename = filename
+        self.original_filename = original_filename
         self.parameters = parameters
         self.remarks = remarks
         self.status = status

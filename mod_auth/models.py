@@ -35,7 +35,7 @@ class Users(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     account_type = db.Column(db.Enum(AccountType))
-    files = db.relationship('UploadedFiles', secondary='file_access', backref=db.backref('user', lazy='dynamic'))
+    files = db.relationship('UploadedFiles', secondary='file_access', backref=db.backref('user', lazy='dynamic'), order_by='UploadedFiles.id')
     sign_up_timestamp = db.Column(db.DateTime(timezone=True))
 
     def __init__(self, username, email, password, name=None, account_type=AccountType.user, sign_up_timestamp=None):

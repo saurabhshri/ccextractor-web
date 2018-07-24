@@ -53,6 +53,10 @@ body.fixed-nav {
   font-size: 0.7rem;
 }
 
+.medium {
+  font-size: 0.8rem;
+}
+
 .o-hidden {
   overflow: hidden !important;
 }
