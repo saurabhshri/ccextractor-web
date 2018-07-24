@@ -10,176 +10,20 @@
     {{ super() }}
     <div class="container-fluid">
         <!-- Breadcrumbs-->
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="#">Dashboard</a>
-            </li>
-            <li class="breadcrumb-item active">My Dashboard</li>
+         <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Dashboard</li>
         </ol>
 
         <!-- Summary Cards-->
         {%- include 'try/mod_dashboard/cards.html' -%}
 
         <!-- File Upload Form -->
-        <div class="card mb-3" style="margin-left: 15px; margin-right: 15px;">
-            <div class="card-header">
-                <i class="fa fa-upload"></i> <a data-toggle="collapse" data-target="#upload-panel">Upload New File <i class="fa fa-chevron-circle-down"></i></a>
-            </div>
-            <div id="upload-panel" class="collapse in">
-                <div class="card-body">
-                    {%- include 'try/mod_dashboard/upload-form.html' -%}
-                </div>
-            </div>
-        </div>
+        <!-- File Upload Form -->
+        {%- include 'try/mod_dashboard/upload-form.html' -%}
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <i class="fa fa-spinner"></i> Recent Queue</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-10 my-auto">
-                                    {% for job in queue[:5] %}
+        {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
 
-                                        {% if job.status.value == 'completed' %}
-                                            {%  set icon = '<i class="fa fa-check-square" style="color: green;"></i>' %}
-                                            {%  set bgcol = '#aeffb12e' %}
-                                            {%  set d_url = 'serve/output/' ~  job.id  %}
-
-                                        {% elif job.status.value == 'error' %}
-                                            {%  set icon = '<i class="fa fa-warning" style="color: red;"></i>' %}
-                                            {%  set bgcol = '#ffaebc2e' %}
-                                            {%  set d_url = '' %}
-
-                                        {% else %}
-                                            {%  set icon = '<i class="fa fa-clock-o" style="color: #f8c246;"></i>' %}
-                                            {%  set bgcol = '#fff1743d' %}
-                                            {%  set d_url = '' %}
-                                        {% endif %}
-
-                                        <div style="background-color: {{ bgcol }};">
-                                            <div class="row">
-                                                <div class="col-lg-8">
-                                                    <a class="list-group-item-action" href="{{ d_url }}">
-                                                        <div class="media">
-                                                            <div class="media-body">
-                                                                {{ icon|safe }} <strong> {{ job.original_filename|truncate(40, True) }}</strong> <span class="text-muted smaller">(Job # {{ job.id }}) </span>
-                                                                <div class="text-muted smaller">Status: {{ job.status.value }} | Added : {{ job.queue_timestamp }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                                <div class="col-lg-4">
-                                                    <div class="list-group-item-action" href="{{ d_url }}">
-                                                        <div class="media float-right text-right">
-                                                            <div class="text-muted medium">
-                                                               {% if job.status.value == 'completed' %}
-                                                                   <div>
-                                                                    Output(
-                                                                    <a href="serve/output/{{job.id}}" download><i class="fa fa-download"></i></a> ,
-                                                                    <a href="serve/output/{{job.id}}/view"><i class="fa fa-eye"></i></a>)
-                                                                   </div>
-                                                                {% endif %}
-
-                                                                {% if job.status.value != 'pending' %}
-                                                                    <div>
-                                                                    Logs (
-                                                                    <a href="serve/log/{{job.id}}" download><i class="fa fa-download"></i></a> ,
-                                                                    <a href="serve/log/{{job.id}}/view"><i class="fa fa-eye"></i></a>)
-                                                                    </div>
-                                                                {% endif %}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                            </div>
-                            <div class="col-sm-2 text-center my-auto">
-                                <div class="h4 mb-0 text-success">{{ processed_files|length }}</div>
-                                <div class="small text-muted">Processed</div>
-                                <hr>
-                                <div class="h4 mb-0 text-warning">{{ queued_files|length }}</div>
-                                <div class="small text-muted">Queued</div>
-                                <hr>
-                                <div class="h5 mb-0 text-danger">{{ errored_files|length }}</div>
-                                <div class="small text-muted">Failed</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                      <div class="card mb-3">
-                    <div class="card-header">
-                        <i class="fa fa-user-circle-o"></i> Profile</div>
-                    <div class="card-body">
-                       <div class="">
-                            <div class="">
-                                {{ g.user.name }}
-                            </div>
-                            <div class="">
-                                @ : {{ g.user.username }}
-                            </div>
-                            <div class="">
-                                <li class="fa fa-envelope-o"></li> : {{ g.user.email }}
-                            </div>
-                            <div class="">
-                                Role : {{ g.user.account_type.value }}
-                            </div>
-                            <div class="">
-                                Member Since : {{ g.user.sign_up_timestamp }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-        </div>
-
-     <div class="row">
-            <div class="col-lg-8">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <i class="fa fa-spinner"></i> Recently Uploaded Files</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-10 my-auto">
-                                    {% for file in uploaded_files[:5] %}
-                                        <div class="row">
-                                            <div class="col-lg-8">
-                                                <a class="list-group-item-action" href="{{ d_url }}">
-                                                    <div class="media">
-                                                        <div class="media-body">
-                                                             <strong> {{ file.original_name|truncate(40, True) }}</strong> <span class="text-muted smaller">Hash: {{ file.hash|truncate(40, True)}} </span>
-                                                            <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Added : {{ file.upload_timestamp }}</div>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-
-                                            <div class="col-lg-2">
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                  <a class="btn btn-outline-dark" href="new/{{ file.filename }}">New Job</a>
-                                                  <a type="button" class="btn btn-outline-danger" href="delete/{{ file.filename }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                            </div>
-                            <div class="col-sm-2 text-center my-auto">
-                                <div class="h4 mb-0 text-warning">{{ uploaded_files|length }}</div>
-                                <div class="small text-muted">Uploaded</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-                </div>
-            </div>
-     </div>
-
+        {%- include 'try/mod_dashboard/recent-files.html' -%}
     </div>
 
     </div>
