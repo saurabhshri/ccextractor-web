@@ -5,13 +5,14 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
-
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="{}">
-                <a class="nav-link" href="{}">
-                    <i class="fa fa-fw {fa-dashboard}"></i>
-                    <span class="nav-link-text">{}</span>
+            {% for entry in layout['menu'] %}
+            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="{{ entry['display_name']}}">
+                <a class="nav-link" href="{{ entry['url']}}">
+                    <i class="{{ entry['icon']}}"></i>
+                    <span class="nav-link-text">{{ entry['display_name']}}</span>
                 </a>
             </li>
+            {% endfor %}
 
         </ul>
 

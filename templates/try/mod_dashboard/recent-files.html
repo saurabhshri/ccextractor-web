@@ -7,14 +7,14 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-10 my-auto">
-                        {% for file in uploaded_files[:5] %}
+                        {% for file in user_details.uploaded_files[:5] %}
                             <div class="row">
                                 <div class="col-lg-8">
                                     <a class="list-group-item-action" href="{{ d_url }}">
                                         <div class="media">
                                             <div class="media-body">
                                                  <strong> {{ file.original_name|truncate(40, True) }}</strong> <span class="text-muted smaller">Hash: {{ file.hash|truncate(40, True)}} </span>
-                                                <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Added : {{ file.upload_timestamp }}</div>
+                                                <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Uploaded {{ file.upload_timestamp|timesince }}</div>
                                             </div>
                                         </div>
                                     </a>
@@ -30,7 +30,7 @@
                         {% endfor %}
                     </div>
                     <div class="col-sm-2 text-center my-auto">
-                        <div class="h4 mb-0 text-warning">{{ uploaded_files|length }}</div>
+                        <div class="h4 mb-0 text-warning">{{ user_details.uploaded_files|length }}</div>
                         <div class="small text-muted">Uploaded</div>
                     </div>
                 </div>

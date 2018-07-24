@@ -10,10 +10,11 @@ import os
 import shutil
 import json
 import hashlib
+from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate, LayoutHelper
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
@@ -101,14 +102,12 @@ def dashboard():
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
         return redirect(url_for('mod_dashboard.dashboard'))
 
-    user = UserDetailsForTemplate(g.user.id)
+    user_details = UserDetailsForTemplate(g.user.id)
+    layout = LayoutHelper(logged_in=True)
     return render_template('try/mod_dashboard/dashboard.html',
                            form=form,
-                           queue=user.queue,
-                           queued_files=user.queued_files,
-                           processed_files=user.processed_files,
-                           errored_files=user.errored_files,
-                           uploaded_files=user.uploaded_files)
+                           layout=layout.get_entries(),
+                           user_details=user_details)
 
 
 @mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
@@ -149,15 +148,13 @@ def new_job(filename):
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
                         log.debug('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']))
             else:
-                user = UserDetailsForTemplate(g.user.id)
+                user_details = UserDetailsForTemplate(g.user.id)
+                layout = LayoutHelper(logged_in=True)
                 return render_template('try/mod_dashboard/new_job.html',
                                        file=file,
                                        form=form,
-                                       queue=user.queue,
-                                       queued_files=user.queued_files,
-                                       processed_files=user.processed_files,
-                                       errored_files=user.errored_files,
-                                       uploaded_files=user.uploaded_files)
+                                       layout=layout.get_entries(),
+                                       user_details=user_details)
         else:
             flash('Invalid new job request!', 'error')
     else:
@@ -587,7 +584,7 @@ def parse_ccextractor_parameters(params):
 
 @mod_dashboard.route('/try', methods=['GET', 'POST'])
 def trying():
-    return render_template('try/mod_dashboard/new_job.html')
+    return "hello"
 
 @mod_dashboard.route('/test', methods=['GET', 'POST'])
 def test():

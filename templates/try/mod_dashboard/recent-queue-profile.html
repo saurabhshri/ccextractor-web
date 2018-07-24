@@ -7,7 +7,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-10 my-auto">
-                            {% for job in queue[:5] %}
+                            {% for job in user_details.queue[:5] %}
 
                                 {% if job.status.value == 'completed' %}
                                     {%  set icon = '<i class="fa fa-check-square" style="color: green;"></i>' %}
@@ -32,7 +32,7 @@
                                                 <div class="media">
                                                     <div class="media-body">
                                                         {{ icon|safe }} <strong> {{ job.original_filename|truncate(40, True) }}</strong> <span class="text-muted smaller">(Job # {{ job.id }}) </span>
-                                                        <div class="text-muted smaller">Status: {{ job.status.value }} | Added : {{ job.queue_timestamp }}</div>
+                                                        <div class="text-muted smaller">Status: {{ job.status.value }} | Added : {{ job.queue_timestamp|timesince }}</div>
                                                     </div>
                                                 </div>
                                             </a>
@@ -65,18 +65,18 @@
                             {% endfor %}
                     </div>
                     <div class="col-sm-2 text-center my-auto">
-                        <div class="h4 mb-0 text-success">{{ processed_files|length }}</div>
+                        <div class="h4 mb-0 text-success">{{ user_details.processed_files|length }}</div>
                         <div class="small text-muted">Processed</div>
                         <hr>
-                        <div class="h4 mb-0 text-warning">{{ queued_files|length }}</div>
+                        <div class="h4 mb-0 text-warning">{{ user_details.queued_files|length }}</div>
                         <div class="small text-muted">Queued</div>
                         <hr>
-                        <div class="h5 mb-0 text-danger">{{ errored_files|length }}</div>
+                        <div class="h5 mb-0 text-danger">{{ user_details.errored_files|length }}</div>
                         <div class="small text-muted">Failed</div>
                     </div>
                 </div>
             </div>
-            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+            <div class="card-footer small text-muted">Updated {{ layout['curr_time']|timesince }}</div>
         </div>
     </div>
     <div class="col-lg-4">
@@ -98,7 +98,7 @@
                         Role : {{ g.user.account_type.value }}
                     </div>
                     <div class="">
-                        Member Since : {{ g.user.sign_up_timestamp }}
+                        Member Since : {{ g.user.sign_up_timestamp|timesince }}
                     </div>
                 </div>
             </div>
