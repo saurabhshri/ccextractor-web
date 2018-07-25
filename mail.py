@@ -23,7 +23,6 @@ def get_api_url(domain):
     return "https://api.mailgun.net/v3/{domain}/messages".format(domain=domain)
 
 def send_simple_message(receiver, subject, body):
-    from run import log
     api_key = app.config['MAILGUN_PVT_API_KEY']
     domain = app.config['EMAIL_DOMAIN']
 

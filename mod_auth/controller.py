@@ -98,14 +98,16 @@ def signup():
             resp = send_verification_mail(form.email.data, verification_code, expires)
 
             if resp.status_code is not 200:
-                flash('Unable to send verification email. Please get in touch.')
+                flash('Unable to send verification email. Please get in touch.', 'error')
                 from run import log
                 log.debug("Mail sending failed. Check mail logs.")
 
             else:
                 user_log.debug('Received registration request for : {email}'.format(email=form.email.data))
                 flash('Please check your email for verification and further instructions.', 'success')
-    return render_template("mod_auth/signup.html", form=form)
+
+    layout = LayoutHelper(logged_in=False)
+    return render_template("try/mod_auth/signup.html", form=form, layout=layout.get_entries())
 
 
 def generate_verification_code(data):
