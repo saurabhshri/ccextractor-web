@@ -1,0 +1,34 @@
+{% block content %}
+<div class="container">
+    <div class="card card-register mx-auto mt-5">
+        <div class="card-header">Register an Account</div>
+        <div class="card-body">
+                <form method="post" name="registrationForm" id="registrationForm">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    <label for="staticEmail" class="">Email</label>
+                        <input type="text" readonly class="form-control" style="background-color: #ffffff;" id="staticEmail" value="{{ email }}">
+                </div>
+                <div class="form-group">
+                    {{ form.name.label }}
+                    {{ macros.render_field(form.name, class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.password.label }}
+                    {{ macros.render_field(form.password, class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.password_repeat.label }}
+                    {{ macros.render_field(form.password_repeat, class_="form-control") }}
+                </div>
+                {{ macros.render_field(form.submit, class_="btn btn-primary btn-block") }}
+            </form>
+            <div class="text-center">
+                <a class="d-block small mt-3" href="{{ url_for('.login') }}">Login Page</a>
+                <a class="d-block small" href="forgot-password.html">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

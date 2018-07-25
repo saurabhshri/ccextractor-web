@@ -161,7 +161,8 @@ def verify_account(email, received_verification_code, expires):
                     user_log.debug("Sign Up Complete for : {email} | User ID: {user_id}".format(email=user.email, user_id=user.id))
                     flash('Signup Complete! Please Login to continue.', 'success')
                 else:
-                    return render_template("mod_auth/verify.html", form=form, email=email)
+                    layout = LayoutHelper(logged_in=False)
+                    return render_template("try/mod_auth/signup-verification.html", form=form, email=email, layout=layout.get_entries())
             else:
                 flash('Email is already registered!', 'error')
             return redirect(url_for('.login'))
