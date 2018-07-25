@@ -27,8 +27,8 @@
         <ul class="navbar-nav ml-auto">
             {% if layout['logged_in'] != 'true' %}
             <li class="nav-item">
-                <a class="nav-link" data-toggle="modal" data-target="#loginModal">
-                    <i class="fa fa-fw fa-sign-out"></i>Login</a>
+                <a class="nav-link" href="{{ url_for('mod_auth.login') }}">
+                    <i class="fa fa-fw fa fa-sign-in"></i>Login</a>
             </li>
 
             {% else %}
