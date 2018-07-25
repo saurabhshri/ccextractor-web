@@ -207,6 +207,22 @@ def admin():
                            ccextractor_parameters_form=ccextractor_parameters_form, parameters=parameters)
 
 
+@mod_dashboard.route('/dashboard/files', methods=['GET', 'POST'])
+@login_required
+def uploaded_files():
+    layout = LayoutHelper(logged_in=True)
+    user_details = UserDetailsForTemplate(g.user.id)
+    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), user_details=user_details)
+
+
+@mod_dashboard.route('/dashboard/queue', methods=['GET', 'POST'])
+@login_required
+def user_queue():
+    layout = LayoutHelper(logged_in=True)
+    user_details = UserDetailsForTemplate(g.user.id)
+    return render_template('try/mod_dashboard/user-queue.html', layout=layout.get_entries(), user_details=user_details)
+
+
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
 @mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])
 @login_required
