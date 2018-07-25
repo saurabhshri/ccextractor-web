@@ -1,0 +1,35 @@
+{% extends "try/layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <link href=" {{ url_for('static', filename='css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+         <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+
+        <!-- Summary Cards-->
+        {%- include 'try/mod_dashboard/admin-cards.html' -%}
+        {%- include 'try/mod_dashboard/admin-ccextractor-parameter-form.html' -%}
+        {%- include 'try/mod_dashboard/admin-ccextractor-version-form.html' -%}
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function(){
+            $("#dataTable").DataTable({
+                order: [[0, 'desc']]
+            })
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTables.bootstrap4.js') }}"></script>
+{% endblock %}
