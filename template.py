@@ -7,6 +7,7 @@ Link     : https://github.com/saurabhshri
 
 """
 from datetime import datetime, timezone
+from flask import url_for
 
 
 class LayoutHelper():
@@ -18,17 +19,17 @@ class LayoutHelper():
             self.entries['menu'] = [
                 {
                     'display_name': 'Dashboard',
-                    'url': 'dashboard',
+                    'url': url_for('mod_dashboard.dashboard'),
                     'icon': 'fa fa-fw fa-dashboard'
                 },
                 {
                     'display_name': 'Files',
-                    'url': 'files',
+                    'url': url_for('mod_dashboard.uploaded_files'),
                     'icon': 'fa fa-fw fa-file'
                 },
                 {
                     'display_name': 'Queue',
-                    'url': 'queue',
+                    'url': url_for('mod_dashboard.user_queue'),
                     'icon': 'fa fa-fw fa-spinner'
                 }
             ]
@@ -38,13 +39,13 @@ class LayoutHelper():
             self.entries['menu'] = [
                 {
                     'display_name': 'Login',
-                    'url': 'login',
-                    'icon': 'fa fa-fw fa-user'
+                    'url': url_for('mod_auth.login'),
+                    'icon': 'fa fa-fw fa-sign-in'
                 },
                 {
                     'display_name': 'SignUp',
                     'url': 'signup',
-                    'icon': 'fa fa-fw fa-pen'
+                    'icon': 'fa fa-user-plus'
                 }
             ]
 
