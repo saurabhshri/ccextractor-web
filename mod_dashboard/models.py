@@ -182,3 +182,14 @@ class UserDetailsForTemplate():
         self.queue = ProcessQueue.query.filter(ProcessQueue.added_by_user == user_id).order_by(db.desc(ProcessQueue.id)).all()
         self.user = Users.query.filter(Users.id == user_id).first()
         self.uploaded_files = self.user.files
+
+class AdminDetailsForTemplate():
+    def __init__(self):
+        self.queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
+        self.users = Users.query.order_by(db.desc(Users.id)).all()
+        self.uploaded_files = UploadedFiles.query.order_by(db.desc(UploadedFiles.id)).all()
+        self.ccextractor_versions = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
+        self.ccextractor_parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
+        self.queued_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
+        self.processed_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
+        self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()

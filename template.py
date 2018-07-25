@@ -11,11 +11,31 @@ from flask import url_for
 
 
 class LayoutHelper():
-    def __init__(self, logged_in):
+    def __init__(self, logged_in, admin=False):
         self.entries = {}
         self.entries['logged_in'] = "false"
 
-        if logged_in:
+        if logged_in and admin:
+            self.entries['menu'] = [
+                {
+                    'display_name': 'Dashboard',
+                    'url': url_for('mod_dashboard.admin'),
+                    'icon': 'fa fa-fw fa-dashboard'
+                },
+                {
+                    'display_name': 'Files',
+                    'url': url_for('mod_dashboard.admin_uploaded_files'),
+                    'icon': 'fa fa-fw fa-file'
+                },
+                {
+                    'display_name': 'Queue',
+                    'url': url_for('mod_dashboard.admin_queue'),
+                    'icon': 'fa fa-fw fa-spinner'
+                }
+            ]
+            self.entries['logged_in'] = "true"
+
+        elif logged_in and not admin:
             self.entries['menu'] = [
                 {
                     'display_name': 'Dashboard',

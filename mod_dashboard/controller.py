@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, ProcessStauts, UserDetailsForTemplate
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, UserDetailsForTemplate, AdminDetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
@@ -163,7 +163,6 @@ def new_job(filename):
     return redirect(url_for('mod_dashboard.dashboard'))
 
 
-@mod_dashboard.route('/admin', methods=['GET', 'POST'])
 @mod_dashboard.route('/admin-dashboard', methods=['GET', 'POST'])
 @login_required
 @check_account_type(account_types=[AccountType.admin])
@@ -198,13 +197,13 @@ def admin():
             log.debug('New CCExtractor parameter added. [{ccx}]'.format(ccx=parameter.id))
             flash('CCExtractor parameter added!', 'success')
 
-    ccextractor = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
-    queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
-    users = Users.query.order_by(db.desc(Users.id)).all()
-    parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
-    return render_template('mod_dashboard/ccextractor.html', type='new', ccextractor_form=ccextractor_form,
-                           ccextractor=ccextractor, queue=queue, users=users,
-                           ccextractor_parameters_form=ccextractor_parameters_form, parameters=parameters)
+    admin_details = AdminDetailsForTemplate()
+    layout = LayoutHelper(logged_in=True, admin=True)
+    return render_template('try/mod_dashboard/admin-dashboard.html',
+                           layout=layout.get_entries(),
+                           admin_details=admin_details,
+                           ccextractor_parameters_form=ccextractor_parameters_form,
+                           ccextractor_form=ccextractor_form)
 
 
 @mod_dashboard.route('/dashboard/files', methods=['GET', 'POST'])
@@ -221,6 +220,21 @@ def user_queue():
     layout = LayoutHelper(logged_in=True)
     user_details = UserDetailsForTemplate(g.user.id)
     return render_template('try/mod_dashboard/user-queue.html', layout=layout.get_entries(), user_details=user_details)
+
+@mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
+@login_required
+def admin_uploaded_files():
+    layout = LayoutHelper(logged_in=True, admin=True)
+    admin_details = AdminDetailsForTemplate()
+    return render_template('try/mod_dashboard/admin-uploaded-files.html', layout=layout.get_entries(), admin_details=admin_details)
+
+
+@mod_dashboard.route('/admin-dashboard/queue', methods=['GET', 'POST'])
+@login_required
+def admin_queue():
+    layout = LayoutHelper(logged_in=True, admin=True)
+    admin_details = AdminDetailsForTemplate()
+    return render_template('try/mod_dashboard/admin-queue.html', layout=layout.get_entries(), admin_details=admin_details)
 
 
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
