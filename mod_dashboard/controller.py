@@ -197,13 +197,11 @@ def admin():
             log.debug('New CCExtractor parameter added. [{ccx}]'.format(ccx=parameter.id))
             flash('CCExtractor parameter added!', 'success')
 
-    admin_details = AdminDetailsForTemplate()
     details = DetailsForTemplate(g.user.id, dashboard='admin')
     layout = LayoutHelper(logged_in=True, admin=True)
-    return render_template('try/mod_dashboard/admin-dashboard.html',
+    return render_template('try/mod_dashboard/dashboard.html',
                            layout=layout.get_entries(),
                            details=details,
-                           admin_details=admin_details,
                            ccextractor_parameters_form=ccextractor_parameters_form,
                            ccextractor_form=ccextractor_form)
 
@@ -225,6 +223,7 @@ def user_queue():
 
 @mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
 @login_required
+@check_account_type(account_types=[AccountType.admin])
 def admin_uploaded_files():
     layout = LayoutHelper(logged_in=True, admin=True)
     details = DetailsForTemplate(g.user.id, dashboard='admin')
@@ -233,6 +232,7 @@ def admin_uploaded_files():
 
 @mod_dashboard.route('/admin-dashboard/queue', methods=['GET', 'POST'])
 @login_required
+@check_account_type(account_types=[AccountType.admin])
 def admin_queue():
     layout = LayoutHelper(logged_in=True, admin=True)
     details = DetailsForTemplate(g.user.id, dashboard='admin')

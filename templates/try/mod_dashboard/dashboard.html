@@ -2,8 +2,13 @@
 
 {% block head %}
     {{ super() }}
+    {% if details.admin_dashboard %}
+        {# admin dashboard <head> content #}
+    {% else%}
     <link href=" {{ url_for('static', filename='css/fileinput.min.css') }}" rel="stylesheet">
     <link href=" {{ url_for('static', filename='css/theme.min.css') }}" rel="stylesheet">
+    {% endif %}
+
 {% endblock %}
 
 {% block content %}
@@ -11,25 +16,42 @@
     <div class="container-fluid">
         <!-- Breadcrumbs-->
          <ol class="breadcrumb">
-            <li class="breadcrumb-item active">Dashboard</li>
+             <li class="breadcrumb-item active">
+                {% if details.admin_dashboard %}
+                    Admin Dashboard
+                {% else%}
+                    Dashboard
+                {% endif %}
+             </li>
         </ol>
 
         <!-- Summary Cards-->
         {%- include 'try/mod_dashboard/cards.html' -%}
 
-        <!-- File Upload Form -->
-        <!-- File Upload Form -->
-        {%- include 'try/mod_dashboard/upload-form.html' -%}
+        {% if details.admin_dashboard %}
+            <!-- CCExtractor Parameters Form -->
+            {%- include 'try/mod_dashboard/admin-ccextractor-parameter-form.html' -%}
 
-        {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
+            <!-- CCExtractor Versions Form -->
+            {%- include 'try/mod_dashboard/admin-ccextractor-version-form.html' -%}
+        {% else%}
+            <!-- File Upload Form -->
+            {%- include 'try/mod_dashboard/upload-form.html' -%}
+            {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
 
-        {%- include 'try/mod_dashboard/recent-files.html' -%}
+            {%- include 'try/mod_dashboard/recent-files.html' -%}
+        {% endif %}
     </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
+    {% if details.admin_dashboard %}
+        {# admin dashboard script content #}
+    {% else%}
     <script src="{{ url_for('static', filename='js/piexif.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/fileinput.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/theme.min.js') }}"></script>
+    {% endif %}
+
 {% endblock %}
