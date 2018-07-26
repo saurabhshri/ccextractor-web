@@ -7,7 +7,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-10 my-auto">
-                        {% for file in user_details.uploaded_files[:5] %}
+                        {% for file in details.uploaded_files[:5] %}
                             <div class="row">
                                 <div class="col-lg-8">
                                     <a class="list-group-item-action" href="{{ d_url }}">
@@ -23,14 +23,14 @@
                                 <div class="col-lg-2">
                                     <div class="btn-group btn-group-sm" role="group">
                                       <a class="btn btn-outline-dark" href="{{ url_for('mod_dashboard.new_job', filename=file.filename) }}">New Job</a>
-                                      <a type="button" class="btn btn-outline-danger" href="delete/{{ file.filename }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                      <a type="button" class="btn btn-outline-danger" href="{{ url_for('mod_dashboard.delete', filename=file.filename) }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                     <div class="col-sm-2 text-center my-auto">
-                        <div class="h4 mb-0 text-warning">{{ user_details.uploaded_files|length }}</div>
+                        <div class="h4 mb-0 text-warning">{{ details.uploaded_files|length }}</div>
                         <div class="small text-muted">Uploaded</div>
                     </div>
                 </div>

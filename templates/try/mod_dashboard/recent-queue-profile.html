@@ -7,7 +7,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-10 my-auto">
-                            {% for job in user_details.queue[:5] %}
+                            {% for job in details.queue[:5] %}
 
                                 {% if job.status.value == 'completed' %}
                                     {%  set icon = '<i class="fa fa-check-square" style="color: green;"></i>' %}
@@ -65,13 +65,13 @@
                             {% endfor %}
                     </div>
                     <div class="col-sm-2 text-center my-auto">
-                        <div class="h4 mb-0 text-success">{{ user_details.processed_files|length }}</div>
+                        <div class="h4 mb-0 text-success">{{ details.processed_files|length }}</div>
                         <div class="small text-muted">Processed</div>
                         <hr>
-                        <div class="h4 mb-0 text-warning">{{ user_details.queued_files|length }}</div>
+                        <div class="h4 mb-0 text-warning">{{ details.queued_files|length }}</div>
                         <div class="small text-muted">Queued</div>
                         <hr>
-                        <div class="h5 mb-0 text-danger">{{ user_details.errored_files|length }}</div>
+                        <div class="h5 mb-0 text-danger">{{ details.errored_files|length }}</div>
                         <div class="small text-muted">Failed</div>
                     </div>
                 </div>
