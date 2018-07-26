@@ -11,9 +11,21 @@
         <!-- Breadcrumbs-->
          <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ url_for('mod_dashboard.dashboard') }}">Dashboard</a>
+                <a href="{{ details.dashboard_url }}">
+                {% if details.admin_dashboard %}
+                    Admin Dashboard
+                {% else%}
+                    Dashboard
+                {% endif %}
+                </a>
             </li>
-            <li class="breadcrumb-item active">My Files</li>
+             <li class="breadcrumb-item active">
+                {% if details.admin_dashboard %}
+                    All Uploaded Files
+                {% else%}
+                    My Files
+                {% endif %}
+             </li>
         </ol>
 
         <!-- Summary Cards-->
@@ -31,6 +43,9 @@
                                     <th>Filename</th>
                                     <th>Hash</th>
                                     <th>Size</th>
+                                    {% if details.admin_dashboard %}
+                                    <th>User ID</th>
+                                    {% endif %}
                                     <th>Uploaded</th>
                                     <th>Actions</th>
                                 </tr>
@@ -41,22 +56,28 @@
                                     <th>Filename</th>
                                     <th>Hash</th>
                                     <th>Size</th>
+                                    {% if details.admin_dashboard %}
+                                    <th>User ID</th>
+                                    {% endif %}
                                     <th>Uploaded</th>
                                     <th>Actions</th>
                                 </tr>
                             </tfoot>
                             <tbody>
-                            {% for file in user_details.uploaded_files %}
+                            {% for file in details.uploaded_files %}
                                 <tr>
                                     <td>{{ file.id }}</td>
                                     <td>{{ file.original_name|truncate(40, True) }}</td>
                                     <td>{{ file.hash|truncate(40, True) }}</td>
                                     <td>{{ (file.size|int)/1000000 }} MB</td>
+                                    {% if details.admin_dashboard %}
+                                    <td>{{ file.original_uploader  }}</td>
+                                    {% endif %}
                                     <td>{{ file.upload_timestamp|timesince}}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
                                           <a class="btn btn-outline-dark" href="{{ url_for('mod_dashboard.new_job', filename=file.filename) }}">New Job</a>
-                                          <a type="button" class="btn btn-outline-danger" href="delete/{{ file.filename }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                          <a type="button" class="btn btn-outline-danger" href="{{ url_for('mod_dashboard.delete', filename=file.filename) }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                         </div>
                                     </td>
                                 </tr>
