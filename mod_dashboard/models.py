@@ -6,13 +6,14 @@ Email    : saurabh.shrivastava54+ccextractorweb[at]gmail.com
 Link     : https://github.com/saurabhshri
 
 """
-from database import db
 import enum
-import json
-
-from datetime import datetime, timezone
 import pytz
+
+from flask import url_for
+from datetime import datetime, timezone
 from tzlocal import get_localzone
+
+from database import db
 
 from mod_auth.controller import generate_verification_code
 from mod_auth.models import Users
@@ -193,3 +194,32 @@ class AdminDetailsForTemplate():
         self.queued_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
         self.processed_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
         self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
+
+class DetailsForTemplate():
+    def __init__(self, user_id, dashboard='user'):
+        self.user = Users.query.filter(Users.id == user_id).first()
+
+        if dashboard == 'admin':
+            self.admin_dashboard = True
+            self.dashboard_url = url_for('mod_dashboard.admin')
+            self.uploaded_files_url = url_for('mod_dashboard.admin_uploaded_files')
+            self.queue_url = url_for('mod_dashboard.admin_queue')
+            self.queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
+            self.users = Users.query.order_by(db.desc(Users.id)).all()
+            self.uploaded_files = UploadedFiles.query.order_by(db.desc(UploadedFiles.id)).all()
+            self.ccextractor_versions = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
+            self.ccextractor_parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
+            self.queued_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
+            self.processed_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
+            self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
+
+        elif dashboard == 'user':
+            self.admin_dashboard = False
+            self.dashboard_url = url_for('mod_dashboard.dashboard')
+            self.uploaded_files_url = url_for('mod_dashboard.uploaded_files')
+            self.queue_url = url_for('mod_dashboard.user_queue')
+            self.queued_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
+            self.processed_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
+            self.errored_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
+            self.queue = ProcessQueue.query.filter(ProcessQueue.added_by_user == user_id).order_by(db.desc(ProcessQueue.id)).all()
+            self.uploaded_files = self.user.files
