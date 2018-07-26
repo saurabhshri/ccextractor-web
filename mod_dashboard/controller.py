@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, UserDetailsForTemplate, AdminDetailsForTemplate
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, DetailsForTemplate, AdminDetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
@@ -103,12 +103,12 @@ def dashboard():
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
         return redirect(url_for('mod_dashboard.dashboard'))
 
-    user_details = UserDetailsForTemplate(g.user.id)
+    details = DetailsForTemplate(g.user.id)
     layout = LayoutHelper(logged_in=True)
     return render_template('try/mod_dashboard/dashboard.html',
                            form=form,
                            layout=layout.get_entries(),
-                           user_details=user_details)
+                           details=details)
 
 
 @mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
@@ -149,13 +149,13 @@ def new_job(filename):
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
                         log.debug('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']))
             else:
-                user_details = UserDetailsForTemplate(g.user.id)
+                details = DetailsForTemplate(g.user.id)
                 layout = LayoutHelper(logged_in=True)
                 return render_template('try/mod_dashboard/new_job.html',
                                        file=file,
                                        form=form,
                                        layout=layout.get_entries(),
-                                       user_details=user_details)
+                                       details=details)
         else:
             flash('Invalid new job request!', 'error')
     else:
@@ -198,9 +198,11 @@ def admin():
             flash('CCExtractor parameter added!', 'success')
 
     admin_details = AdminDetailsForTemplate()
+    details = DetailsForTemplate(g.user.id, dashboard='admin')
     layout = LayoutHelper(logged_in=True, admin=True)
     return render_template('try/mod_dashboard/admin-dashboard.html',
                            layout=layout.get_entries(),
+                           details=details,
                            admin_details=admin_details,
                            ccextractor_parameters_form=ccextractor_parameters_form,
                            ccextractor_form=ccextractor_form)
@@ -210,31 +212,31 @@ def admin():
 @login_required
 def uploaded_files():
     layout = LayoutHelper(logged_in=True)
-    user_details = UserDetailsForTemplate(g.user.id)
-    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), user_details=user_details)
+    details = DetailsForTemplate(g.user.id)
+    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/dashboard/queue', methods=['GET', 'POST'])
 @login_required
 def user_queue():
     layout = LayoutHelper(logged_in=True)
-    user_details = UserDetailsForTemplate(g.user.id)
-    return render_template('try/mod_dashboard/user-queue.html', layout=layout.get_entries(), user_details=user_details)
+    details = DetailsForTemplate(g.user.id)
+    return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 @mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
 @login_required
 def admin_uploaded_files():
     layout = LayoutHelper(logged_in=True, admin=True)
-    admin_details = AdminDetailsForTemplate()
-    return render_template('try/mod_dashboard/admin-uploaded-files.html', layout=layout.get_entries(), admin_details=admin_details)
+    details = DetailsForTemplate(g.user.id, dashboard='admin')
+    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/admin-dashboard/queue', methods=['GET', 'POST'])
 @login_required
 def admin_queue():
     layout = LayoutHelper(logged_in=True, admin=True)
-    admin_details = AdminDetailsForTemplate()
-    return render_template('try/mod_dashboard/admin-queue.html', layout=layout.get_entries(), admin_details=admin_details)
+    details = DetailsForTemplate(g.user.id, dashboard='admin')
+    return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
