@@ -6,9 +6,9 @@
                 <div class="card-body-icon">
                     <i class="fa fa-fw fa-spinner"></i>
                 </div>
-                <div class="mr-5">{{ user_details.queued_files|length }} Jobs Processing.</div>
+                <div class="mr-5">{{ details.queued_files|length }} Jobs Processing.</div>
             </div>
-            <a class="card-footer text-white clearfix small z-1" href="{{ url_for('mod_dashboard.user_queue') }}">
+            <a class="card-footer text-white clearfix small z-1" href="{{ details.queue_url }}">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                     <i class="fa fa-angle-right"></i>
@@ -22,9 +22,9 @@
                 <div class="card-body-icon">
                     <i class="fa fa-fw fa-check"></i>
                 </div>
-                <div class="mr-5">{{ user_details.processed_files|length }} Jobs Completed.</div>
+                <div class="mr-5">{{ details.processed_files|length }} Jobs Completed.</div>
             </div>
-            <a class="card-footer text-white clearfix small z-1" href="{{ url_for('mod_dashboard.user_queue') }}">
+            <a class="card-footer text-white clearfix small z-1" href="{{ details.queue_url }}">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                     <i class="fa fa-angle-right"></i>
@@ -38,9 +38,9 @@
                 <div class="card-body-icon">
                     <i class="fa fa-fw fa-cloud-upload"></i>
                 </div>
-                <div class="mr-5">{{ user_details.uploaded_files|length }} Files Uploaded.</div>
+                <div class="mr-5">{{ details.uploaded_files|length }} Files Uploaded.</div>
             </div>
-            <a class="card-footer text-white clearfix small z-1" href="{{ url_for('mod_dashboard.uploaded_files') }}">
+            <a class="card-footer text-white clearfix small z-1" href="{{ details.uploaded_files_url }}">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                     <i class="fa fa-angle-right"></i>
