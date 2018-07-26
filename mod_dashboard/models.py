@@ -16,7 +16,7 @@ from tzlocal import get_localzone
 from database import db
 
 from mod_auth.controller import generate_verification_code
-from mod_auth.models import Users
+from mod_auth.models import Users, AccountType
 
 class ProcessStauts(enum.Enum):
     pending = 'pending'
@@ -198,6 +198,10 @@ class AdminDetailsForTemplate():
 class DetailsForTemplate():
     def __init__(self, user_id, dashboard='user'):
         self.user = Users.query.filter(Users.id == user_id).first()
+
+        if self.user.account_type == AccountType.admin:
+            self.admin_dashboard_url = url_for('mod_dashboard.admin')
+            self.user_dashboard_url = url_for('mod_dashboard.dashboard')
 
         if dashboard == 'admin':
             self.admin_dashboard = True

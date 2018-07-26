@@ -7,53 +7,59 @@ Link     : https://github.com/saurabhshri
 
 """
 from datetime import datetime, timezone
-from flask import url_for
+from flask import url_for, g
 
 
 class LayoutHelper():
-    def __init__(self, logged_in, admin=False):
+    def __init__(self, logged_in, details=None, admin=False):
         self.entries = {}
         self.entries['logged_in'] = "false"
 
-        if logged_in and admin:
-            self.entries['menu'] = [
-                {
-                    'display_name': 'Dashboard',
-                    'url': url_for('mod_dashboard.admin'),
-                    'icon': 'fa fa-fw fa-dashboard'
-                },
-                {
-                    'display_name': 'Files',
-                    'url': url_for('mod_dashboard.admin_uploaded_files'),
-                    'icon': 'fa fa-fw fa-file'
-                },
-                {
-                    'display_name': 'Queue',
-                    'url': url_for('mod_dashboard.admin_queue'),
-                    'icon': 'fa fa-fw fa-spinner'
-                }
-            ]
-            self.entries['logged_in'] = "true"
+        print(details)
 
-        elif logged_in and not admin:
+        if logged_in:
+            self.entries['logged_in'] = "true"
             self.entries['menu'] = [
                 {
                     'display_name': 'Dashboard',
-                    'url': url_for('mod_dashboard.dashboard'),
+                    'url': details.dashboard_url,
                     'icon': 'fa fa-fw fa-dashboard'
                 },
                 {
                     'display_name': 'Files',
-                    'url': url_for('mod_dashboard.uploaded_files'),
+                    'url': details.uploaded_files_url,
                     'icon': 'fa fa-fw fa-file'
                 },
                 {
                     'display_name': 'Queue',
-                    'url': url_for('mod_dashboard.user_queue'),
+                    'url': details.queue_url,
                     'icon': 'fa fa-fw fa-spinner'
                 }
             ]
-            self.entries['logged_in'] = "true"
+
+            if details.admin_dashboard:
+                try:
+                    if details.user_dashboard_url:
+                        self.entries['menu'].append(
+                            {
+                                'display_name': 'User Dashboard',
+                                'url': details.user_dashboard_url,
+                                'icon': 'fa fa-fw fa-user'
+                            })
+                except AttributeError as e:
+                    pass
+
+            else:
+                try:
+                    if details.admin_dashboard_url:
+                        self.entries['menu'].append(
+                            {
+                                'display_name': 'Admin Dashboard',
+                                'url': details.admin_dashboard_url,
+                                'icon': 'fa fa-fw fa-lock'
+                            })
+                except AttributeError as e:
+                    pass
 
         else:
             self.entries['menu'] = [

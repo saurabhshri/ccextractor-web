@@ -104,14 +104,14 @@ def dashboard():
         return redirect(url_for('mod_dashboard.dashboard'))
 
     details = DetailsForTemplate(g.user.id)
-    layout = LayoutHelper(logged_in=True)
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/dashboard.html',
                            form=form,
                            layout=layout.get_entries(),
                            details=details)
 
 
-@mod_dashboard.route('/new/<filename>', methods=['GET', 'POST'])
+@mod_dashboard.route('/dashboard/new/<filename>', methods=['GET', 'POST'])
 @login_required
 def new_job(filename):
     from run import log
@@ -150,7 +150,7 @@ def new_job(filename):
                         log.debug('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']))
             else:
                 details = DetailsForTemplate(g.user.id)
-                layout = LayoutHelper(logged_in=True)
+                layout = LayoutHelper(logged_in=True, details=details)
                 return render_template('try/mod_dashboard/new_job.html',
                                        file=file,
                                        form=form,
@@ -198,7 +198,7 @@ def admin():
             flash('CCExtractor parameter added!', 'success')
 
     details = DetailsForTemplate(g.user.id, dashboard='admin')
-    layout = LayoutHelper(logged_in=True, admin=True)
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/dashboard.html',
                            layout=layout.get_entries(),
                            details=details,
@@ -209,24 +209,24 @@ def admin():
 @mod_dashboard.route('/dashboard/files', methods=['GET', 'POST'])
 @login_required
 def uploaded_files():
-    layout = LayoutHelper(logged_in=True)
     details = DetailsForTemplate(g.user.id)
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/dashboard/queue', methods=['GET', 'POST'])
 @login_required
 def user_queue():
-    layout = LayoutHelper(logged_in=True)
     details = DetailsForTemplate(g.user.id)
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 @mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def admin_uploaded_files():
-    layout = LayoutHelper(logged_in=True, admin=True)
     details = DetailsForTemplate(g.user.id, dashboard='admin')
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
@@ -234,8 +234,8 @@ def admin_uploaded_files():
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def admin_queue():
-    layout = LayoutHelper(logged_in=True, admin=True)
     details = DetailsForTemplate(g.user.id, dashboard='admin')
+    layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 
