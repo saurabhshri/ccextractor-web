@@ -11,13 +11,26 @@
         <!-- Breadcrumbs-->
          <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ url_for('mod_dashboard.admin') }}">Dashboard</a>
+                <a href="{{ details.dashboard_url }}">
+                {% if details.admin_dashboard %}
+                    Admin Dashboard
+                {% else%}
+                    Dashboard
+                {% endif %}
+                </a>
             </li>
-            <li class="breadcrumb-item active">Job Queue</li>
+             <li class="breadcrumb-item active">
+                {% if details.admin_dashboard %}
+                    Complete Queue
+                {% else%}
+                    My Queue
+                {% endif %}
+             </li>
         </ol>
 
         <!-- Summary Cards-->
-        {%- include 'try/mod_dashboard/admin-cards.html' -%}
+        {%- include 'try/mod_dashboard/cards.html' -%}
+
          <div style="margin-right: 15px; margin-left: 15px;">
             <div class="card mb-3">
                 <div class="card-header"><i class="fa fa-table"></i> Process Queue</div>
@@ -31,7 +44,9 @@
                                     <th>Parameters</th>
                                     <th>Platform</th>
                                     <th>Status</th>
+                                    {% if details.admin_dashboard %}
                                     <th>User ID</th>
+                                    {% endif %}
                                     <th>Added</th>
                                     <th>Output</th>
                                     <th>Log</th>
@@ -44,21 +59,25 @@
                                     <th>Parameters</th>
                                     <th>Platform</th>
                                     <th>Status</th>
+                                    {% if details.admin_dashboard %}
                                     <th>User ID</th>
+                                    {% endif %}
                                     <th>Added</th>
                                     <th>Output</th>
                                     <th>Log</th>
                                 </tr>
                             </tfoot>
                             <tbody>
-                            {% for job in admin_details.queue %}
+                            {% for job in details.queue %}
                                 <tr>
                                     <td>{{ job.id }}</td>
                                     <td>{{ job.original_filename|truncate(40, True) }}</td>
                                     <td>{{ job.parameters}}</td>
                                     <td>{{ job.platform.value}}</td>
                                     <td>{{ job.status.value }}</td>
+                                    {% if details.admin_dashboard %}
                                     <td>{{ job.added_by_user }}</td>
+                                    {% endif %}
                                     <td>{{ job.queue_timestamp|timesince }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
@@ -92,6 +111,7 @@
                 <div class="card-footer small text-muted">Updated </div>
             </div>
         </div>
+
     </div>
 {% endblock %}
 
