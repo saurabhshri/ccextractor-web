@@ -197,6 +197,14 @@ class AdminDetailsForTemplate():
 
 class DetailsForTemplate():
     def __init__(self, user_id, dashboard='user'):
+
+        from flask import current_app as app
+        self.kvm_enabled = app.config['ENABLE_KVM']
+
+        if self.kvm_enabled:
+            from mod_kvm.models import KVM, KVM_Status
+            self.kvm = KVM.query.all()
+
         self.user = Users.query.filter(Users.id == user_id).first()
 
         if self.user.account_type == AccountType.admin:
