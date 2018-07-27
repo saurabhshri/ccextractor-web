@@ -8,10 +8,12 @@ Link     : https://github.com/saurabhshri
 """
 
 import enum
+import pytz
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-import pytz
 from tzlocal import get_localzone
+
 from database import db
 
 
@@ -38,14 +40,18 @@ class Users(db.Model):
     files = db.relationship('UploadedFiles', secondary='file_access', backref=db.backref('user', lazy='dynamic'), order_by='UploadedFiles.id')
     sign_up_timestamp = db.Column(db.DateTime(timezone=True))
 
-    def __init__(self, username, email, password, name=None, account_type=AccountType.user, sign_up_timestamp=None):
+    def __init__(self, email, password, username=None, name=None, account_type=AccountType.user, sign_up_timestamp=None):
         self.name = name
-        self.username = username
         self.email = email
         self.password = generate_password_hash(password)
         self.account_type = account_type
 
         tz = get_localzone()
+
+        if username is None:
+            self.username = generate_username(email)
+        else:
+            self.username = username
 
         if sign_up_timestamp is None:
             sign_up_timestamp = tz.localize(datetime.now(), is_dst=None)
@@ -111,3 +117,17 @@ class Users(db.Model):
         Localize the timestamp to utc
         """
         self.sign_up_timestamp = pytz.utc.localize(self.sign_up_timestamp, is_dst=None)
+
+def generate_username(email):
+    #TODO : Disallow a set of usernames such as 'admin'
+    base_username = username = email.split('@')[0]
+    count_suffix = 1
+    while True:
+        user = Users.query.filter_by(username=username).first()
+        if user is not None:
+            username = '{base_username}-{count_suffix}'.format(base_username=base_username, count_suffix=str(count_suffix))
+            count_suffix += 1
+        else:
+            break
+
+    return username

@@ -39,20 +39,6 @@ def before_app_request():
     user_id = session.get('user_id', 0)
     g.user = Users.query.filter(Users.id == user_id).first()
 
-def generate_username(email):
-    #TODO : Disallow a set of usernames such as 'admin'
-    base_username = username = email.split('@')[0]
-    count_suffix = 1
-    while True:
-        user = Users.query.filter_by(username=username).first()
-        if user is not None:
-            username = '{base_username}-{count_suffix}'.format(base_username=base_username, count_suffix=str(count_suffix))
-            count_suffix += 1
-        else:
-            break
-
-    return username
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -146,8 +132,7 @@ def verify_account(email, received_verification_code, expires):
             if user is None:
                 form = SignupForm()
                 if form.validate_on_submit():
-                    user = Users(username=generate_username(email),
-                                 email=email,
+                    user = Users(email=email,
                                  password=form.password.data,
                                  name=form.name.data)
                     db.session.add(user)
