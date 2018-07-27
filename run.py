@@ -48,7 +48,10 @@ log.debug("flask-sqlaclchemy (db) object created.")
 app.register_blueprint(landing)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_dashboard)
-app.register_blueprint(mod_kvm)
+
+if app.config['ENABLE_KVM']:
+    app.register_blueprint(mod_kvm)
+
 log.debug("Blueprints registered.")
 
 def init_app():
@@ -123,8 +126,8 @@ def timesince(dt, default="just now"):
 
 @app.before_first_request
 def before_first_request():
-    log.debug('INIT : Clearing session.')
-    session.clear()
+    #log.debug('INIT : Clearing session.')
+    #session.clear()
 
     log.debug('INIT : Preparing database.')
     db.create_all()
