@@ -14,7 +14,7 @@
                                         <div class="media">
                                             <div class="media-body">
                                                  <strong> {{ file.original_name|truncate(40, True) }}</strong> <span class="text-muted smaller">Hash: {{ file.hash|truncate(40, True)}} </span>
-                                                <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Uploaded {{ file.upload_timestamp|timesince }}</div>
+                                                <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Uploaded {{ file.upload_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ file.original_uploader }} {% endif %}</div>
                                             </div>
                                         </div>
                                     </a>

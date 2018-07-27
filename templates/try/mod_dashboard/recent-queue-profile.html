@@ -32,7 +32,7 @@
                                                 <div class="media">
                                                     <div class="media-body">
                                                         {{ icon|safe }} <strong> {{ job.original_filename|truncate(40, True) }}</strong> <span class="text-muted smaller">(Job # {{ job.id }}) </span>
-                                                        <div class="text-muted smaller">Status: {{ job.status.value }} | Added : {{ job.queue_timestamp|timesince }}</div>
+                                                        <div class="text-muted smaller">Status: {{ job.status.value }} | Added {{ job.queue_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ job.added_by_user }} {% endif %}</div>
                                                     </div>
                                                 </div>
                                             </a>
@@ -80,29 +80,7 @@
         </div>
     </div>
     <div class="col-lg-4">
-              <div class="card mb-3">
-            <div class="card-header">
-                <i class="fa fa-user-circle-o"></i> Profile</div>
-            <div class="card-body">
-               <div class="">
-                    <div class="">
-                        {{ g.user.name }}
-                    </div>
-                    <div class="">
-                        @ : {{ g.user.username }}
-                    </div>
-                    <div class="">
-                        <li class="fa fa-envelope-o"></li> : {{ g.user.email }}
-                    </div>
-                    <div class="">
-                        Role : {{ g.user.account_type.value }}
-                    </div>
-                    <div class="">
-                        Member Since : {{ g.user.sign_up_timestamp|timesince }}
-                    </div>
-                </div>
-            </div>
-        </div>
+    {%- include 'try/mod_dashboard/profile-box.html' -%}
     </div>
 </div>
 {% endblock %}

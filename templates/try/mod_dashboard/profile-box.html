@@ -1,0 +1,23 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fa fa-user-circle-o"></i> Profile</div>
+    <div class="card-body">
+        <div class="">
+            <div class="">
+                {{ g.user.name }}
+            </div>
+            <div class="">
+                @ : {{ g.user.username }}
+            </div>
+            <div class="">
+                <li class="fa fa-envelope-o"></li> : {{ g.user.email }}
+            </div>
+            <div class="">
+                Role : {{ g.user.account_type.value }}
+            </div>
+            <div class="">
+                Member Since : {{ g.user.sign_up_timestamp|timesince }}
+            </div>
+        </div>
+    </div>
+</div>
