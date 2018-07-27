@@ -24,9 +24,8 @@ class Logger:
 
 
         if format is None:
-            format = '[%(asctime)s] [%(name)s] [%(levelname)s] [%(pathname)s#L%(lineno)d] | "%(message)s"'
+            format = '[%(asctime)s] [%(name)s] [%(levelname)s] [%(pathname)s#L%(lineno)d]\t| "%(message)s"'
         format = logging.Formatter(format)
-
 
         self.log_to_console = logging.StreamHandler()
         self.log_to_console.setFormatter(format)
