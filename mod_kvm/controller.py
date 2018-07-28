@@ -7,15 +7,20 @@ Link     : https://github.com/saurabhshri
 
 """
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
 import datetime
+import json
+
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
 
 from database import db
 
 from mod_auth.controller import login_required, check_account_type
 from mod_auth.models import AccountType
-from mod_kvm.models import KVM, VM, kvm_manager, KVM_Status
+from mod_kvm.models import KVM, VM, kvm_manager, KVM_Status, kvm_log
 from mod_dashboard.models import Platforms
+
+
+
 
 mod_kvm = Blueprint("mod_kvm", __name__)
 
@@ -24,17 +29,22 @@ def init_kvm_db():
 
     for platform in Platforms:
         name = app.config['KVM_{platform}_NAME'.format(platform=platform.value.upper())]
+        kvm_log.debug('KVM : {name} > Trying to initialise.'.format(name=name))
         kvm = KVM.query.filter(KVM.name == name).first()
         if kvm is None:
             status = kvm_manager(name)
+            kvm_log.debug('KVM : {name} > Fetched status = {status}'.format(name=name, status=status))
             kvm = KVM(name=name, platform=platform.value, status=status, timestamp=datetime.datetime.now())
             db.session.add(kvm)
             db.session.commit()
+            kvm_log.debug('KVM : {name} > Status updated in DB.'.format(name=name, status=status))
+
 
 @mod_kvm.route('/kvm', methods=['GET', 'POST'])
 @login_required
 @check_account_type([AccountType.admin])
 def manage_kvm():
+    init_kvm_db()
     kvm = KVM.query.all()
     return render_template('mod_kvm/kvm.html', kvm=kvm, kvm_status=KVM_Status)
 
@@ -42,18 +52,64 @@ def manage_kvm():
 @login_required
 @check_account_type([AccountType.admin])
 def kvm_cmd(cmd, kvm_name):
-    vm = VM(kvm_name)
+    kvm = KVM.query.filter(KVM.name == kvm_name).first()
+    if kvm is None:
+        resp = {'status': 'failed', 'reason': '{KVM} not found'.format(KVM=kvm_name)}
+        flash('Failed to execute {cmd} on KVM {kvm_name}, {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
 
-    if cmd == 'start':
-       vm.start()
+    else:
+        vm = VM(kvm_name)
 
-    elif cmd == 'stop':
-        vm.stop()
+        if cmd == 'start':
+           resp = vm.start()
 
-    if cmd == 'shutdown':
-        vm.shutdown()
+        elif cmd == 'stop':
+            resp = vm.stop()
 
-    return redirect(url_for('mod_kvm.manage_kvm'))
+        elif cmd == 'shutdown':
+            resp = vm.shutdown()
+
+        elif cmd == 'maintain':
+            resp = vm.mainatain()
+
+        else:
+            resp = {'status': 'failed', 'reason': 'Command {cmd} not found'.format(cmd=cmd)}
+            flash('Failed to execute {cmd} on KVM {kvm_name}, {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
+
+    if resp['status'] == 'success':
+        kvm.status = resp['new_state']
+        db.session.commit()
+        flash('Executed {cmd} on KVM {kvm_name}.'.format(cmd=cmd, kvm_name=kvm_name), 'success')
+    else:
+        flash('Failed to execute {cmd} on KVM {kvm_name}. , {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
+
+    return str(resp)
 
 
+@mod_kvm.route('/kvm-status/<kvm_name>', methods=['GET', 'POST'])
+@login_required
+@check_account_type([AccountType.admin])
+def check_kvm_status(kvm_name):
+    #TODO : Should we query the actual status on each request? Or we should update the db after fixed interval and then update the db?
+    # Okay, so we can not update the db on each request because say we're working with maintainance mode, actual status could be running
+    kvm = KVM.query.filter(KVM.name == kvm_name).first()
+    if kvm is None:
+        resp = {'status': 'failed', 'reason': '{KVM} not found'.format(KVM=kvm_name)}
+    else:
+        vm = VM(kvm_name)
+        kvm_log.debug('KVM : {name} > Fetching status, current status in db : {status}'.format(name=kvm.name, status=kvm.status))
+        try:
+            status = vm.status()
+            kvm_log.debug('KVM : {name} > Fetching status, actual status : {status}'.format(name=kvm.name, status=status))
+        except Exception as e:
+            kvm_log.debug('KVM : {name} > Failed to fetch status, {e}'.format(name=kvm.name, e=e))
+            resp = {'status': 'failed', 'reason': '{e}'.format(e=e)}
+        else:
+            kvm.status = status
+            db.session.commit()
+            kvm_log.debug('KVM : {name} > Status in db updated.'.format(name=kvm.name, status=status))
+            resp = {'status': 'success', 'state': '{state}'.format(state=kvm.status)}
+
+    resp = json.dumps(resp)
+    return resp
 
