@@ -15,7 +15,7 @@
         <p class="card-text">Platform status</p>
         <div class="row">
             {% for vm in details.kvm %}
-            <div class="col-sm-4 text-center my-auto">
+            <div class="col-sm-4 text-center my-auto" style="padding-left: 0px; padding-right: 0px;">
                     {% if vm.status.value == 'running' %}
                         <div class="h4 mb-0 text-success">
                     {% else%}
@@ -24,11 +24,15 @@
                             {{ vm.name }}
                         </div>
                     <div class="small text-muted">{{ vm.status.value }}</div>
-                    <hr>
+
+                    {%  if details.admin_dashboard %}
+                            <div class="small text-muted">Admin T1</div>
+                            <div class="small text-muted">Admin T2</div>
+
+                    {% endif %}
             </div>
             {% endfor %}
         </div>
-
-        <a href="#" class="btn btn-primary">Go somewhere</a>
-</div>
+    </div>
     <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+</div>
