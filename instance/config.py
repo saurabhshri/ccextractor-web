@@ -16,3 +16,11 @@ KVM_WINDOWS_NAME = ''
 WINDOWS_JOBS_DIR = ''
 KVM_MAC_NAME = ''
 MAC_JOBS_DIR = ''
+
+ENABLE_LOCAL_MODE = False
+"""
+Only to be filled in case of local mode:
+"""
+ADMIN_NAME = 'Administrator'
+ADMIN_EMAIL = 'admin@ccextractor.web'
+ADMIN_PWD = 'admin@ccextractor.web'
