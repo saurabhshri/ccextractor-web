@@ -196,7 +196,10 @@ class AdminDetailsForTemplate():
         self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
 
 class DetailsForTemplate():
-    def __init__(self, user_id, dashboard='user'):
+    def __init__(self, user_id, admin_dashboard=False):
+
+        self.user = Users.query.filter(Users.id == user_id).first()
+        self.admin_dashboard = admin_dashboard
 
         from flask import current_app as app
         self.kvm_enabled = app.config['ENABLE_KVM']
@@ -205,14 +208,11 @@ class DetailsForTemplate():
             from mod_kvm.models import KVM, KVM_Status
             self.kvm = KVM.query.all()
 
-        self.user = Users.query.filter(Users.id == user_id).first()
-
         if self.user.account_type == AccountType.admin:
             self.admin_dashboard_url = url_for('mod_dashboard.admin')
             self.user_dashboard_url = url_for('mod_dashboard.dashboard')
 
-        if dashboard == 'admin':
-            self.admin_dashboard = True
+        if admin_dashboard:
             self.dashboard_url = url_for('mod_dashboard.admin')
             self.uploaded_files_url = url_for('mod_dashboard.admin_uploaded_files')
             self.queue_url = url_for('mod_dashboard.admin_queue')
@@ -225,8 +225,7 @@ class DetailsForTemplate():
             self.processed_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
             self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
 
-        elif dashboard == 'user':
-            self.admin_dashboard = False
+        else:
             self.dashboard_url = url_for('mod_dashboard.dashboard')
             self.uploaded_files_url = url_for('mod_dashboard.uploaded_files')
             self.queue_url = url_for('mod_dashboard.user_queue')
