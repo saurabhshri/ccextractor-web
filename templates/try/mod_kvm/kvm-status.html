@@ -23,10 +23,21 @@
                     {% endif %}
                             {{ vm.name }}
                         </div>
-                    <div class="small text-muted">{{ vm.status.value }}</div>
+                    <div class="small text-muted">({{ vm.status.value }})</div>
 
                     {%  if details.admin_dashboard %}
-                            <div class="small text-muted">Admin T1</div>
+                            <div class="small text-muted" style="padding-top: 10px; padding-bottom: 10px;">
+                                {% if vm.status.value == 'running' %}
+                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='stop', kvm_name=vm.name) }}"><i class="fa fa-stop-circle" style="color:#dc3545; font-size: 1.5em;" aria-hidden="true" title="Stop"></i></a>
+                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='maintain', kvm_name=vm.name) }}"><i class="fa fa-wrench" style="color:#ffc107; font-size: 1.5em;" aria-hidden="true" title="Maintain"></i></a>
+
+                                {% elif vm.status.value == 'stopped' or  vm.status.value == 'rebooting'%}
+                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='start', kvm_name=vm.name) }}"><i class="fa fa-play-circle" style="color:#28a745; font-size: 1.5em;" aria-hidden="true" title="Start"></i></a>
+
+                                {% elif vm.status.value == 'maintainance'%}
+                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='toggle', kvm_name=vm.name) }}">Toggle</a>
+                                {% endif %}
+                            </div>
                             <div class="small text-muted">Admin T2</div>
 
                     {% endif %}
