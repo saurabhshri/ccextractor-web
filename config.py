@@ -22,6 +22,9 @@ class Config(object):
     LOG_LEVEL = "DEBUG"
     LOG_FILE_DIR = "logs/"
 
+    ENABLE_MEDIAINFO_SUPPORT = True
+    MEDIAINFO_LIB_PATH = "/usr/local/lib/libmediainfo.dylib" #leave empty if want to find automatically
+
 class DevelopmentConfig(Config):
     """
     Development configurations

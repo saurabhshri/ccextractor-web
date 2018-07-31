@@ -14,3 +14,4 @@ python-magic
 blinker
 libvirt-python
 requests
+pymediainfo

@@ -7,13 +7,11 @@ Link     : https://github.com/saurabhshri
 
 """
 import os
-import enum
-import magic
-import mimetypes
 
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField, TextAreaField, SelectField, BooleanField, StringField
 from wtforms.validators import DataRequired, ValidationError
+
 
 ALLOWED_EXTENSIONS = set(['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.3mm', '.3p2', '.60d', '.787', '.89', '.aaf', '.aec', '.aep', '.aepx',
 '.aet', '.aetx', '.ajp', '.ale', '.am', '.amc', '.amv', '.amx', '.anim', '.aqt', '.arcut', '.arf', '.asf', '.asx', '.avb',
@@ -45,9 +43,9 @@ ALLOWED_EXTENSIONS = set(['.264', '.3g2', '.3gp', '.3gp2', '.3gpp', '.3gpp2', '.
 '.zm1', '.zm2', '.zm3', '.zmv', 'bin', 'raw'])
 
 class UploadForm(FlaskForm):
-    accept = 'video/mp4, video/x-m4v, video/*, .bin, .raw'
+    accept = 'video/mp4, video/x-m4v, video/*, .bin, .raw, video/MP2T, .ts'
 
-    file = FileField('Select your file', [DataRequired(message='No file selected.')], render_kw={'accept': accept})
+    file = FileField('Select your file', [DataRequired(message='No file selected.')] , render_kw={'accept': accept})
 
     parameters = TextAreaField('Parameters')
     ccextractor_version = SelectField('CCExtractor Version', [DataRequired(message='Select Version')], coerce=str)
@@ -58,14 +56,9 @@ class UploadForm(FlaskForm):
 
     @staticmethod
     def validate_file(form, field):
-        mimetype = magic.from_buffer(field.data.read(1024), mime=True)
-        field.data.seek(0, 0)
-
-        guessed_extension = mimetypes.guess_extension(mimetype)
-
         filename, extension = os.path.splitext(field.data.filename)
-        if len(extension) > 0 or guessed_extension is not None:
-            if extension not in ALLOWED_EXTENSIONS or guessed_extension not in ALLOWED_EXTENSIONS:
+        if len(extension) > 0:
+            if extension not in ALLOWED_EXTENSIONS: #or guessed_extension not in ALLOWED_EXTENSIONS:
                 raise ValidationError('Extension not allowed')
 
 

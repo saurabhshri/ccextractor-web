@@ -10,7 +10,6 @@ import os
 import shutil
 import json
 import hashlib
-from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
@@ -45,6 +44,27 @@ def dashboard():
             temp_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], filename)
             uploaded_file.save(temp_path)
             log.debug('Saving as temporary file : {path} by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
+
+            if app.config['ENABLE_MEDIAINFO_SUPPORT']:
+                from pymediainfo import MediaInfo
+                log.debug('Checking the temporary file for validity : {path} by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
+                if app.config['MEDIAINFO_LIB_PATH']:
+                    media_info = MediaInfo.parse(filename=temp_path, library_file=app.config['MEDIAINFO_LIB_PATH'])
+                else:
+                    media_info = MediaInfo.parse(filename=temp_path)
+
+                media_info_json = json.loads(media_info.to_json())
+                is_valid_video_file = False
+                for track in media_info.tracks:
+                    if track.track_type == 'Video':
+                        is_valid_video_file = True
+                        break
+
+                if not is_valid_video_file:
+                    flash('Invalid file uploaded, No video track found.', 'error')
+                    return redirect(url_for('mod_dashboard.dashboard'))
+
+
             file_hash = create_file_hash(temp_path)
             if file_exist(file_hash):
                 file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
@@ -77,6 +97,19 @@ def dashboard():
                 #TODO: Process video to get media info and store in an xml file
 
                 os.rename(temp_path, os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename))
+                log.debug('File moved to video repository : {path}'.format(path=os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename)))
+
+                if app.config['ENABLE_MEDIAINFO_SUPPORT']:
+                    media_info_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], '{filename}{extension}'.format(filename=file_db.hash, extension='.json'))
+                    try:
+                        log.debug('Creating mediainfo file for the video : {name} | {file_path}'.format(name=file_db.filename, file_path=media_info_file_path))
+                        with open(media_info_file_path, 'w', encoding='utf8') as media_info_file:
+                            content = json.dumps(media_info_json, indent=4, sort_keys=True, separators=(',', ': '), ensure_ascii=False)
+                            media_info_file.write(content)
+                            log.debug('Created media info file : {file_path}'.format(file_path=media_info_file_path))
+                    except Exception as e:
+                        log.error('Error creating media info file : {file_path} | {e}'.format(file_path=media_info_file_path, e=e))
+
                 flash('File uploaded.', 'success')
                 log.debug('File {file_id} uploaded by: {user_id}'.format(file_id=file_db.id, user_id=g.user.id))
 
@@ -197,7 +230,7 @@ def admin():
             log.debug('New CCExtractor parameter added. [{ccx}]'.format(ccx=parameter.id))
             flash('CCExtractor parameter added!', 'success')
 
-    details = DetailsForTemplate(g.user.id, dashboard='admin')
+    details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/dashboard.html',
                            layout=layout.get_entries(),
@@ -225,7 +258,7 @@ def user_queue():
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def admin_uploaded_files():
-    details = DetailsForTemplate(g.user.id, dashboard='admin')
+    details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
@@ -234,7 +267,7 @@ def admin_uploaded_files():
 @login_required
 @check_account_type(account_types=[AccountType.admin])
 def admin_queue():
-    details = DetailsForTemplate(g.user.id, dashboard='admin')
+    details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
@@ -621,4 +654,19 @@ def trying():
 
 @mod_dashboard.route('/test', methods=['GET', 'POST'])
 def test():
-    return render_template('try/mod_dashboard/dashboard.html')
+    path = "/Users/saurabhshri/Documents/GitHub/ccextractor-web/ID.ts"
+    print('Checking file : {path}'.format(path=path))
+    from pymediainfo import MediaInfo
+    media_info = MediaInfo.parse(filename=path, library_file="/Users/saurabhshri/Documents/GitHub/ccextractor-web/libmediainfo.dylib")
+
+    is_valid_video_file = False
+    print(media_info.to_json())
+    for track in media_info.tracks:
+        print(track)
+
+        if track.track_type == 'Video':
+            is_valid_video_file = True
+
+    if not is_valid_video_file:
+        flash('Invalid file uploaded, No video track found.', 'error')
+    return 'lol'
