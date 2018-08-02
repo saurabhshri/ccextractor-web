@@ -13,20 +13,20 @@ import os
 from flask import Flask, g, session
 
 # modules and internal imports
-from config import app_config
 from database import db
 from logger import Logger
+from config_parser import general_config
 
 from landing.controller import landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
 from mod_kvm.controller import mod_kvm
 
-from config_parser import general_config
 
-#creating Flask app object
+# creating Flask app object
 app = Flask(__name__, instance_relative_config=True)
 
+# attaching configuration to app
 app.config.from_mapping(general_config)
 app.config.from_pyfile('config.py') # secret configurations : 'instance/config.py'
 
@@ -54,18 +54,62 @@ if app.config['ENABLE_KVM']:
 
 log.debug("Blueprints registered.")
 
-def init_app():
+def init_app() -> bool:
+    """
+        Summary
+        ----------
+        Initialises the application on deployment.
+
+        Details
+        ----------
+        This function runs before the very first request is processed by the application after deployment.
+
+        - Initialises database with pre-existing values needed for app functioning.
+            > If the values don't exist, create them.
+
+        - Set up 'Application Mode' (either Public or Local) depending on configuration.
+            Config variable : 'ENABLE_LOCAL_MODE'
+            Possible values : True, False
+
+            > If 'Local Mode' (ENABLE_LOCAL_MODE == True)
+                - To use when deploying the app on local/private server for personal/single/isolated use.
+                - Creates an Admin User, with credentials from secret config (instance/config.py)
+                - By default logs in as this admin user.
+                - All the operations (upload, processing, deletion etc. are done through this account.
+                - There still exist the capability to create (and login as) other users.
+
+            > If 'Public Mode' (ENABLE_LOCAL_MODE == False)
+                - To use when deploying the app on public server, where different people can access the app.
+                - No default account is created.
+                - Each user creates their own account and all operations are under their account.
+                - Admin account can be created by granting 'Role' as 'admin'.
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise.
+    """
+
+    # Setting 'Application Mode'
     log.debug('INIT : Checking app mode.')
     if app.config['ENABLE_LOCAL_MODE']:
         log.debug('LOCAL MODE ENABLED')
+
         from mod_auth.models import Users, AccountType
         email = app.config['ADMIN_EMAIL']
         admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
+
         if admin_user is None:
-            admin_user = Users(email=email, name=app.config['ADMIN_NAME'], password=app.config['ADMIN_PWD'], account_type=AccountType.admin)
+            admin_user = Users(email=email,
+                               name=app.config['ADMIN_NAME'],
+                               password=app.config['ADMIN_PWD'],
+                               account_type=AccountType.admin)
+
             db.session.add(admin_user)
             db.session.commit()
+
             log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
+
         else:
             log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
 
@@ -84,13 +128,14 @@ def init_app():
 
         else:
             log.debug('User ID with no account found in session. Appending admin account to global logged in user.')
+
             user_id = session.get('user_id', 0)
             g.user = Users.query.filter(Users.id == user_id).first()
 
     else:
         log.debug('PUBLIC MODE ENABLED')
 
-
+    # Initialising Database
     from mod_dashboard.models import CCExtractorVersions
     ccextractor = CCExtractorVersions.query.all()
     if not ccextractor:
@@ -98,12 +143,44 @@ def init_app():
         db.session.add(ccextractor)
         db.session.commit()
 
+    return True
+
 @app.template_filter()
-def timesince(dt, default="just now"):
+def timesince(dt, default="just now", precision=0):
     """
-    Returns string representing "time since" e.g.
-    3 days ago, 5 hours ago etc.
+        Summary
+        ----------
+        Returns string representing "time since" e.g. 3 days ago, 5 hours ago etc.
+
+        Details
+        ----------
+        This snippet adds a 'timesince' filter for jinja2 template (used by Flask) while rendering the web pages. The
+        filter takes a datetime object (dt) and subtracts it with the current time to get the difference in times.
+        If the difference period is greater than 1 (integer) value, it chooses the respective period value.
+
+        Examples
+        ________
+
+        In the template, if the variable `file.upload_timestamp` store a datetime object, then
+            <h1> Uploaded {{ file.upload_timestamp|timesince }} </h1>
+
+        Output : <h1> Uploaded 2 hours ago </h1>
+
+        Parameters
+        ----------
+        dt : datetime
+            The datetime object upto which the passed time is to be calculated.
+        default : str
+            The default value to be returned when the difference does not fall in any of the periods. e.g 'just now'.
+        precision : int
+            Decimal places to show in the surpassed time. E.g. if precision = 1, output = 1.2 weeks ago.
+
+        Returns
+        -------
+        str
+            String representation of the time since given datetime object.
     """
+
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc)
     diff = now - dt
@@ -120,23 +197,43 @@ def timesince(dt, default="just now"):
 
     for period, singular, plural in periods:
         if period >= 1:
-            return "%d %s ago" % (period, singular if period == 1 else plural)
+            return '{period:.{precision}f} {period_name} ago'.format(period=period,
+                                                                     precision=precision,
+                                                                     period_name=singular if period == 1 else plural)
 
     return default
 
 @app.before_first_request
 def before_first_request():
-    #log.debug('INIT : Clearing session.')
-    #session.clear()
+    """
+        Summary
+        ----------
+        Runs the contained functions before the very first request is processed by the application after deployment.
 
+        Details
+        ----------
+        Contains the functions which are needed to be executed before the very first request to the application is
+        received. Involves
+
+        - Creating tables in the databases from models (if they don't already exist)
+        - Initialising application with required configuration and database values
+        - Creating directories upon which the app depends
+    """
+
+    # creating database tables if they don't exist
     log.debug('INIT : Preparing database.')
     db.create_all()
 
+    # initialising application with configuration and pre-required database values
     log.debug('INIT : Initialising app.')
     init_app()
 
-    #create directories if they don't exist
+    # creating directories if they don't exist
     os.makedirs(os.path.dirname(os.path.join(app.config['TEMP_UPLOAD_FOLDER'])), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.join(app.config['VIDEO_REPOSITORY'])), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.join(app.config['LOGS_DIR'])), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.join(app.config['OUTPUT_DIR'])), exist_ok=True)
+
 
 if __name__ == '__main__':
     log.debug("Running App.")
