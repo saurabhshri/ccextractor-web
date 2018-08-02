@@ -9,10 +9,8 @@ Link     : https://github.com/saurabhshri
 
 import os
 
-# 3rd party imports
 from flask import Flask, g, session
 
-# modules and internal imports
 from database import db
 from logger import Logger
 from config_parser import general_config
@@ -23,10 +21,8 @@ from mod_dashboard.controller import mod_dashboard
 from mod_kvm.controller import mod_kvm
 
 
-# creating Flask app object
 app = Flask(__name__, instance_relative_config=True)
 
-# attaching configuration to app
 app.config.from_mapping(general_config)
 app.config.from_pyfile('config.py') # secret configurations : 'instance/config.py'
 
@@ -39,7 +35,6 @@ log = logger.get_logger("app")
 log.debug("Configuration loaded.")
 log.debug("Logger created.")
 
-#creating flask-sqlaclchemy (db) object
 db.init_app(app)
 log.debug("flask-sqlaclchemy (db) object created.")
 
@@ -159,7 +154,7 @@ def timesince(dt, default="just now", precision=0):
         If the difference period is greater than 1 (integer) value, it chooses the respective period value.
 
         Examples
-        ________
+        --------
 
         In the template, if the variable `file.upload_timestamp` store a datetime object, then
             <h1> Uploaded {{ file.upload_timestamp|timesince }} </h1>
@@ -220,11 +215,9 @@ def before_first_request():
         - Creating directories upon which the app depends
     """
 
-    # creating database tables if they don't exist
     log.debug('INIT : Preparing database.')
     db.create_all()
 
-    # initialising application with configuration and pre-required database values
     log.debug('INIT : Initialising app.')
     init_app()
 
