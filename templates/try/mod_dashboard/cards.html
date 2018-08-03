@@ -8,7 +8,7 @@
                 </div>
                 <div class="mr-5">{{ details.queued_files|length }} Jobs Processing.</div>
             </div>
-            <a class="card-footer text-white clearfix small z-1" href="{{ details.queue_url }}">
+            <a class="card-footer text-white clearfix small z-1" data-toggle="modal" data-target="#processingFilesModal">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                     <i class="fa fa-angle-right"></i>
@@ -24,7 +24,7 @@
                 </div>
                 <div class="mr-5">{{ details.processed_files|length }} Jobs Completed.</div>
             </div>
-            <a class="card-footer text-white clearfix small z-1" href="{{ details.queue_url }}">
+            <a class="card-footer text-white clearfix small z-1" data-toggle="modal" data-target="#completedJobsModal">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                     <i class="fa fa-angle-right"></i>
@@ -46,6 +46,145 @@
                     <i class="fa fa-angle-right"></i>
                 </span>
             </a>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Processing Files Modal-->
+<div class="modal fade" id="processingFilesModal" tabindex="-1" role="dialog" aria-labelledby="processingFilesModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Jobs being processed.</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% set ns = namespace(at_least_one_job_found=false) %}
+
+                {% for job in details.queue %}
+                    {% if job.status.value == 'processing' or job.status.value == 'pending' %}
+                        {% set ns.at_least_one_job_found = True %}
+                        <div>
+                            <div class="row justify-content-center">
+                                <div class="col-lg-12">
+                                    <p class="list-group-item-action" href="">
+                                        <div class="media">
+                                            <div class="media-body" style="text-align: center;">
+                                                 <span class="text-muted smaller">(Job # {{ job.id }}) </span> <strong> {{ job.original_filename|truncate(20, True) }}</strong>
+                                                <div class="text-muted smaller">Status: {{ job.status.value }} | Added {{ job.queue_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ job.added_by_user }} {% endif %}</div>
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                {% if not ns.at_least_one_job_found %}
+                    <div>
+                        <div class="row justify-content-center">
+                            <div class="col-lg-12">
+                                <p class="list-group-item-action" href="">
+                                    <div class="media">
+                                        <div class="media-body" style="text-align: center;">
+                                            All files processed! 🙌
+                                        </div>
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="{{ details.queue_url }}">View Queue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Processed Files Modal-->
+<div class="modal fade" id="completedJobsModal" tabindex="-1" role="dialog" aria-labelledby="completedJobsModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Jobs completed.</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% set ns = namespace(at_least_one_job_found=false) %}
+
+                {% for job in details.queue %}
+                    {% if job.status.value == 'completed'%}
+                        {% set ns.at_least_one_job_found = True %}
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8">
+                                        <div class="media">
+                                            <div class="media-body">
+                                                 <span class="text-muted smaller">(Job # {{ job.id }}) </span> <strong> {{ job.original_filename|truncate(20, True) }}</strong>
+                                                <div class="text-muted smaller">Status: {{ job.status.value }} | Added {{ job.queue_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ job.added_by_user }} {% endif %}</div>
+                                            </div>
+                                        </div>
+                                    </p>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="list-group-item-action" href="{{ d_url }}">
+                                            <div class="media float-right text-right">
+                                                <div class="text-muted medium">
+                                                   {% if job.status.value == 'completed' %}
+                                                       <div>
+                                                        Output(
+                                                        <a href="serve/output/{{job.id}}" download><i class="fa fa-download"></i></a> ,
+                                                        <a href="serve/output/{{job.id}}/view"><i class="fa fa-eye"></i></a>)
+                                                       </div>
+                                                    {% endif %}
+
+                                                    {% if job.status.value != 'pending' %}
+                                                        <div>
+                                                        Logs (
+                                                        <a href="serve/log/{{job.id}}" download><i class="fa fa-download"></i></a> ,
+                                                        <a href="serve/log/{{job.id}}/view"><i class="fa fa-eye"></i></a>)
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                    {% endif %}
+                {% endfor %}
+
+                {% if not ns.at_least_one_job_found %}
+                    <div>
+                        <div class="row justify-content-center">
+                            <div class="col-lg-12">
+                                <p class="list-group-item-action" href="">
+                                    <div class="media">
+                                        <div class="media-body" style="text-align: center;">
+                                            This place looks empty! 🤷
+                                        </div>
+                                    </div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                <a class="btn btn-primary" href="{{ details.queue_url }}">View Queue</a>
+            </div>
         </div>
     </div>
 </div>
