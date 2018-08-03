@@ -72,6 +72,9 @@ def kvm_cmd(cmd, kvm_name):
         elif cmd == 'maintain':
             resp = vm.mainatain()
 
+        elif cmd == 'resume':
+            resp = vm.resume()
+
         else:
             resp = {'status': 'failed', 'reason': 'Command {cmd} not found'.format(cmd=cmd)}
             flash('Failed to execute {cmd} on KVM {kvm_name}, {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
@@ -83,7 +86,7 @@ def kvm_cmd(cmd, kvm_name):
     else:
         flash('Failed to execute {cmd} on KVM {kvm_name}. , {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
 
-    return str(resp)
+    return redirect(url_for('mod_dashboard.admin'))
 
 
 @mod_kvm.route('/kvm-status/<kvm_name>', methods=['GET', 'POST'])

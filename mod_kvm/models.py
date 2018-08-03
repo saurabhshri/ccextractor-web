@@ -41,6 +41,7 @@ class KVM_cmds(enum.Enum):
     stop = 'stop'
     snapshot = 'snapshot'
     suspend = 'suspend'
+    resume = 'resume'
     reboot = 'reboot'
     maintain = 'maintain' #suspend + db shows maintainance
 
@@ -84,6 +85,9 @@ class VM():
 
     def suspend(self):
         return kvm_manager(self.name, KVM_cmds.suspend)
+
+    def resume(self):
+        return kvm_manager(self.name, KVM_cmds.resume)
 
     def mainatain(self):
         return kvm_manager(self.name, KVM_cmds.maintain)
@@ -131,7 +135,7 @@ def kvm_manager(name, op=None):
     if op is None:
         return status
 
-    if op is KVM_cmds.start:
+    elif op is KVM_cmds.start:
         if status is KVM_Status.running:
             print(" : {name} : Already Running".format(name=name))
             return {'status': 'failed', 'reason': 'Already Running'}
@@ -144,7 +148,7 @@ def kvm_manager(name, op=None):
             print(" : {name} : Error Starting. Traceback : {e}".format(name=name, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
-    if op is KVM_cmds.stop or op is KVM_cmds.shutdown:
+    elif op is KVM_cmds.stop or op is KVM_cmds.shutdown:
         if status is KVM_Status.stopped or status is KVM_Status.rebooting:
             print(" : {name} : Already Stopped".format(name=name))
             return {'status': 'failed', 'reason': 'Already Stopped'}
@@ -162,7 +166,7 @@ def kvm_manager(name, op=None):
             print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
-    if op is KVM_cmds.suspend or op is KVM_cmds.maintain:
+    elif op is KVM_cmds.suspend or op is KVM_cmds.maintain:
         if status is KVM_Status.suspended:
             print(" : {name} : Already suspended".format(name=name))
             return {'status': 'failed', 'reason': 'Already Suspended'}
@@ -174,6 +178,21 @@ def kvm_manager(name, op=None):
                 return {'status': 'success', 'new_state': KVM_Status.suspended}
             elif op is KVM_cmds.maintain:
                 return {'status': 'success', 'new_state': KVM_Status.maintainance}
+        except Exception as e:
+            print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
+            return {'status': 'failed', 'reason': '{e}'.format(e=e)}
+
+
+    elif op is KVM_cmds.resume:
+        if status is not KVM_Status.suspended:
+            print(" : {name} : Tried resuming, state is not suspended.".format(name=name))
+            return {'status': 'failed', 'reason': 'Not Suspended'}
+
+        try:
+            kvm.resume()
+            print(" : {name} : {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.running))
+            if op is KVM_cmds.suspend:
+                return {'status': 'success', 'new_state': KVM_Status.running}
         except Exception as e:
             print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
