@@ -29,15 +29,16 @@ def init_kvm_db():
 
     for platform in Platforms:
         name = app.config['KVM_{platform}_NAME'.format(platform=platform.value.upper())]
-        kvm_log.debug('KVM : {name} > Trying to initialise.'.format(name=name))
-        kvm = KVM.query.filter(KVM.name == name).first()
-        if kvm is None:
-            status = kvm_manager(name)
-            kvm_log.debug('KVM : {name} > Fetched status = {status}'.format(name=name, status=status))
-            kvm = KVM(name=name, platform=platform.value, status=status, timestamp=datetime.datetime.now())
-            db.session.add(kvm)
-            db.session.commit()
-            kvm_log.debug('KVM : {name} > Status updated in DB.'.format(name=name, status=status))
+        if name:
+            kvm_log.debug('KVM : {name} > Trying to initialise.'.format(name=name))
+            kvm = KVM.query.filter(KVM.name == name).first()
+            if kvm is None:
+                status = kvm_manager(name)
+                kvm_log.debug('KVM : {name} > Fetched status = {status}'.format(name=name, status=status))
+                kvm = KVM(name=name, platform=platform.value, status=status, timestamp=datetime.datetime.now())
+                db.session.add(kvm)
+                db.session.commit()
+                kvm_log.debug('KVM : {name} > Status updated in DB.'.format(name=name, status=status))
 
 
 @mod_kvm.route('/kvm', methods=['GET', 'POST'])
