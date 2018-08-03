@@ -37,7 +37,7 @@
                                     <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='start', kvm_name=vm.name) }}"><i class="fa fa-play-circle" style="color:#28a745; font-size: 1.5em;" aria-hidden="true" title="Start"></i></a>
 
                                 {% elif vm.status.value == 'maintainance'%}
-                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='toggle', kvm_name=vm.name) }}">Toggle</a>
+                                    <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='resume', kvm_name=vm.name) }}"><i class="fa fa-refresh" style="color:#28a745; font-size: 1.5em;" aria-hidden="true" title="Resume"></i></a>
                                 {% endif %}
                             </div>
 
