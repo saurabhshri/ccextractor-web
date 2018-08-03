@@ -191,8 +191,7 @@ def kvm_manager(name, op=None):
         try:
             kvm.resume()
             print(" : {name} : {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.running))
-            if op is KVM_cmds.suspend:
-                return {'status': 'success', 'new_state': KVM_Status.running}
+            return {'status': 'success', 'new_state': KVM_Status.running}
         except Exception as e:
             print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
