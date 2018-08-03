@@ -31,7 +31,7 @@
                                             <a class="list-group-item-action" href="{{ d_url }}">
                                                 <div class="media">
                                                     <div class="media-body">
-                                                        {{ icon|safe }} <strong> {{ job.original_filename|truncate(40, True) }}</strong> <span class="text-muted smaller">(Job # {{ job.id }}) </span>
+                                                        {{ icon|safe }} <strong> {{ job.original_filename|truncate(20, True) }}</strong> <span class="text-muted smaller">(Job # {{ job.id }}) </span>
                                                         <div class="text-muted smaller">Status: {{ job.status.value }} | Added {{ job.queue_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ job.added_by_user }} {% endif %}</div>
                                                     </div>
                                                 </div>

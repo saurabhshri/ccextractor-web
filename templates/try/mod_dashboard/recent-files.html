@@ -13,7 +13,8 @@
                                     <a class="list-group-item-action" href="{{ d_url }}">
                                         <div class="media">
                                             <div class="media-body">
-                                                 <strong> {{ file.original_name|truncate(40, True) }}</strong> <span class="text-muted smaller">Hash: {{ file.hash|truncate(40, True)}} </span>
+                                                <strong> {{ file.original_name|truncate(40, True) }}</strong>
+                                                <div class="text-muted smaller">Hash: {{ file.hash|truncate(40, True)}} </div>
                                                 <div class="text-muted smaller">({{ (file.size|int)/1000000 }} MB)  | Uploaded {{ file.upload_timestamp|timesince }} {% if details.admin_dashboard %} by user: {{ file.original_uploader }} {% endif %}</div>
                                             </div>
                                         </div>

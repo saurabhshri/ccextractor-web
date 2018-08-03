@@ -4,9 +4,11 @@
             <li class="nav-item">
                 <a class="nav-link active" href="#">Platform Status</a>
             </li>
+            <!--
             <li class="nav-item">
                 <a class="nav-link" href="#">Toggle KVM Status</a>
             </li>
+            -->
         </ul>
     </div>
 
@@ -38,7 +40,6 @@
                                     <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='toggle', kvm_name=vm.name) }}">Toggle</a>
                                 {% endif %}
                             </div>
-                            <div class="small text-muted">Admin T2</div>
 
                     {% endif %}
             </div>
