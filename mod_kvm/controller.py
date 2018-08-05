@@ -10,7 +10,7 @@ Link     : https://github.com/saurabhshri
 import datetime
 import json
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, g
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from database import db
 
@@ -18,9 +18,6 @@ from mod_auth.controller import login_required, check_account_type
 from mod_auth.models import AccountType
 from mod_kvm.models import KVM, VM, kvm_manager, KVM_Status, kvm_log
 from mod_dashboard.models import Platforms
-
-
-
 
 mod_kvm = Blueprint("mod_kvm", __name__)
 
@@ -39,6 +36,9 @@ def init_kvm_db():
                 db.session.add(kvm)
                 db.session.commit()
                 kvm_log.debug('KVM : {name} > Status updated in DB.'.format(name=name, status=status))
+            else:
+                kvm_log.debug('KVM : {name} > Already initialised.'.format(name=name))
+                update_kvm_status(kvm_name=name)
 
 
 @mod_kvm.route('/kvm', methods=['GET', 'POST'])
@@ -62,7 +62,7 @@ def kvm_cmd(cmd, kvm_name):
         vm = VM(kvm_name)
 
         if cmd == 'start':
-           resp = vm.start()
+            resp = vm.start()
 
         elif cmd == 'stop':
             resp = vm.stop()
@@ -94,8 +94,9 @@ def kvm_cmd(cmd, kvm_name):
 @login_required
 @check_account_type([AccountType.admin])
 def check_kvm_status(kvm_name):
-    #TODO : Should we query the actual status on each request? Or we should update the db after fixed interval and then update the db?
-    # Okay, so we can not update the db on each request because say we're working with maintainance mode, actual status could be running
+    return update_kvm_status(kvm_name=kvm_name)
+
+def update_kvm_status(kvm_name):
     kvm = KVM.query.filter(KVM.name == kvm_name).first()
     if kvm is None:
         resp = {'status': 'failed', 'reason': '{KVM} not found'.format(KVM=kvm_name)}

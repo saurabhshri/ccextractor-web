@@ -221,6 +221,11 @@ def before_first_request():
     log.debug('INIT : Initialising app.')
     init_app()
 
+    if app.config['ENABLE_KVM']:
+        log.debug('INIT : Initialising KVM.')
+        from mod_kvm.controller import init_kvm_db
+        init_kvm_db()
+
     # creating directories if they don't exist
     os.makedirs(os.path.dirname(os.path.join(app.config['TEMP_UPLOAD_FOLDER'])), exist_ok=True)
     os.makedirs(os.path.dirname(os.path.join(app.config['VIDEO_REPOSITORY'])), exist_ok=True)

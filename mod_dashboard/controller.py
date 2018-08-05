@@ -13,7 +13,7 @@ import hashlib
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
 
-from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, DetailsForTemplate, AdminDetailsForTemplate
+from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, DetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
@@ -47,13 +47,15 @@ def dashboard():
 
             if app.config['ENABLE_MEDIAINFO_SUPPORT']:
                 from pymediainfo import MediaInfo
-                log.debug('Checking the temporary file for validity : {path} by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
+                log.debug('Checking if file is vaild : {path} by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
+
                 if app.config['MEDIAINFO_LIB_PATH']:
                     media_info = MediaInfo.parse(filename=temp_path, library_file=app.config['MEDIAINFO_LIB_PATH'])
                 else:
                     media_info = MediaInfo.parse(filename=temp_path)
 
                 media_info_json = json.loads(media_info.to_json())
+
                 is_valid_video_file = False
                 for track in media_info.tracks:
                     if track.track_type == 'Video':
@@ -61,11 +63,13 @@ def dashboard():
                         break
 
                 if not is_valid_video_file:
+                    log.debug('Invalid file : {path} uploaded by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
                     flash('Invalid file uploaded, No video track found.', 'error')
                     return redirect(url_for('mod_dashboard.dashboard'))
 
 
             file_hash = create_file_hash(temp_path)
+
             if file_exist(file_hash):
                 file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
                 users_with_file_access = Users.query.filter(Users.files.any(id=file.id)).all()
@@ -376,7 +380,6 @@ def progress():
                 db.session.commit()
                 log.debug('[Job Number: {queued_file_id}] > Updating status to [{status}].'.format(queued_file_id=queued_file.id,
                                                                                                    status=queued_file.status))
-                #return Resp(stat='success', reason='')
 
             elif request.form['report_type'] == 'log':
                 uploaded_file = request.files['file']
@@ -386,7 +389,6 @@ def progress():
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['LOGS_DIR']))
                     log.debug('[Job Number: {queued_file_id}] > Uploaded log file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
-                    #return Resp(stat='success', reason='')
 
             elif request.form['report_type'] == 'output':
                 uploaded_file = request.files['file']
@@ -396,16 +398,13 @@ def progress():
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['OUTPUT_DIR']))
                     log.debug('[Job Number: {queued_file_id}] > Uploaded Output file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
-                #return Resp(stat='success', reason='')
 
         else:
             log.debug('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
             return "Invalid Token"
-            #return Resp(stat='failed', reason='Invalid token')
 
     log.debug('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token= request.form['token']))
     return "Invalid Request"
-    #return Resp(stat='failed', reason='Invalid request')
 
 
 def serve_file_download(file_name, folder='', as_attachment=True, content_type='application/octet-stream'):
