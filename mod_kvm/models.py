@@ -94,21 +94,21 @@ class VM():
 
 
 def kvm_manager(name, op=None):
-    status = KVM_Status.unknown
     conn = libvirt.open("qemu:///system")
     if conn is None:
-        kvm_log.debug("Couldn't open connection to libvirt!")
-        print("Couldn't open connection to libvirt!")
+        kvm_log.error("Couldn't open connection to libvirt!")
         return None
 
     try:
         kvm = conn.lookupByName(name)
     except libvirt.libvirtError:
-        print("Couldn't find KVM with name : {name}".format(name=name))
+        kvm_log.error("Couldn't find KVM with name : {name}".format(name=name))
         status = KVM_Status.not_found
-        return None
+        return {'status': 'failed', 'reason': 'Not Found!'}
 
     state, reason =kvm.state()
+
+    kvm_log.debug('Discovered state = {state}, reason = {reason}'.format(state=state, reason=reason))
 
     if state == libvirt.VIR_DOMAIN_RUNNING:
         status = KVM_Status.running
@@ -123,77 +123,70 @@ def kvm_manager(name, op=None):
     else:
         status = KVM_Status.unknown
 
-    """
-    if kvm.isActive():
-        print(" : {name} : Found Running".format(name=name))
-        status = KVM_Status.running
-    else:
-        print(" : {name} : Found Stopped".format(name=name))
-        status = KVM_Status.stopped
-    """
+    kvm_log.debug(' :: {name} :: Discovered state = {state}, reason = {reason}'.format(name=name, state=state, reason=reason))
 
     if op is None:
         return status
 
     elif op is KVM_cmds.start:
         if status is KVM_Status.running:
-            print(" : {name} : Already Running".format(name=name))
+            kvm_log.error(" :: {name} :: Already Running".format(name=name))
             return {'status': 'failed', 'reason': 'Already Running'}
 
         try:
             kvm.create()
-            print(" : {name} : Started Running".format(name=name))
+            kvm_log.debug(" :: {name} :: Started Running".format(name=name))
             return {'status': 'success', 'new_state': KVM_Status.running}
         except Exception as e:
-            print(" : {name} : Error Starting. Traceback : {e}".format(name=name, e=e))
+            kvm_log.error(" :: {name} :: Error Starting. Traceback : {e}".format(name=name, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
     elif op is KVM_cmds.stop or op is KVM_cmds.shutdown:
         if status is KVM_Status.stopped or status is KVM_Status.rebooting:
-            print(" : {name} : Already Stopped".format(name=name))
+            kvm_log.error(" :: {name} :: Already Stopped".format(name=name))
             return {'status': 'failed', 'reason': 'Already Stopped'}
 
         try:
             if op is KVM_cmds.shutdown:
                 kvm.shutdown()
-                print(" : {name} : {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.rebooting))
+                kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.rebooting))
                 return {'status': 'success', 'new_state': KVM_Status.rebooting}
             elif op is KVM_cmds.stop:
                 kvm.destroy()
-                print(" : {name} : {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
+                kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
                 return {'status': 'success', 'new_state': KVM_Status.stopped}
         except Exception as e:
-            print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
+            kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
     elif op is KVM_cmds.suspend or op is KVM_cmds.maintain:
         if status is KVM_Status.suspended:
-            print(" : {name} : Already suspended".format(name=name))
+            kvm_log.error(" :: {name} :: Already suspended".format(name=name))
             return {'status': 'failed', 'reason': 'Already Suspended'}
 
         try:
             kvm.suspend()
-            print(" : {name} : {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
+            kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
             if op is KVM_cmds.suspend:
                 return {'status': 'success', 'new_state': KVM_Status.suspended}
             elif op is KVM_cmds.maintain:
                 return {'status': 'success', 'new_state': KVM_Status.maintainance}
         except Exception as e:
-            print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
+            kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
 
     elif op is KVM_cmds.resume:
         if status is not KVM_Status.suspended:
-            print(" : {name} : Tried resuming, state is not suspended.".format(name=name))
+            kvm_log.error(" :: {name} :: Tried resuming, state is not suspended.".format(name=name))
             return {'status': 'failed', 'reason': 'Not Suspended'}
 
         try:
             kvm.resume()
-            print(" : {name} : {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.running))
+            kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.running))
             return {'status': 'success', 'new_state': KVM_Status.running}
         except Exception as e:
-            print(" : {name} : {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
+            kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
     conn.close()
