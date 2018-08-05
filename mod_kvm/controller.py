@@ -19,7 +19,9 @@ from mod_auth.models import AccountType
 from mod_kvm.models import KVM, VM, kvm_manager, KVM_Status, kvm_log
 from mod_dashboard.models import Platforms
 
+
 mod_kvm = Blueprint("mod_kvm", __name__)
+
 
 def init_kvm_db():
     from flask import current_app as app
@@ -40,14 +42,6 @@ def init_kvm_db():
                 kvm_log.debug('KVM : {name} > Already initialised.'.format(name=name))
                 update_kvm_status(kvm_name=name)
 
-
-@mod_kvm.route('/kvm', methods=['GET', 'POST'])
-@login_required
-@check_account_type([AccountType.admin])
-def manage_kvm():
-    init_kvm_db()
-    kvm = KVM.query.all()
-    return render_template('mod_kvm/kvm.html', kvm=kvm, kvm_status=KVM_Status)
 
 @mod_kvm.route('/kvm-cmd/<cmd>/<kvm_name>', methods=['GET', 'POST'])
 @login_required
@@ -94,7 +88,14 @@ def kvm_cmd(cmd, kvm_name):
 @login_required
 @check_account_type([AccountType.admin])
 def check_kvm_status(kvm_name):
-    return update_kvm_status(kvm_name=kvm_name)
+
+    resp = json.loads(update_kvm_status(kvm_name=kvm_name))
+    if resp['status'] == 'success':
+        flash('Refreshed KVM {kvm_name}.'.format(kvm_name=kvm_name), 'success')
+    else:
+        flash('Failed to refresh KVM {kvm_name}, {reason}.'.format(kvm_name=kvm_name, reason=resp['reason']), 'error')
+
+    return redirect(url_for('mod_dashboard.admin'))
 
 def update_kvm_status(kvm_name):
     kvm = KVM.query.filter(KVM.name == kvm_name).first()
