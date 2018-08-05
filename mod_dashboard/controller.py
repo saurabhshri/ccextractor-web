@@ -506,7 +506,6 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         log.debug('Job: {job_no} > Created by {user_id}.'.format(job_no=queued_file.id, user_id=added_by_user))
         log.debug('Job: {job_no} > Platform : {platform}.'.format(job_no=queued_file.id, platform=platform))
 
-        job_dir = ""
         if platform == Platforms.linux.value:
             job_dir = app.config['LINUX_JOBS_DIR']
         elif platform == Platforms.windows.value:
@@ -534,8 +533,9 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
         video_file_path = os.path.join(app.config['VIDEO_REPOSITORY'], filename)
         if os.path.exists(video_file_path):
             try:
-                log.debug('Job: {job_no} > Copying video file to Jobs dir : {filename} > {video_file_name}'.format(job_no=queued_file.id, filename=filename, video_file_name=video_file_name))
-                shutil.copy(video_file_path, '{job_dir}/{video_file_name}'.format(job_dir=job_dir, video_file_name=video_file_name))
+                job_video_file_path = os.path.join(job_dir, '{video_file_name}'.format(video_file_name=video_file_name))
+                log.debug('Job: {job_no} > Copying video file to Jobs dir : {video_file_path} > {job_video_file_path}'.format(job_no=queued_file.id, video_file_path=video_file_path, job_video_file_path=job_video_file_path))
+                shutil.copy(video_file_path, job_video_file_path)
                 log.debug('Job: {job_no} > Video file copied.'.format(job_no=queued_file.id))
 
             except Exception as e:
