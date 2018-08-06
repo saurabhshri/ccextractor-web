@@ -275,6 +275,32 @@ def admin_queue():
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
+@mod_dashboard.route('/admin-dashboard/users', methods=['GET', 'POST'])
+@login_required
+@check_account_type(account_types=[AccountType.admin])
+def user_list():
+    details = DetailsForTemplate(g.user.id, admin_dashboard=True)
+    layout = LayoutHelper(logged_in=True, details=details)
+    return render_template('try/mod_dashboard/user-list.html', layout=layout.get_entries(), details=details)
+
+
+@mod_dashboard.route('/change-acc-type/<user_id>/<type>', methods=['GET', 'POST'])
+@login_required
+@check_account_type(account_types=[AccountType.admin])
+def change_acc_type(user_id, type):
+    user = Users.query.filter(Users.id == user_id).first()
+    if user is not None:
+        if type == 'admin':
+            user.account_type = AccountType.admin
+        elif type == 'user':
+            user.account_type = AccountType.user
+        db.session.commit()
+        flash('Account type change successful.', 'success')
+    else:
+        flash('User not found.', 'error')
+
+    return redirect(request.referrer)
+
 
 @mod_dashboard.route('/serve/<type>/<job_no>', methods=['GET', 'POST'])
 @mod_dashboard.route('/serve/<type>/<job_no>/<view>', methods=['GET', 'POST'])

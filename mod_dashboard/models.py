@@ -175,25 +175,6 @@ class CCExtractorParameters(db.Model):
     def __repr__(self):
         return '<CExtractorParamter {id}>'.format(id=self.id)
 
-class UserDetailsForTemplate():
-    def __init__(self, user_id):
-        self.queued_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
-        self.processed_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
-        self.errored_files = ProcessQueue.query.filter((ProcessQueue.added_by_user == user_id) & (ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
-        self.queue = ProcessQueue.query.filter(ProcessQueue.added_by_user == user_id).order_by(db.desc(ProcessQueue.id)).all()
-        self.user = Users.query.filter(Users.id == user_id).first()
-        self.uploaded_files = self.user.files
-
-class AdminDetailsForTemplate():
-    def __init__(self):
-        self.queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
-        self.users = Users.query.order_by(db.desc(Users.id)).all()
-        self.uploaded_files = UploadedFiles.query.order_by(db.desc(UploadedFiles.id)).all()
-        self.ccextractor_versions = CCExtractorVersions.query.order_by(db.desc(CCExtractorVersions.id)).all()
-        self.ccextractor_parameters = CCExtractorParameters.query.order_by(db.desc(CCExtractorParameters.id)).all()
-        self.queued_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).order_by(db.desc(ProcessQueue.id)).all()
-        self.processed_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).order_by(db.desc(ProcessQueue.id)).all()
-        self.errored_files = ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.error)).order_by(db.desc(ProcessQueue.id)).all()
 
 class DetailsForTemplate():
     def __init__(self, user_id, admin_dashboard=False):
@@ -216,6 +197,7 @@ class DetailsForTemplate():
             self.dashboard_url = url_for('mod_dashboard.admin')
             self.uploaded_files_url = url_for('mod_dashboard.admin_uploaded_files')
             self.queue_url = url_for('mod_dashboard.admin_queue')
+            self.user_list_url = url_for('mod_dashboard.user_list')
             self.queue = ProcessQueue.query.order_by(db.desc(ProcessQueue.id)).all()
             self.users = Users.query.order_by(db.desc(Users.id)).all()
             self.uploaded_files = UploadedFiles.query.order_by(db.desc(UploadedFiles.id)).all()

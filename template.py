@@ -42,6 +42,12 @@ class LayoutHelper():
                     if details.user_dashboard_url:
                         self.entries['menu'].append(
                             {
+                                'display_name': 'User List',
+                                'url': details.user_list_url,
+                                'icon': 'fa fa-fw fa-list'
+                            })
+                        self.entries['menu'].append(
+                            {
                                 'display_name': 'User Dashboard',
                                 'url': details.user_dashboard_url,
                                 'icon': 'fa fa-fw fa-user'

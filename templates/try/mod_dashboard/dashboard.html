@@ -34,15 +34,14 @@
 
             <!-- CCExtractor Versions Form -->
             {%- include 'try/mod_dashboard/admin-ccextractor-version-form.html' -%}
-
-            {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
-            {%- include 'try/mod_dashboard/recent-files.html' -%}
         {% else%}
             <!-- File Upload Form -->
             {%- include 'try/mod_dashboard/upload-form.html' -%}
+        {% endif %}
+
+
             {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
             {%- include 'try/mod_dashboard/recent-files.html' -%}
-        {% endif %}
     </div>
 {% endblock %}
 

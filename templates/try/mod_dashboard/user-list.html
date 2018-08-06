@@ -1,0 +1,91 @@
+{% extends "try/layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <link href=" {{ url_for('static', filename='css/dataTables.bootstrap4.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+         <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ details.dashboard_url }}">
+                    Admin Dashboard
+                </a>
+            </li>
+             <li class="breadcrumb-item active">
+                 User List
+             </li>
+        </ol>
+
+        <!-- Summary Cards-->
+        {%- include 'try/mod_dashboard/cards.html' -%}
+
+        <div style="margin-right: 15px; margin-left: 15px;">
+            <div class="card mb-3">
+                <div class="card-header"><i class="fa fa-table"></i> User List</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Account Type</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Account Type</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                            {% for user in details.users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.account_type.value }}</td>
+                                    <td>{{ user.sign_up_timestamp|timesince}}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            {% if user.account_type.value == 'admin' %}
+                                                <a class="btn btn-outline-dark" href="{{ url_for('mod_dashboard.change_acc_type', user_id=user.id, type='user') }}">Make 'User'</a>
+                                            {% elif user.account_type.value == 'user' %}
+                                                <a class="btn btn-outline-dark" href="{{ url_for('mod_dashboard.change_acc_type', user_id=user.id, type='admin') }}">Make 'Admin'</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function(){
+            $("#dataTable").DataTable({
+                order: [[0, 'desc']]
+            })
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTables.bootstrap4.js') }}"></script>
+{% endblock %}
