@@ -63,7 +63,7 @@ def dashboard():
                         break
 
                 if not is_valid_video_file:
-                    log.debug('Invalid file : {path} uploaded by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
+                    log.warning('Invalid file : {path} uploaded by user: {user_id}'.format(path=temp_path, user_id=g.user.id))
                     flash('Invalid file uploaded, No video track found.', 'error')
                     return redirect(url_for('mod_dashboard.dashboard'))
 
@@ -176,11 +176,11 @@ def new_job(filename):
 
                     if rv['status'] == 'duplicate':
                         flash('Job with same conifguration already in the queue. Job #{job_number}'.format(job_number=rv['job_number']), 'warning')
-                        log.debug('Duplicate job configuration for job number: {job_number} '.format(job_number=rv['job_number']))
+                        log.warning('Duplicate job configuration for job number: {job_number} '.format(job_number=rv['job_number']))
 
                     elif rv['status'] == 'failed':
                         flash('Failed to add job! Reason : {reason}'.format(reason=rv['reason']), 'error')
-                        log.debug('Failed to add job! Reason : {reason}'.format(reason=rv['reason']))
+                        log.error('Failed to add job! Reason : {reason}'.format(reason=rv['reason']))
 
                     else:
                         flash('Job added to queue. Job #{job_number}'.format(job_number=rv['job_number']), 'success')
@@ -294,10 +294,10 @@ def serve(type, job_no, view=None):
             else:
                 flash('Invalid filetype.', 'error')
         else:
-            log.debug('Forbidden download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
+            log.warning('Forbidden download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
             flash('Forbidden.', 'error')
     else:
-        log.debug('Invalid download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
+        log.warning('Invalid download request for: {job_no} by user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
         flash('Illegal request. Job not found', 'error')
     return redirect(request.referrer)
 
@@ -446,7 +446,7 @@ def update_cmd_json(parameter, type="new"):
         if parameter.parameter in param['parameter']:
             if type == 'new':
                 flash('Parameter already exists in JSON file!', 'error')
-                log.debug('Parameter: {param} already exists in JSON file'.format(param=param))
+                log.warning('Parameter: {param} already exists in JSON file'.format(param=param))
                 return
             elif type == 'delete' or type == 'update':
                 flash('Updating parameter in JSON file!', 'warning')
@@ -653,26 +653,3 @@ def parse_ccextractor_parameters(params):
             }
 
     return json.dumps(resp)
-
-@mod_dashboard.route('/try', methods=['GET', 'POST'])
-def trying():
-    return "hello"
-
-@mod_dashboard.route('/test', methods=['GET', 'POST'])
-def test():
-    path = "/Users/saurabhshri/Documents/GitHub/ccextractor-web/ID.ts"
-    print('Checking file : {path}'.format(path=path))
-    from pymediainfo import MediaInfo
-    media_info = MediaInfo.parse(filename=path, library_file="/Users/saurabhshri/Documents/GitHub/ccextractor-web/libmediainfo.dylib")
-
-    is_valid_video_file = False
-    print(media_info.to_json())
-    for track in media_info.tracks:
-        print(track)
-
-        if track.track_type == 'Video':
-            is_valid_video_file = True
-
-    if not is_valid_video_file:
-        flash('Invalid file uploaded, No video track found.', 'error')
-    return 'lol'

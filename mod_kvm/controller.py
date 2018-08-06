@@ -35,7 +35,7 @@ def init_kvm_db():
                 try:
                     vm = VM(name)
                 except Exception as e:
-                    kvm_log.debug('KVM : {name} > Failed. Reason : {e}'.format(name=name, e=e))
+                    kvm_log.error('KVM : {name} > Failed. Reason : {e}'.format(name=name, e=e))
                 else:
                     status = vm.status
                     kvm_log.debug('KVM : {name} > Fetched status = {status}'.format(name=name, status=status))
@@ -44,7 +44,7 @@ def init_kvm_db():
                     db.session.commit()
                     kvm_log.debug('KVM : {name} > Status updated in DB.'.format(name=name, status=status))
             else:
-                kvm_log.debug('KVM : {name} > Already initialised.'.format(name=name))
+                kvm_log.warning('KVM : {name} > Already initialised.'.format(name=name))
                 update_kvm_status(kvm_name=name)
 
 
@@ -61,7 +61,7 @@ def kvm_cmd(cmd, kvm_name):
         try:
             vm = VM(kvm_name)
         except Exception as e:
-            kvm_log.debug('KVM : {name} > Failed. Reason : {e}'.format(name=kvm.name, e=e))
+            kvm_log.error('KVM : {name} > Failed. Reason : {e}'.format(name=kvm.name, e=e))
             resp = {'status': 'failed', 'reason': '{e}'.format(e=e)}
         else:
             if cmd == 'start':
@@ -115,7 +115,7 @@ def update_kvm_status(kvm_name):
             vm = VM(kvm_name)
 
         except Exception as e:
-            kvm_log.debug('KVM : {name} > Failed. Reason : {e}'.format(name=kvm.name, e=e))
+            kvm_log.error('KVM : {name} > Failed. Reason : {e}'.format(name=kvm.name, e=e))
             resp = {'status': 'failed', 'reason': '{e}'.format(e=e)}
 
         else:
@@ -124,7 +124,7 @@ def update_kvm_status(kvm_name):
                 status = vm.status
                 kvm_log.debug('KVM : {name} > Fetching status, actual status : {status}'.format(name=kvm.name, status=status))
             except Exception as e:
-                kvm_log.debug('KVM : {name} > Failed to fetch status, {e}'.format(name=kvm.name, e=e))
+                kvm_log.error('KVM : {name} > Failed to fetch status, {e}'.format(name=kvm.name, e=e))
                 resp = {'status': 'failed', 'reason': '{e}'.format(e=e)}
             else:
                 kvm.status = status
