@@ -379,7 +379,8 @@ def progress():
                 db.session.add(queued_file)
                 db.session.commit()
                 log.debug('[Job Number: {queued_file_id}] > Updating status to [{status}].'.format(queued_file_id=queued_file.id, status=queued_file.status))
-                return {'status': 'success'}
+                resp = {'status': 'success'}
+                return json.dumps(resp)
 
             elif request.form['report_type'] == 'log':
                 uploaded_file = request.files['file']
@@ -392,7 +393,7 @@ def progress():
                     resp = {'status': 'success'}
                 else:
                     resp = {'status': 'failed', 'reason': 'No file found'}
-                return resp
+                return json.dumps(resp)
 
             elif request.form['report_type'] == 'output':
                 uploaded_file = request.files['file']
@@ -405,7 +406,7 @@ def progress():
                     resp = {'status': 'success'}
                 else:
                     resp = {'status': 'failed', 'reason': 'No file found'}
-                return resp
+                return json.dumps(resp)
         else:
             log.error('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
             return "Invalid Token"

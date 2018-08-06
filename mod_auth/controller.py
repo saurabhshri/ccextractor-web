@@ -43,7 +43,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if g.user is None:
-            user_log.debug('[IP: {ip}] tried to access {endpoint} without logging in.'.format(ip=request.remote_addr, endpoint=request.endpoint))
+            user_log.warning('[IP: {ip}] tried to access {endpoint} without logging in.'.format(ip=request.remote_addr, endpoint=request.endpoint))
             flash('You need to login first.', 'error')
             return redirect(url_for('mod_auth.login', next=request.endpoint))
 
@@ -57,7 +57,7 @@ def check_account_type(account_types=None, parent_route=None):
         def decorated_function(*args, **kwargs):
             if g.user.account_type in account_types:
                 return f(*args, **kwargs)
-            user_log.debug('[User: {user_id}] account type : {user_acc_type} tried to access {endpoint} without {req_acc_types} privilege(s).'.format(user_id=g.user.id, user_acc_type=g.user.account_type, endpoint=request.endpoint, req_acc_types=account_types))
+            user_log.warning('[User: {user_id}] account type : {user_acc_type} tried to access {endpoint} without {req_acc_types} privilege(s).'.format(user_id=g.user.id, user_acc_type=g.user.account_type, endpoint=request.endpoint, req_acc_types=account_types))
             flash('Your account does not have enough privileges to access this functionality.', 'error')
             return redirect(url_for('mod_dashboard.dashboard'))
         return decorated_function
@@ -75,7 +75,7 @@ def signup():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is not None:
             flash('Email is already registered!', 'error')
-            user_log.debug('Duplicate registration attempt for : {email}, registered with user : {user}'.format(email=form.email.data, user=user.id))
+            user_log.error('Duplicate registration attempt for : {email}, registered with user : {user}'.format(email=form.email.data, user=user.id))
             return redirect(url_for('.login'))
         else:
             expires = int(time.time()) + 86400
@@ -86,7 +86,7 @@ def signup():
             if resp.status_code is not 200:
                 flash('Unable to send verification email. Please get in touch.', 'error')
                 from run import log
-                log.debug("Mail sending failed. Check mail logs.")
+                log.error("Mail sending failed. Check mail logs.")
 
             else:
                 user_log.debug('Received registration request for : {email}'.format(email=form.email.data))
@@ -191,7 +191,7 @@ def login():
                 return redirect(url_for(redirect_location))
         else:
             flash('Wrong username or password', 'error')
-            user_log.debug('Invalid login attempt from IP: {ip} for email :{email}'.format(email=form.email.data, ip=request.remote_addr))
+            user_log.warning('Invalid login attempt from IP: {ip} for email :{email}'.format(email=form.email.data, ip=request.remote_addr))
 
         return redirect(url_for('.login'))
     layout = LayoutHelper(logged_in=False)

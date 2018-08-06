@@ -137,7 +137,7 @@ class ProcessQueue(db.Model):
         self.queue_timestamp = pytz.utc.localize(self.queue_timestamp, is_dst=None)
 
 class CCExtractorVersions(db.Model):
-    __tablename__ = 'ccextractor_version'
+    __tablename__ = 'ccextractor_versions'
     id = db.Column(db.Integer, primary_key=True)
     version = db.Column(db.String(100), nullable=False)
     commit = db.Column(db.String(64), nullable=False)
