@@ -121,7 +121,7 @@ def update_kvm_status(kvm_name):
         else:
             kvm_log.debug('KVM : {name} > Fetching status, current status in db : {status}'.format(name=kvm.name, status=kvm.status))
             try:
-                status = vm.status()
+                status = vm.status
                 kvm_log.debug('KVM : {name} > Fetching status, actual status : {status}'.format(name=kvm.name, status=status))
             except Exception as e:
                 kvm_log.debug('KVM : {name} > Failed to fetch status, {e}'.format(name=kvm.name, e=e))

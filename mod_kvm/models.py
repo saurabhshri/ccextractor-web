@@ -156,7 +156,7 @@ class VM():
             return {'status': 'failed', 'reason': 'Already Stopped'}
 
         try:
-            self.kvm.stop()
+            self.kvm.destroy()
             kvm_log.debug(" :: {name} :: Stopping Success.".format(name=self.name))
             return {'status': 'success', 'current_state': KVM_Status.stopped}
         except Exception as e:
