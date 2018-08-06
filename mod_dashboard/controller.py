@@ -284,7 +284,7 @@ def serve(type, job_no, view=None):
     from run import log
     job = ProcessQueue.query.filter(ProcessQueue.id == job_no).first()
     if job is not None:
-        if job.added_by_user == g.user.id:
+        if job.added_by_user == g.user.id or g.user.account_type == AccountType.admin:
             if type == 'log':
                 log.debug('Serving log file for job number: {job_no} to user : {user_id}'.format(job_no=job_no, user_id=g.user.id))
                 return serve_file_download(file_name='{id}.log'.format(id=job.id), folder=app.config['LOGS_DIR'], as_attachment=(True if view is None else False))
