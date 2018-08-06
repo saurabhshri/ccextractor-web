@@ -175,9 +175,13 @@ def timesince(dt, default="just now", precision=0):
         str
             String representation of the time since given datetime object.
     """
+    from datetime import datetime
+    if dt.tzinfo is None:
+        now = datetime.now()
+    else:
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
 
-    from datetime import datetime, timezone
-    now = datetime.now(timezone.utc)
     diff = now - dt
 
     periods = (
