@@ -116,11 +116,11 @@ def kvm_manager(name, op=None):
         conn = libvirt.open("qemu:///system")
     except Exception as e:
         kvm_log.error("Exception occured while opening connection to libvirt : {e}".format(e=e))
-        return None # {'status': 'failed', 'reason': '{e}'.format(e=e)}
+        return {'status': 'failed', 'reason': '{e}'.format(e=e)}
     else:
         if conn is None:
             kvm_log.error("Could not open connection to libvirt!")
-            return None # {'status': 'failed', 'reason': 'Could not open connection to libvirt!'}
+            return {'status': 'failed', 'reason': 'Could not open connection to libvirt!'}
 
     try:
         kvm = conn.lookupByName(name)
@@ -148,7 +148,7 @@ def kvm_manager(name, op=None):
     kvm_log.debug(' :: {name} :: Discovered state = {state}, reason = {reason}'.format(name=name, state=state, reason=reason))
 
     if op is None:
-        return status
+        return {'status': 'success', 'current_state': status}
 
     elif op is KVM_cmds.start:
         if status is KVM_Status.running:
@@ -158,7 +158,7 @@ def kvm_manager(name, op=None):
         try:
             kvm.create()
             kvm_log.debug(" :: {name} :: Started Running".format(name=name))
-            return {'status': 'success', 'new_state': KVM_Status.running}
+            return {'status': 'success', 'current_state': KVM_Status.running}
         except Exception as e:
             kvm_log.error(" :: {name} :: Error Starting. Traceback : {e}".format(name=name, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
@@ -171,12 +171,12 @@ def kvm_manager(name, op=None):
         try:
             if op is KVM_cmds.shutdown:
                 kvm.shutdown()
-                kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.rebooting))
-                return {'status': 'success', 'new_state': KVM_Status.rebooting}
+                kvm_log.debug(" :: {name} :: {cmd} success, new state = {current_state}".format(name=name, cmd=op.value, current_state=KVM_Status.rebooting))
+                return {'status': 'success', 'current_state': KVM_Status.rebooting}
             elif op is KVM_cmds.stop:
                 kvm.destroy()
-                kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state}".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
-                return {'status': 'success', 'new_state': KVM_Status.stopped}
+                kvm_log.debug(" :: {name} :: {cmd} success, new state = {current_state}".format(name=name, cmd=op.value, current_state=KVM_Status.stopped))
+                return {'status': 'success', 'current_state': KVM_Status.stopped}
         except Exception as e:
             kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
@@ -188,11 +188,11 @@ def kvm_manager(name, op=None):
 
         try:
             kvm.suspend()
-            kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.stopped))
+            kvm_log.debug(" :: {name} :: {cmd} success, new state = {current_state} ".format(name=name, cmd=op.value, current_state=KVM_Status.stopped))
             if op is KVM_cmds.suspend:
-                return {'status': 'success', 'new_state': KVM_Status.suspended}
+                return {'status': 'success', 'current_state': KVM_Status.suspended}
             elif op is KVM_cmds.maintain:
-                return {'status': 'success', 'new_state': KVM_Status.maintainance}
+                return {'status': 'success', 'current_state': KVM_Status.maintainance}
         except Exception as e:
             kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
@@ -205,10 +205,8 @@ def kvm_manager(name, op=None):
 
         try:
             kvm.resume()
-            kvm_log.debug(" :: {name} :: {cmd} success, new state = {new_state} ".format(name=name, cmd=op.value, new_state=KVM_Status.running))
-            return {'status': 'success', 'new_state': KVM_Status.running}
+            kvm_log.debug(" :: {name} :: {cmd} success, new state = {current_state} ".format(name=name, cmd=op.value, current_state=KVM_Status.running))
+            return {'status': 'success', 'current_state': KVM_Status.running}
         except Exception as e:
             kvm_log.error(" :: {name} :: {cmd} error. Traceback : {e}".format(name=name, cmd=op.value, e=e))
             return {'status': 'failed', 'reason': '{e}'.format(e=e)}
-
-    conn.close()

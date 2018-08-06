@@ -75,7 +75,7 @@ def kvm_cmd(cmd, kvm_name):
             flash('Failed to execute {cmd} on KVM {kvm_name}, {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
 
     if resp['status'] == 'success':
-        kvm.status = resp['new_state']
+        kvm.status = resp['current_state']
         db.session.commit()
         flash('Executed {cmd} on KVM {kvm_name}.'.format(cmd=cmd, kvm_name=kvm_name), 'success')
     else:
