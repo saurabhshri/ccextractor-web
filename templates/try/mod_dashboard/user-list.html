@@ -51,7 +51,12 @@
                             </tfoot>
                             <tbody>
                             {% for user in details.users %}
-                                <tr>
+                                {% if user.account_type.value == 'admin' %}
+                                    {% set admin_highlight_style = 'style=background-color:#7db3d024;' %}
+                                {% else %}
+                                    {% set admin_highlight_style = '' %}
+                                {% endif %}
+                                <tr {{ admin_highlight_style }}>
                                     <td>{{ user.id }}</td>
                                     <td>{{ user.username }}</td>
                                     <td>{{ user.email }}</td>

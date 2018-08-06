@@ -70,7 +70,24 @@
                             <tbody>
                             {% for job in details.queue %}
                                 <tr>
-                                    <td>{{ job.id }}</td>
+                                    <td>
+                                        <div class="row">
+
+                                        {% if job.status.value == 'completed' %}
+                                            {% set status_icon = '<i class="fa fa-check-square" style="color: green;" title="success"></i>' %}
+                                        {% elif job.status.value == 'processing' %}
+                                            {% set status_icon = '<i class="fa fa-cog" style="color: #ffba2b;" title="processing"></i>' %}
+                                        {% elif job.status.value == 'pending' %}
+                                            {% set status_icon = '<i class="fa fa-clock-o" style="color: #ffba2b;" title="pending"></i>' %}
+                                        {% elif job.status.value == 'errored' %}
+                                            {% set status_icon = '<i class="fa fa-warning" style="color: #2b87ff;" title="errored"></i>' %}
+                                        {% endif %}
+
+                                        <div class="col-lg-6">{{ job.id }}</div>
+                                            <div class="col-lg-6">  {{ status_icon|safe }}</div>
+                                        </div>
+
+                                    </td>
                                     <td>{{ job.original_filename|truncate(40, True) }}</td>
                                     <td>{{ job.parameters}}</td>
                                     <td>{{ job.platform.value}}</td>
