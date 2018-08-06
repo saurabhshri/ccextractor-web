@@ -46,12 +46,12 @@ class Users(db.Model):
         self.password = generate_password_hash(password)
         self.account_type = account_type
 
-        tz = get_localzone()
-
         if username is None:
             self.username = generate_username(email)
         else:
             self.username = username
+
+        tz = get_localzone()
 
         if sign_up_timestamp is None:
             sign_up_timestamp = tz.localize(datetime.now(), is_dst=None)

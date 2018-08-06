@@ -7,9 +7,12 @@ Link     : https://github.com/saurabhshri
 
 """
 
-from datetime import datetime
 import enum
 import libvirt
+import pytz
+
+from datetime import datetime
+from tzlocal import get_localzone
 
 from database import db
 from logger import Logger
@@ -57,12 +60,27 @@ class KVM(db.Model):
         self.name = name
         self.platform = platform
         self.status = status
+
+        tz = get_localzone()
+
         if timestamp is None:
-            timestamp = datetime.datetime.now()
+            timestamp = tz.localize(datetime.now(), is_dst=None)
+            timestamp = timestamp.astimezone(pytz.UTC)
+
+        if timestamp.tzinfo is None:
+            timestamp = pytz.utc.localize(timestamp, is_dst=None)
+
         self.start_timestamp = timestamp
 
     def __repr__(self):
         return '<KVM : {id}>'.format(id=self.id)
+
+    @db.reconstructor
+    def may_the_timezone_be_with_it(self):
+        """
+        Localize the timestamp to utc
+        """
+        self.start_timestamp = pytz.utc.localize(self.start_timestamp, is_dst=None)
 
 class VM():
     def __init__(self, name):
@@ -94,16 +112,20 @@ class VM():
 
 
 def kvm_manager(name, op=None):
-    conn = libvirt.open("qemu:///system")
-    if conn is None:
-        kvm_log.error("Couldn't open connection to libvirt!")
-        return None
+    try:
+        conn = libvirt.open("qemu:///system")
+    except Exception as e:
+        kvm_log.error("Exception occured while opening connection to libvirt : {e}".format(e=e))
+        return None # {'status': 'failed', 'reason': '{e}'.format(e=e)}
+    else:
+        if conn is None:
+            kvm_log.error("Could not open connection to libvirt!")
+            return None # {'status': 'failed', 'reason': 'Could not open connection to libvirt!'}
 
     try:
         kvm = conn.lookupByName(name)
     except libvirt.libvirtError:
         kvm_log.error("Couldn't find KVM with name : {name}".format(name=name))
-        status = KVM_Status.not_found
         return {'status': 'failed', 'reason': 'Not Found!'}
 
     state, reason =kvm.state()

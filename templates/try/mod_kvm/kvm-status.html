@@ -28,11 +28,11 @@
                         </div>
                     <div class="small text-muted">({{ vm.status.value }})</div>
 
+                    {%  if details.admin_dashboard %}
                     <span class="small text-muted" style="padding-top: 10px; padding-bottom: 10px;">
                         <a href="{{ url_for('mod_kvm.check_kvm_status', kvm_name=vm.name) }}"><i class="fa fa-refresh" style="color:#007bff; font-size: 1.5em;" aria-hidden="true" title="Refresh"></i></a>
                     </span>
 
-                    {%  if details.admin_dashboard %}
                             <div class="small text-muted" style="padding-top: 10px; padding-bottom: 10px;">
                                 {% if vm.status.value == 'running' %}
                                     <a href="{{ url_for('mod_kvm.kvm_cmd', cmd='shutdown', kvm_name=vm.name) }}"><i class="fa fa-power-off" style="color:#dc3545; font-size: 1.5em;" aria-hidden="true" title="Shutdown"></i></a>
