@@ -378,8 +378,8 @@ def progress():
                 queued_file.status = request.form['status']
                 db.session.add(queued_file)
                 db.session.commit()
-                log.debug('[Job Number: {queued_file_id}] > Updating status to [{status}].'.format(queued_file_id=queued_file.id,
-                                                                                                   status=queued_file.status))
+                log.debug('[Job Number: {queued_file_id}] > Updating status to [{status}].'.format(queued_file_id=queued_file.id, status=queued_file.status))
+                return {'status': 'success'}
 
             elif request.form['report_type'] == 'log':
                 uploaded_file = request.files['file']
@@ -389,6 +389,10 @@ def progress():
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['LOGS_DIR']))
                     log.debug('[Job Number: {queued_file_id}] > Uploaded log file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
+                    resp = {'status': 'success'}
+                else:
+                    resp = {'status': 'failed', 'reason': 'No file found'}
+                return resp
 
             elif request.form['report_type'] == 'output':
                 uploaded_file = request.files['file']
@@ -398,12 +402,15 @@ def progress():
                     uploaded_file.save(temp_path)
                     shutil.move(temp_path, os.path.join(app.config['OUTPUT_DIR']))
                     log.debug('[Job Number: {queued_file_id}] > Uploaded Output file : {filename}'.format(queued_file_id=queued_file.id, filename=filename))
-
+                    resp = {'status': 'success'}
+                else:
+                    resp = {'status': 'failed', 'reason': 'No file found'}
+                return resp
         else:
-            log.debug('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
+            log.error('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
             return "Invalid Token"
 
-    log.debug('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token= request.form['token']))
+    log.error('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token= request.form['token']))
     return "Invalid Request"
 
 
@@ -538,7 +545,7 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
                 log.debug('Job: {job_no} > Video file copied.'.format(job_no=queued_file.id))
 
             except Exception as e:
-                log.debug('Job: {job_no} > Error Copying video file to Jobs dir. : {exception}'.format(job_no=queued_file.id, exception=e))
+                log.error('Job: {job_no} > Error Copying video file to Jobs dir. : {exception}'.format(job_no=queued_file.id, exception=e))
                 return {'status': 'failed', 'reason': 'Unable to copy video file for processing.'}
 
             try:
@@ -548,7 +555,7 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
                     job_file.write(content)
                     log.debug('Job: {job_no} > Created job configuration file: {job_file_path}'.format(job_no=queued_file.id, job_file_path=job_file_path))
             except Exception as e:
-                log.debug('Job: {job_no} > Error creating job configuration file. : {exception}'.format(job_no=queued_file.id, exception=e))
+                log.error('Job: {job_no} > Error creating job configuration file. : {exception}'.format(job_no=queued_file.id, exception=e))
                 return {'status': 'failed', 'reason': 'Unable to create job configuration file.'}
 
             return {'status': 'success', 'job_number': queued_file.id}

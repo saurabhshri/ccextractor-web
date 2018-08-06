@@ -88,7 +88,7 @@ def kvm_cmd(cmd, kvm_name):
         db.session.commit()
         flash('Executed {cmd} on KVM {kvm_name}.'.format(cmd=cmd, kvm_name=kvm_name), 'success')
     else:
-        flash('Failed to execute {cmd} on KVM {kvm_name}. , {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
+        flash('Failed to execute {cmd} on KVM {kvm_name}, {reason}.'.format(cmd=cmd, kvm_name=kvm_name, reason=resp['reason']), 'error')
 
     return redirect(url_for('mod_dashboard.admin'))
 
