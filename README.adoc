@@ -1,0 +1,69 @@
+# 📡 CCExtractor-Web image:https://travis-ci.org/saurabhshri/ccextractor-web.svg?branch=master["Linux/macOS Build Status", link="https://travis-ci.org/saurabhshri/ccextractor-web"] image:https://codecov.io/gh/saurabhshri/ccextractor-web/branch/master/graph/badge.svg["Linux/macOS Build Status", link="https://codecov.io/gh/saurabhshri/ccextractor-web"]
+
+A web application for subtitle extraction through CCExtractor. Being developed under GSoC 2018 with CCExtractor.
+
+
+---
+
+_There are two major branches in this repository - `master` and `development`._
+
+_The `development` branch is regularly updated as the work proceeds. At the end of each phase, the development branch is merged with the `master` branch._
+
+_The project is in it's very early stage and is constantly evolving. The available functions, usage instructions et cetera are expected to refactor over time. It is not production ready but you are welcome to play with it, or better, help improve it! :)_
+
+---
+
+[link=docs/using.adoc]
+image::https://media.giphy.com/media/xUPGcfbMG6a2k2z57O/source.gif[align="center"]
+_Using CCExtractor-Web_
+
+
+=== Before You Run ===
+
+1. Please make sure you have all the dependencies listed in `requirements.txt` (located in root directory) installed.
+
+    pip3 install -r requirements.txt
+
+2. Make sure you fill the configuration files. They contain the necessary _settings_, _preferences_ and the important information required for the functioning of the app. There are two configuration files
+
+  - `config.py` : This is a general config file containing variables required for functioning of the application.
+  - `instance/config.py` : This is a secret config file, meaning the config variables in this file contain sensitive information and should not reach git or be exposed.
+
+You'll find description of each variable in the config file itself. Feel free to open an issue in case more information is needed.
+
+== Project Details ==
+
+The aim of the project is to create an easy to use web application that can be hosted on a web-server for subtitle
+extraction using CCExtractor. The idea is simple – the users do not need to install CCExtractor on their own machine, they can directly use the web application to process their files anytime, anywhere. It would also serve as an easy interface for first time developers (notably GSoC and GCI students) to experience the extraction process.
+
+The high level workflow for this project basically involves obtaining files from user along with suitable parameters, passing them to the CCExtractor , processing the files, obtaining output file and making it available for download. Other things include, but is not limited to, user management, file management, record maintenance, multiple CCExtractor binary options and API.
+
+Once hosted on a server, some probable use cases:
+
+- A simple interface for users, right in their web browser to upload their files and get subtitle files from any device without actually installing CCExtractor.
+
+- Extract subtitle from files using mobile phones, tablets or literally anything connected to internet.
+
+- Quickly reproduce and validate bug reports.
+
+- By choosing the binary version being used for extraction – helps in tracking down regressions.
+
+- Experience the working of CCExtractor on real files before choosing to install it.
+
+### Important Links
+
+- Project link on official GSoC web-app : https://summerofcode.withgoogle.com/projects/#5789900830408704
+
+- Project repository on Github: https://github.com/saurabhshri/ccextractor-web
+
+- Mentors : https://github.com/canihavesomecoffee[@canihavesomecoffee^] and https://github.com/alexbrt[@alexbrt^]
+
+### Credits and Licensing
+
+CCExtractor-Web is released under the MIT License (MIT).
+
+I have tried my best to ensure that credit and reference is given in the source wherever it is due. In case I have missed any reference/license, firstly please accept my apology. Feel free to reach out to me and I'll be happy to correct my mistake. 🤝
+
+### Contributing
+
+The project is under constant development, and needs a lot of brushing and bug fixes. Feel free to contribute in any way. Your contribution will be highly appreciated! 🙂
