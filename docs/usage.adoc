@@ -1,0 +1,3 @@
+== Usage Instructions ==
+
+Using CCExtractor-Web is super-easy. All you have to do is upload your files which contain subtitles and optionally choose relevant options to extract subtitles. Here's a detailed guideline for the usage.

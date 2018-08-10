@@ -1,0 +1,14 @@
+== Installation Instructions ==
+
+=== Before You Run ===
+
+1. Please make sure you have all the dependencies listed in `requirements.txt` (located in root directory) installed.
+
+    pip3 install -r requirements.txt
+
+2. Make sure you fill the configuration files. They contain the necessary _settings_, _preferences_ and the important information required for the functioning of the app. There are two configuration files
+
+  - `config.py` : This is a general config file containing variables required for functioning of the application.
+  - `instance/config.py` : This is a secret config file, meaning the config variables in this file contain sensitive information and should not reach git or be exposed.
+
+You'll find description of each variable in the config file itself. Feel free to open an issue in case more information is needed.
