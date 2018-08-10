@@ -14,7 +14,7 @@ _The project is in it's very early stage and is constantly evolving. The availab
 ---
 
 [link=docs/using.adoc]
-image::https://raw.githubusercontent.com/saurabhshri/ccextractor-web/development/docs/images/using.gif[align="center"]
+image::https://raw.githubusercontent.com/saurabhshri/ccextractor-web/development/docs/images/usage.gif[align="center"]
 
 
 === Before You Run ===
