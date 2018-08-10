@@ -16,19 +16,14 @@ _The project is in it's very early stage and is constantly evolving. The availab
 [link=docs/using.adoc]
 image::https://raw.githubusercontent.com/saurabhshri/ccextractor-web/development/docs/images/usage.gif[align="center"]
 
+== Using CCExtractor-Web ==
 
-=== Before You Run ===
+An usage guideline can be found in the `docs`, link:docs/usage.adoc[here].
 
-1. Please make sure you have all the dependencies listed in `requirements.txt` (located in root directory) installed.
 
-    pip3 install -r requirements.txt
+== Running/Installing Your Own CCExtractor-Web Instance ==
 
-2. Make sure you fill the configuration files. They contain the necessary _settings_, _preferences_ and the important information required for the functioning of the app. There are two configuration files
-
-  - `config.py` : This is a general config file containing variables required for functioning of the application.
-  - `instance/config.py` : This is a secret config file, meaning the config variables in this file contain sensitive information and should not reach git or be exposed.
-
-You'll find description of each variable in the config file itself. Feel free to open an issue in case more information is needed.
+An installation guideline can be found in the `docs`, link:docs/installation.adoc[here].
 
 == Project Details ==
 
@@ -59,7 +54,7 @@ Once hosted on a server, some probable use cases:
 
 ### Credits and Licensing
 
-CCExtractor-Web is released under the MIT License (MIT).
+https://github.com/saurabhshri/ccextractor-web[CCExtractor-Web] is released under the link:LICENSE.md[*MIT License (MIT)*].
 
 I have tried my best to ensure that credit and reference is given in the source wherever it is due. In case I have missed any reference/license, firstly please accept my apology. Feel free to reach out to me and I'll be happy to correct my mistake. 🤝
 
