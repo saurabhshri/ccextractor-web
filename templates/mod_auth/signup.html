@@ -1,25 +1,14 @@
 {% extends "layout.html" %}
 
-{% block body %}
+{% block content %}
     {{ super() }}
-    <div class="">
-        <div class="">
-            <p>Signup</p>
-        </div>
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+         <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Sign Up</li>
+        </ol>
     </div>
-    <form method="post" name="emailRegistrationForm" id="emailRegistrationForm" action="{{ url_for('.signup') }}">
-        {{ form.csrf_token }}
 
-        <div class="">
-            <div class="medium-12 columns">
-                {{ macros.render_field(form.email) }}
-            </div>
-            <div class="medium-12 columns">
-                {{ macros.render_field(form.submit) }}
-            </div>
-             <div class="medium-12 columns">
-                <p>Existing account? <a href="{{ url_for('.login') }}">Log in here</a>.</p>
-            </div>
-        </div>
-    </form>
+    {%- include 'mod_auth/signup-form.html' -%}
+
 {% endblock %}

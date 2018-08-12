@@ -5,53 +5,59 @@
 
 <head>
 {% block head %}
-
-    <title>{% block title %} {% endblock %} - CCExtractor<sup>Web</sup></title>
-
     <meta charset="utf-8">
+    <title>{% block title %} {% endblock %} - CCExtractor Web</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="{% block meta_description %}{% endblock %}">
-    <meta name="author" content="{% block meta_content %}{% endblock %}">
+    <meta name="author" content="{% block meta_author %}{% endblock %}">
 
     {% block css %}
-    <!-- Bootstrap core CSS -->
-    <link href=" {{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <!-- Bootstrap core CSS-->
+        <link href=" {{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+        <!-- Custom fonts for this template-->
+        <link href=" {{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+        <!-- Custom styles for this template-->
+        <link href=" {{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+        <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 
-    <!-- Custom styles for this template -->
     {% endblock %}
 {% endblock %}
 </head>
 
-
-<body>
+<body class="fixed-nav sticky-footer bg-dark sidenav-toggled" id="page-top">
 {% block body %}
+    <!-- Navigation-->
+    {%- include 'navigation.html'-%}
 
-    <!-- Navigation Bar -->
-    {%- include 'navbar.html' -%}
+    <div class="content-wrapper">
+        {% block content %}
+            {{ macros.display_flash_messages() }}
+        {% endblock %}
+    </div>
 
-    {{ macros.display_flash_messages() }}
-
-    <!-- Page Content -->
-    {% block content %}
-    {% endblock %}
-
-
-    <!-- Footer
-    {% block footer %}
-    <footer class="py-5 bg-dark footer">
-      <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy;</p>
-      </div>
+    <footer class="sticky-footer">
+        <div class="container">
+            <div class="text-center">
+                <small>Copyright © {{ layout['year'] }} CCExtractor Web</small>
+            </div>
+        </div>
     </footer>
-    {% endblock %}
-    -->
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
 
-    <!-- Scripts -->
     {% block scripts %}
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
     {% endblock %}
 
 {% endblock %}
 </body>
+
 </html>

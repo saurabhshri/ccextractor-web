@@ -142,7 +142,7 @@ def dashboard():
 
     details = DetailsForTemplate(g.user.id)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/dashboard.html',
+    return render_template('mod_dashboard/dashboard.html',
                            form=form,
                            layout=layout.get_entries(),
                            details=details)
@@ -188,7 +188,7 @@ def new_job(filename):
             else:
                 details = DetailsForTemplate(g.user.id)
                 layout = LayoutHelper(logged_in=True, details=details)
-                return render_template('try/mod_dashboard/new_job.html',
+                return render_template('mod_dashboard/new_job.html',
                                        file=file,
                                        form=form,
                                        layout=layout.get_entries(),
@@ -236,7 +236,7 @@ def admin():
 
     details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/dashboard.html',
+    return render_template('mod_dashboard/dashboard.html',
                            layout=layout.get_entries(),
                            details=details,
                            ccextractor_parameters_form=ccextractor_parameters_form,
@@ -248,7 +248,7 @@ def admin():
 def uploaded_files():
     details = DetailsForTemplate(g.user.id)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
+    return render_template('mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/dashboard/queue', methods=['GET', 'POST'])
@@ -256,7 +256,7 @@ def uploaded_files():
 def user_queue():
     details = DetailsForTemplate(g.user.id)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
+    return render_template('mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 @mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
 @login_required
@@ -264,7 +264,7 @@ def user_queue():
 def admin_uploaded_files():
     details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
+    return render_template('mod_dashboard/uploaded-files.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/admin-dashboard/queue', methods=['GET', 'POST'])
@@ -273,7 +273,7 @@ def admin_uploaded_files():
 def admin_queue():
     details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
+    return render_template('mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
 @mod_dashboard.route('/admin-dashboard/users', methods=['GET', 'POST'])
 @login_required
@@ -281,7 +281,7 @@ def admin_queue():
 def user_list():
     details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
-    return render_template('try/mod_dashboard/user-list.html', layout=layout.get_entries(), details=details)
+    return render_template('mod_dashboard/user-list.html', layout=layout.get_entries(), details=details)
 
 
 @mod_dashboard.route('/change-acc-type/<user_id>/<type>', methods=['GET', 'POST'])

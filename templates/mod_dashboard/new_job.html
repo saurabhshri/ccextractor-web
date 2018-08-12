@@ -1,4 +1,4 @@
-{% extends "try/layout.html" %}
+{% extends "layout.html" %}
 
 {% block content %}
     {{ super() }}
@@ -12,14 +12,14 @@
         </ol>
 
         <!-- Summary Cards-->
-        {%- include 'try/mod_dashboard/cards.html' -%}
+        {%- include 'mod_dashboard/cards.html' -%}
 
         <!-- File Upload Form -->
-        {%- include 'try/mod_dashboard/new-job-form.html' -%}
+        {%- include 'mod_dashboard/new-job-form.html' -%}
 
-        {%- include 'try/mod_dashboard/recent-queue-profile.html' -%}
+        {%- include 'mod_dashboard/recent-queue-profile.html' -%}
 
-        {%- include 'try/mod_dashboard/recent-files.html' -%}
+        {%- include 'mod_dashboard/recent-files.html' -%}
 
     </div>
 {% endblock %}

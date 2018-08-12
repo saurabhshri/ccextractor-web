@@ -1,4 +1,4 @@
-{% extends "try/layout.html" %}
+{% extends "layout.html" %}
 
 {% block content %}
     {{ super() }}
@@ -12,6 +12,6 @@
         </ol>
     </div>
 
-    {%- include 'try/mod_auth/signup-verification-form.html' -%}
+    {%- include 'mod_auth/signup-verification-form.html' -%}
 
 {% endblock %}

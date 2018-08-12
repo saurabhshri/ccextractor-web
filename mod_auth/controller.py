@@ -93,7 +93,7 @@ def signup():
                 flash('Please check your email for verification and further instructions.', 'success')
 
     layout = LayoutHelper(logged_in=False)
-    return render_template("try/mod_auth/signup.html", form=form, layout=layout.get_entries())
+    return render_template("mod_auth/signup.html", form=form, layout=layout.get_entries())
 
 
 def generate_verification_code(data):
@@ -147,7 +147,7 @@ def verify_account(email, received_verification_code, expires):
                     flash('Signup Complete! Please Login to continue.', 'success')
                 else:
                     layout = LayoutHelper(logged_in=False)
-                    return render_template("try/mod_auth/signup-verification.html", form=form, email=email, layout=layout.get_entries())
+                    return render_template("mod_auth/signup-verification.html", form=form, email=email, layout=layout.get_entries())
             else:
                 flash('Email is already registered!', 'error')
             return redirect(url_for('.login'))
@@ -195,7 +195,7 @@ def login():
 
         return redirect(url_for('.login'))
     layout = LayoutHelper(logged_in=False)
-    return render_template("try/mod_auth/login.html", form=form, layout=layout.get_entries(), next=redirect_location)
+    return render_template("mod_auth/login.html", form=form, layout=layout.get_entries(), next=redirect_location)
 
 
 @mod_auth.route('/profile', methods=['GET', 'POST'])

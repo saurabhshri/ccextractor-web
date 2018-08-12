@@ -1,16 +1,58 @@
 {% extends "layout.html" %}
 
-{% block body %}
+{% block head %}
     {{ super() }}
-    <div class="">
-        <div class="">
-            <p>Dashboard</p>
-        </div>
+    {% if details.admin_dashboard %}
+        {# admin dashboard <head> content #}
+    {% else%}
+    <link href=" {{ url_for('static', filename='css/fileinput.min.css') }}" rel="stylesheet">
+    <link href=" {{ url_for('static', filename='css/theme.min.css') }}" rel="stylesheet">
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+         <ol class="breadcrumb">
+             <li class="breadcrumb-item active">
+                {% if details.admin_dashboard %}
+                    Admin Dashboard
+                {% else%}
+                    Dashboard
+                {% endif %}
+             </li>
+        </ol>
+
+        <!-- Summary Cards-->
+        {%- include 'mod_dashboard/cards.html' -%}
+
+        {% if details.admin_dashboard %}
+            <!-- CCExtractor Parameters Form -->
+            {%- include 'mod_dashboard/admin-ccextractor-parameter-form.html' -%}
+
+            <!-- CCExtractor Versions Form -->
+            {%- include 'mod_dashboard/admin-ccextractor-version-form.html' -%}
+        {% else%}
+            <!-- File Upload Form -->
+            {%- include 'mod_dashboard/upload-form.html' -%}
+        {% endif %}
+
+
+            {%- include 'mod_dashboard/recent-queue-profile.html' -%}
+            {%- include 'mod_dashboard/recent-files.html' -%}
     </div>
+{% endblock %}
 
-    {%- include 'mod_dashboard/upload.html' -%}
+{% block scripts %}
+    {{ super() }}
+    {% if details.admin_dashboard %}
+        {# admin dashboard script content #}
+    {% else%}
+    <script src="{{ url_for('static', filename='js/piexif.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fileinput.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme.min.js') }}"></script>
+    {% endif %}
 
-    {%- include 'mod_dashboard/job_queue.html'-%}
-
-    {%- include 'mod_dashboard/user_files.html'-%}
 {% endblock %}
