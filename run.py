@@ -130,14 +130,6 @@ def init_app() -> bool:
     else:
         log.debug('PUBLIC MODE ENABLED')
 
-    # Initialising Database
-    from mod_dashboard.models import CCExtractorVersions
-    ccextractor = CCExtractorVersions.query.all()
-    if not ccextractor:
-        ccextractor = CCExtractorVersions('1', '22222', 'build/ccextractor', 'build/ccextractor', 'build/ccextractor')
-        db.session.add(ccextractor)
-        db.session.commit()
-
     return True
 
 @app.template_filter()
