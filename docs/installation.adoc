@@ -1,14 +1,74 @@
-== Installation Instructions ==
+:toc:
 
-=== Before You Run ===
+== Installation Instructions
 
-1. Please make sure you have all the dependencies listed in `requirements.txt` (located in root directory) installed.
+1. Clone the repository from Github using :
+
+    git clone https://www.github.com/saurabhshri/ccextractor-web.git
+
+2. Make sure you have all the dependencies listed in `requirements.txt` (located in root directory) installed :
 
     pip3 install -r requirements.txt
 
-2. Make sure you fill the configuration files. They contain the necessary _settings_, _preferences_ and the important information required for the functioning of the app. There are two configuration files
+3. Fill the configuration files. They contain the necessary _settings_, _preferences_ and the important information required for the functioning of the app. You'll find description of each variable in the config file itself. Feel free to open an issue in case more information is needed. There are two configuration files :
 
   - `config.py` : This is a general config file containing variables required for functioning of the application.
   - `instance/config.py` : This is a secret config file, meaning the config variables in this file contain sensitive information and should not reach git or be exposed.
 
-You'll find description of each variable in the config file itself. Feel free to open an issue in case more information is needed.
+4. Run the application :
+
+    python3 run.py
+
+[https://youtu.be/xKtdaOmiILc]
+image::https://raw.githubusercontent.com/saurabhshri/ccextractor-web/development/docs/images/installation.gif[align="center"]
+
+
+_(Full video : https://youtu.be/xKtdaOmiILc)_
+
+== Things To Know
+=== Local vs Public Instance ===
+
+Configured using `ENABLE_LOCAL_MODE`. Set it to`True` for _Local Mode_ and `False` for _Public Mode_.
+
+==== Local Mode
+
+- To use when deploying the app on local/private server for personal/single/isolated use.
+- Creates an Admin User, with credentials from secret config (instance/config.py)
+- By default logs in as this admin user.
+- All the operations (upload, processing, deletion etc. are done through this account.
+- There still exist the capability to create (and login as) other users.
+
+==== Public Mode
+
+- To use when deploying the app on public server, where different people can access the app.
+- No default account is created.
+- Each user creates their own account and all operations are under their account.
+- Admin account can be created by granting 'Role' as 'admin'.
+
+=== KVM Support ===
+
+While there are checks for the validity of uploaded files, it's possible that user uploads a malicious file, and compromise running server. To sandbox executing user uploaded files, there's a buil-in KVM support.
+
+==== Prerequisites
+
+- KVM with the desired platform.
+- User should be able to auto-login on boot. Also, set power settings to no sleep.
+- CCExtractor executable and network access present in KVM.
+- NFS mount with the host server to read job files.
+
+Here are link to some helpful guides that may help you fullfil the pre-requisites
+
+* KVM
+    - http://sharadchhetri.com/2014/10/09/install-kvm-kernel-based-virtual-machine-ubuntu-14-04-lts-desktop/
+    - https://help.ubuntu.com/community/KVM/Installation
+
+* NFS Mount
+    - https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nfs-mount-on-ubuntu-16-04
+    - https://www.tecmint.com/how-to-setup-nfs-server-in-linux/
+
+
+To use the app with KVM support, enable it by setting `ENABLE_KVM` to `True`. Fill the config file with the relevant KVM names.
+
+=== MediaInfo Support ===
+
+To check if uploaded files indeed have video tracks, the app has the capability to use MediaInfo. It's recommended to use this as it'll help prevent uploading malicious files. Install MediaInfo library and set `ENABLE_MEDIAINFO_SUPPORT` to `True`.
