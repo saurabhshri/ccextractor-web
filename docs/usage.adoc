@@ -1,3 +1,111 @@
-== Usage Instructions ==
+
+:toc:
+
+= Usage Instructions
 
 Using CCExtractor-Web is super-easy. All you have to do is upload your files which contain subtitles and optionally choose relevant options to extract subtitles. Here's a detailed guideline for the usage.
+
+== For Users
+
+Available features (can be accessed from sidebar) :
+
+* Dashboard (`/dashboard`)
+  - File Uploading
+  - Quick Stats
+  - 5 Recently Added Jobs
+  - 5 Recently Uploaded Files
+  - Account Info
+  - Platform Status
+
+* Uploaded Files (`/files`)
+  - List of all uploaded files.
+  - Name, Hash, Size, Upload Date
+  - Actions (New Task/Delete)
+
+* Queue (`/queue`)
+  - List of the complete job queue.
+  - Job Number, Status Icon, Filename, Parameters, Platform, Status, Added Date
+  - Output (View, Download)
+  - Logs (View, Download)
+
+* Admin Dashboard (`/admin-dashboard`)
+  - (Only for users with Admin privileges).
+
+### Registration
+
+1. Goto signup page, `{domain}/signup` (e.g. https://cc.web/signup).
+2. Enter your email address.
+3. In you email account, find the verification email and click the link.
+4. Fill the details and click `Complete Signup`.
+
+### Login/Logout
+
+1. Goto login page, `{domain}/login` (e.g. https://cc.web/login).
+2. Enter your email address and password and click login.
+3. On successful attempt, you should be redirected to the dashboard.
+4. To logout, click `Logout` on the navigation bar and confirm by clicking `Logout`.
+
+### Uploading File and Downloading Output.
+
+1. Goto your dashboard, `{domain}/dashboard` (e.g. https://cc.web/dashboard).
+2. Click on `Upload New File` to expand upload form.
+3. Pick a file you want to process.
+4. [Optional] Click on `Add Custom Parameters` to specify parameters for CCExtractor. Field supports suggestions and tab auto-complete.
+5. [Optional] Click on `Additional Options` to specify CCExtractor Version, Platform and Remarks.
+6. If you want to process the file immediately, check `Start Processing`.
+7. Click `Upload File`.
+
+[https://www.youtube.com/watch?v=0Qw4a0ZzVJc]
+image::https://raw.githubusercontent.com/saurabhshri/ccextractor-web/development/docs/images/usage.gif[align="center"]
+_(Full video : https://www.youtube.com/watch?v=0Qw4a0ZzVJc)_
+
+== For Admins
+
+Available features (can be accessed from sidebar) :
+
+* Dashboard (`/admin-dashboard`)
+  - CCExtractor Version Form
+  - CCExtractor Parameters Form
+  - Quick Stats
+  - 5 Recently Added Jobs
+  - 5 Recently Uploaded Files
+  - Account Info
+  - Platform Control Panel
+
+* Uploaded Files (`/files`)
+  - List of all uploaded files.
+  - Name, Hash, Size, Uploader, Upload Date
+  - Actions (New Task/Delete)
+
+* Queue (`/queue`)
+  - List of the complete job queue.
+  - Job Number, Status Icon, Filename, Parameters, Platform, Status, User, Added Date
+  - Output (View, Download)
+  - Logs (View, Download)
+
+* User List (`/users`)
+  - List of all users registered.
+  - Id, Username, Email, Account Type, Joining Date
+  - Actions (Make Admin/User)
+  
+* User Dashboard (`/dashboard`)
+
+### Add New CCExtractor Parameter
+
+1. Goto Dashboard, `{domain}/admin-dashboard` (e.g. https://cc.web/admin-dashboard).
+2. Click `Add New CCExtractor Parameter` to expand the form.
+3. Fill the form and click `Submit`.
+
+### Add New CCExtractor Version
+
+1. Goto Dashboard, `{domain}/admin-dashboard` (e.g. https://cc.web/admin-dashboard).
+2. Click `Add New CCExtractor Version` to expand the form.
+3. Fill the form and click `Submit`.
+
+### KVM Control Panel
+
+- Refresh : To update the KVM status in the panel and DB.
+- Start : Start the KVM which is in off state.
+- Shutdown : Sends shutdown command to the KVM.
+- Stop : Halts the KVM.
+- Manage : Puts KVM into maintainance mode.
