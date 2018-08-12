@@ -15,7 +15,7 @@ from database import db
 from logger import Logger
 from config_parser import general_config
 
-from landing.controller import landing
+from mod_landing.controller import mod_landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
 from mod_kvm.controller import mod_kvm
@@ -40,7 +40,7 @@ log.debug("flask-sqlaclchemy (db) object created.")
 
 
 # Registering blueprint for all modules
-app.register_blueprint(landing)
+app.register_blueprint(mod_landing)
 app.register_blueprint(mod_auth)
 app.register_blueprint(mod_dashboard)
 
