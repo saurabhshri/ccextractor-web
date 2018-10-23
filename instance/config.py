@@ -39,7 +39,7 @@ SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@127.0.0.1/test'
     Summary:    This value is used in one of the tests, leave it as it is.
     Required:   Yes
 """
-SECRET_CONFIG_READING_TEST = 'Its a magical place.'
+SECRET_CONFIG_READING_TEST = 'It\'s a magical place.'
 
 
 """
