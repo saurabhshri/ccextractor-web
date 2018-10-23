@@ -19,4 +19,4 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(app.config['CONFIG_READING_TEST'], 'May the 24th be with you!')
 
         #instance/config.py
-        self.assertEqual(app.config['SECRET_CONFIG_READING_TEST'], 'Its a magical place.')
+        self.assertEqual(app.config['SECRET_CONFIG_READING_TEST'], 'It\'s a magical place.')
