@@ -21,6 +21,7 @@ before_install:
   - sudo service mysql restart
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
   - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('root') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+  - sudo apt-get -y install libvirt-dev
 
 install:
   - pip install -r requirements.txt

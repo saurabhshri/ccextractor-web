@@ -15,8 +15,6 @@ class LayoutHelper():
         self.entries = {}
         self.entries['logged_in'] = "false"
 
-        print(details)
-
         if logged_in:
             self.entries['logged_in'] = "true"
             self.entries['menu'] = [

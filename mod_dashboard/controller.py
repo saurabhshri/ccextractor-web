@@ -17,7 +17,7 @@ from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersion
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import login_required, check_account_type
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 from database import db
 from template import LayoutHelper
@@ -609,7 +609,7 @@ def parse_ccextractor_parameters(params):
 
     #TODO: Optimise the whole process, prepare lists and output extension while parsing
     for param in params:
-        param_count += 1;
+        param_count += 1
 
         if is_value:
             is_value = False
