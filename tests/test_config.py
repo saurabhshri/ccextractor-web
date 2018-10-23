@@ -8,11 +8,11 @@ Link     : https://github.com/saurabhshri
 """
 import unittest
 
-from run import app, createConfig
+from run import app
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_config_is_being_read(self):
         #config.py

@@ -8,14 +8,14 @@ Link     : https://github.com/saurabhshri
 """
 import unittest
 import time
-from run import app, createConfig
+from run import app
 from tests.template_test_helper import captured_templates
 
 from mod_auth.controller import generate_verification_code, send_verification_mail, send_signup_confirmation_mail
 
 class TestEmailSignUp(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_email_signup_form_renders(self):
         with captured_templates(app) as templates:
@@ -59,7 +59,7 @@ class TestEmailSignUp(unittest.TestCase):
 
 class TestVerify(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_verifying_using_empty_information(self):
         response = app.test_client().get('/verify/')
@@ -96,7 +96,7 @@ class TestVerify(unittest.TestCase):
             expires = int(time.time()) + 86400
             verification_code = generate_verification_code("{email}{expires}".format(email=email, expires=expires))
             response = app.test_client().get('/verify/{email}/{verification_code}/{expires}'.format(email=email, verification_code=verification_code, expires=expires), follow_redirects=True)
-            self.assertIn(b'Signing up using email', response.data)
+            self.assertIn(b'Verification complete!', response.data)
 
     def test_sending_confirmation_mail(self):
         with app.app_context():
@@ -106,7 +106,7 @@ class TestVerify(unittest.TestCase):
 
 class TestLogIn(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_login_form_renders(self):
         with captured_templates(app) as templates:
@@ -132,17 +132,10 @@ class TestLogIn(unittest.TestCase):
         return app.test_client().post('/login', data=dict(email=email,
                                                           password=password, submit=submit), follow_redirects=True)
 
-class TestLogOut(unittest.TestCase):
-    def setUp(self):
-        createConfig()
-
-    def test_if_logout_redirects_to_login(self):
-        response = app.test_client().get('/logout')
-        self.assertEqual(response.status_code, 302)
 
 class TestProfile(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_access_denied_without_login(self):
         response = app.test_client().get('/profile')

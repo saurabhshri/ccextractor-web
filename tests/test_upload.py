@@ -7,13 +7,13 @@ Link     : https://github.com/saurabhshri
 
 """
 import unittest
-from run import app, createConfig
+from run import app
 
 
 class TestUpload(unittest.TestCase):
 
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_without_login_redirected_to_login_page(self):
         response = app.test_client().get('/dashboard')

@@ -8,12 +8,12 @@ Link     : https://github.com/saurabhshri
 """
 import unittest
 
-from run import app, createConfig
+from run import app
 from mail import send_simple_message, get_api_url
 
 class TestEmail(unittest.TestCase):
     def setUp(self):
-        createConfig()
+        pass
 
     def test_if_correct_api_url_is_generated(self):
         obtained_api_url = get_api_url(app.config['EMAIL_DOMAIN'])

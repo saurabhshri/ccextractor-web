@@ -8,13 +8,12 @@ Link     : https://github.com/saurabhshri
 """
 import unittest, requests
 
-from run import app, createConfig
+from run import app
 
 class TestRunningApp(unittest.TestCase):
     def create_app(self):
-        createConfig()
         app.run()
 
     def test_flask_application_is_up_and_running(self):
         response = app.test_client().get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
