@@ -11,6 +11,7 @@ import time
 from run import app
 from tests.template_test_helper import captured_templates
 
+from mod_auth.models import Users, AccountType
 from mod_auth.controller import generate_verification_code, send_verification_mail, send_signup_confirmation_mail
 
 class TestEmailSignUp(unittest.TestCase):
@@ -127,7 +128,6 @@ class TestLogIn(unittest.TestCase):
         response = self.login(email = 'someone@example.com', password='')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Password cannot be empty.', response.data)
-
     def login(self, email, password, submit='Login'):
         return app.test_client().post('/login', data=dict(email=email,
                                                           password=password, submit=submit), follow_redirects=True)
@@ -144,3 +144,66 @@ class TestProfile(unittest.TestCase):
     def test_if_without_login_redirected_to_login_page(self):
         response = app.test_client().get('/profile')
         self.assertIn(b'<a href="/login?next=mod_auth.profile">/login?next=mod_auth.profile</a>', response.data)
+
+
+
+
+def login_helper(client, email, password, submit='Login'):
+    with app.app_context():
+        admin_user = Users.query.filter(
+                Users.email == app.config['ADMIN_EMAIL']).first()
+    
+        if admin_user is None:
+            admin_user = Users(email=app.config['ADMIN_EMAIL'],
+                                name=app.config['ADMIN_NAME'],
+                                password=app.config['ADMIN_PWD'],
+                                account_type=AccountType.admin)
+
+            db.session.add(admin_user)
+            db.session.commit()
+    with client.session_transaction() as sess:
+        sess['user_id'] = admin_user.id
+    # return client.post('/login', data=dict(email=email,
+    #                                                       password=password, submit=submit), follow_redirects=True)
+
+class TestUsersAdmin(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_can_access_users_list_page(self):
+        client = app.test_client()
+        login_helper(client, app.config['ADMIN_EMAIL'], app.config['ADMIN_PWD'])
+
+        response = client.get("/admin-dashboard/users")
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertIn(b'id="dataTable"', response.data)
+
+    def test_if_without_login_redirected_to_login_page(self):
+        client = app.test_client()
+
+        response = client.get("/admin-dashboard/users")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'<a href="/login?next=mod_dashboard.user_list">/login?next=mod_dashboard.user_list</a>', response.data)
+
+class TestFilesAdmin(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_can_access_uploaded_files_list_page(self):
+        client = app.test_client()
+        r = login_helper(client, app.config['ADMIN_EMAIL'], app.config['ADMIN_PWD'])
+
+
+        response = client.get("/admin-dashboard/files")
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertIn(b'id="dataTable"', response.data)
+        self.assertIn(b'Uploaded Files', response.data)
+
+    def test_if_without_login_redirected_to_login_page(self):
+        client = app.test_client()
+
+        response = client.get("/admin-dashboard/files")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'<a href="/login?next=mod_dashboard.admin_uploaded_files">/login?next=mod_dashboard.admin_uploaded_files</a>', response.data)
