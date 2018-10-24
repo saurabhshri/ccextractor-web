@@ -10,7 +10,7 @@ import unittest
 import time
 from run import app
 from tests.template_test_helper import captured_templates
-
+from database import db
 from mod_auth.models import Users, AccountType
 from mod_auth.controller import generate_verification_code, send_verification_mail, send_signup_confirmation_mail
 
