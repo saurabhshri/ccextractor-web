@@ -230,6 +230,7 @@ class TestFilesAdmin(unittest.TestCase):
 
 class TestErrorHandlers(unittest.TestCase):
     def setUp(self):
+        app.config['WTF_CSRF_ENABLED'] = False
         pass
 
     def test_404_page_is_shown(self):
@@ -238,3 +239,11 @@ class TestErrorHandlers(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn(
             b'<h1>Error 404 - Page not found</h1>', response.data)
+    def test_404_page_with_dashboard_links_is_shown_when_logged_in(self):
+        client = app.test_client()
+        login_helper(
+            client, app.config['ADMIN_EMAIL'], app.config['ADMIN_PWD'])
+        response = client.get("/i-dont-exist")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(
+            b'data-target="#logoutModal"', response.data)
