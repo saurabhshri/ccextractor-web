@@ -233,10 +233,11 @@ def page_not_found_handler(e):
     """
     Handles the 404 error and displays a template.
     """
-    details = None
     if g.user is not None:
         details = DetailsForTemplate(g.user.id, admin_dashboard=False)
-    layout = LayoutHelper(logged_in=not g.user is None, details=details)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
     return render_template('404.html', layout=layout.get_entries()), 404
 
 
@@ -245,10 +246,11 @@ def internal_server_error_handler(e):
     """
     Handles the 500 error and displays a template.
     """
-    details = None
     if g.user is not None:
         details = DetailsForTemplate(g.user.id, admin_dashboard=False)
-    layout = LayoutHelper(logged_in=not g.user is None, details=details)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
     return render_template('500.html', layout=layout.get_entries()), 500
 
 if __name__ == '__main__':
