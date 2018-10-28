@@ -19,7 +19,7 @@ from mod_landing.controller import mod_landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
 from mod_kvm.controller import mod_kvm
-
+from mod_dashboard.models import DetailsForTemplate
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -233,7 +233,9 @@ def page_not_found_handler(e):
     """
     Handles the 404 error and displays a template.
     """
-    layout = LayoutHelper(logged_in=False)
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+    layout = LayoutHelper(logged_in=not g.user is None, details=details)
     return render_template('404.html', layout=layout.get_entries()), 404
 
 
@@ -242,7 +244,9 @@ def internal_server_error_handler(e):
     """
     Handles the 500 error and displays a template.
     """
-    layout = LayoutHelper(logged_in=False)
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+    layout = LayoutHelper(logged_in=not g.user is None, details=details)
     return render_template('500.html', layout=layout.get_entries()), 500
 
 if __name__ == '__main__':
