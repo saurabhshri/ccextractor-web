@@ -9,8 +9,8 @@ Link     : https://github.com/saurabhshri
 
 import os
 
-from flask import Flask, g, session
-
+from flask import Flask, g, session, render_template
+from template import LayoutHelper
 from database import db
 from logger import Logger
 from config_parser import general_config
@@ -19,7 +19,7 @@ from mod_landing.controller import mod_landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
 from mod_kvm.controller import mod_kvm
-
+from mod_dashboard.models import DetailsForTemplate
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -228,6 +228,30 @@ def before_first_request():
     os.makedirs(os.path.dirname(os.path.join(app.config['LOGS_DIR'])), exist_ok=True)
     os.makedirs(os.path.dirname(os.path.join(app.config['OUTPUT_DIR'])), exist_ok=True)
 
+@app.errorhandler(404)
+def page_not_found_handler(e):
+    """
+    Handles the 404 error and displays a template.
+    """
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('404.html', layout=layout.get_entries()), 404
+
+
+@app.errorhandler(500)
+def internal_server_error_handler(e):
+    """
+    Handles the 500 error and displays a template.
+    """
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('500.html', layout=layout.get_entries()), 500
 
 if __name__ == '__main__':
     log.debug("Running App.")

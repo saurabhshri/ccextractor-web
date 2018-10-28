@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="mt-10"></div>
+    <h1>Error 500 - Internal server error</h1>
+    <p>You can:
+        <ul>
+            <li>Try again later</li>
+            <li><a href="#" id="playPong">Play pong</a></li>
+            <li>Get in touch</li>
+        </ul>
+    </p>
+    <canvas width="1000" height="500" id="pongCanvas">Your browser doesn't support html5 canvas.</canvas>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+
+<script src="{{ url_for('static', filename='js/pong.js') }}"></script>
+
+
+{% endblock %}

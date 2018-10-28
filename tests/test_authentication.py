@@ -226,3 +226,15 @@ class TestFilesAdmin(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(
             b'<a href="/login?next=mod_dashboard.admin_uploaded_files">/login?next=mod_dashboard.admin_uploaded_files</a>', response.data)
+
+
+class TestErrorHandlers(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_404_page_is_shown(self):
+        client = app.test_client()
+        response = client.get("/i-dont-exist")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(
+            b'<h1>Error 404 - Page not found</h1>', response.data)

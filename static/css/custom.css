@@ -486,3 +486,6 @@ footer.sticky-footer {
     top: 0px !important;
 }
 
+#pongCanvas {
+  display: none;
+}
