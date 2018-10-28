@@ -233,6 +233,7 @@ def page_not_found_handler(e):
     """
     Handles the 404 error and displays a template.
     """
+    details = None
     if g.user is not None:
         details = DetailsForTemplate(g.user.id, admin_dashboard=False)
     layout = LayoutHelper(logged_in=not g.user is None, details=details)
@@ -244,6 +245,7 @@ def internal_server_error_handler(e):
     """
     Handles the 500 error and displays a template.
     """
+    details = None
     if g.user is not None:
         details = DetailsForTemplate(g.user.id, admin_dashboard=False)
     layout = LayoutHelper(logged_in=not g.user is None, details=details)
