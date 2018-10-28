@@ -1,3 +1,6 @@
+/**
+ * @author ALbert Koczy 2018
+ */
 (function() {
   let started = false;
   const canvas = document.querySelector("#pongCanvas");
@@ -36,8 +39,9 @@
       // wait a bit before the launch not to suprise the player
       vx = random(0, 5);
       vy = random(0, 5);
-      if (Math.random() > 0.5) { // randomize direction
-        vx *= -1; 
+      if (Math.random() > 0.5) {
+        // randomize direction
+        vx *= -1;
       }
       if (Math.random() > 0.5) {
         vy *= -1;
@@ -109,16 +113,10 @@
   document.addEventListener("keydown", function(ev) {
     if (!started) return;
     // WA and arrows
-    if (ev.keyCode === 87) {
+    if ((ev.keyCode === 87 || ev.keyCode === 38) && y1 > 0) {
       y1 -= speed;
     }
-    if (ev.keyCode === 83) {
-      y1 += speed;
-    }
-    if (ev.keyCode === 38) {
-      y1 -= speed;
-    }
-    if (ev.keyCode === 40) {
+    if ((ev.keyCode === 83 || ev.keyCode === 40) && y1 < h - pHeight) {
       y1 += speed;
     }
   });
