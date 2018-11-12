@@ -5,6 +5,15 @@ language: python
 python:
   - 3.6
 
+jobs:
+  include:
+    - install :
+        - pip install -r requirements.txt
+        - pip install codecov
+    - install :
+        - pip install pipenv
+        - pipenv install --dev
+
 addons:
   apt:
     sources:
@@ -22,10 +31,6 @@ before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
   - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('root') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
   - sudo apt-get -y install libvirt-dev
-
-install:
-  - pip install -r requirements.txt
-  - pip install codecov
 
 script:
   - coverage run -m unittest discover

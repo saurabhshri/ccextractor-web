@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+codecov = "*"
+
+[packages]
+click = ">=6.7"
+itsdangerous = ">=0.24,<1.0"
+pytz = "*"
+tzlocal = "*"
+python-magic = "*"
+blinker = "*"
+libvirt-python = "*"
+requests = "*"
+pymediainfo = "*"
+Flask = ">=1.0.2"
+"Jinja2" = ">=2.10"
+MarkupSafe = ">=1.0"
+Werkzeug = ">=0.14.1"
+Flask-SQLAlchemy = ">=2.3.1"
+PyMySQL = "*"
+Flask-WTF = "*"
+email_validator = "*"
+
+[requires]
+python_version = "3.6"
