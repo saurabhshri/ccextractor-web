@@ -42,7 +42,7 @@
       
         {% endif %}
         {% if field.errors %}
-            <div class="alert alert-danger alert-dismissible fade show" style="display: inline; border: none;">
+            <div class="alert alert-danger alert-dismissible fade show m-1" style="border: none;display: inline-block">
             	<strong>Oops!</strong> {{ field.errors|join(', ') }}
                 <a href="#" class="close" data-dismiss="alert" style="float: none;">&times;</a>
             </div>
@@ -57,23 +57,23 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="">
-                <div class="">
-                    <ul class="">
+                <div class="row ml-auto pull-right" style="position:fixed; top: 100px !important; right: 25px !important;z-index: 2">
+                    <div class="alert-group" style="width:100%">
                         {% for category, message in messages %}
                             {% if category == 'error' %}
-                                <div class="alert alert-danger alert-dismissible fade show" style="display: inline; border: none;">
+                                <div class="alert mr-1 mb-1 alert-danger alert-dismissible fade show" >
                                     <strong>Error: </strong>
 
                             {% elif category == 'warning' %}
-                                <div class="alert alert-warning alert-dismissible fade show" style="display: inline; border: none;">
+                                <div class="alert mr-1 mb-1 alert-warning alert-dismissible fade show" >
                                     <strong>Warning: </strong>
 
                             {% elif category == 'success' %}
-                                <div class="alert alert-success alert-dismissible fade show" style="display: inline; border: none;">
+                                <div class="alert mr-1 mb-1 alert-success alert-dismissible fade show" >
                                     <strong>Success: </strong>
 
                             {% elif category == 'info' %}
-                                <div class="alert alert-info alert-dismissible fade show" style="display: inline; border: none;">
+                                <div class="alert mr-1 mb-1 alert-info alert-dismissible fade show" >
                                     <strong>Note: </strong>
 
                             {% endif %}
@@ -81,7 +81,7 @@
                                     <a href="#" class="close" data-dismiss="alert" style="float: none;">&times;</a>
                                 </div>
                         {% endfor %}
-                    </ul>
+                            </div>
                 </div>
             </div>
         {% endif %}
