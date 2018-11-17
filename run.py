@@ -89,46 +89,45 @@ def init_app() -> bool:
     log.debug('INIT : Checking app mode.')
     if app.config['ENABLE_LOCAL_MODE']:
         log.debug('LOCAL MODE ENABLED')
-
-        from mod_auth.models import Users, AccountType
-        email = app.config['ADMIN_EMAIL']
-        admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
-
-        if admin_user is None:
-            admin_user = Users(email=email,
-                               name=app.config['ADMIN_NAME'],
-                               password=app.config['ADMIN_PWD'],
-                               account_type=AccountType.admin)
-
-            db.session.add(admin_user)
-            db.session.commit()
-
-            log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
-
-        else:
-            log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
-
-        try:
-            if g.user is not None:
-                log.debug('Account found in session, id = {id} '.format(id=g.user.id))
-
-                if g.user.id == admin_user.id:
-                    log.debug('Logged in as admin account for : {email}.'.format(email=email))
-                else:
-                    log.debug('Failed to login using admin account for : {email}, {id} already logged in.'.format(email=email, id=g.user.id))
-
-        except Exception as e:
-            log.debug('No account found in session, adding admin account to session.')
-            session['user_id'] = admin_user.id
-
-        else:
-            log.debug('User ID with no account found in session. Appending admin account to global logged in user.')
-
-            user_id = session.get('user_id', 0)
-            g.user = Users.query.filter(Users.id == user_id).first()
-
     else:
         log.debug('PUBLIC MODE ENABLED')
+
+    from mod_auth.models import Users, AccountType
+    email = app.config['ADMIN_EMAIL']
+    admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
+
+    if admin_user is None:
+        admin_user = Users(email=email,
+                           name=app.config['ADMIN_NAME'],
+                           password=app.config['ADMIN_PWD'],
+                           account_type=AccountType.admin)
+
+        db.session.add(admin_user)
+        db.session.commit()
+
+        log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
+
+    else:
+        log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
+
+    try:
+        if g.user is not None:
+            log.debug('Account found in session, id = {id} '.format(id=g.user.id))
+
+            if g.user.id == admin_user.id:
+                log.debug('Logged in as admin account for : {email}.'.format(email=email))
+            else:
+                log.debug('Failed to login using admin account for : {email}, {id} already logged in.'.format(email=email, id=g.user.id))
+
+    except Exception as e:
+        log.debug('No account found in session, adding admin account to session.')
+        session['user_id'] = admin_user.id
+
+    else:
+        log.debug('User ID with no account found in session. Appending admin account to global logged in user.')
+
+        user_id = session.get('user_id', 0)
+        g.user = Users.query.filter(Users.id == user_id).first()
 
     return True
 
