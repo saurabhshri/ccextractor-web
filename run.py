@@ -85,29 +85,28 @@ def init_app() -> bool:
             True if successful, False otherwise.
     """
 
-    # Setting 'Application Mode'
+
     from mod_auth.models import Users, AccountType
-    
+    email = app.config['ADMIN_EMAIL']
+    admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
+
+    if admin_user is None:
+        admin_user = Users(email=email,
+                           name=app.config['ADMIN_NAME'],
+                           password=app.config['ADMIN_PWD'],
+                           account_type=AccountType.admin)
+
+        db.session.add(admin_user)
+        db.session.commit()
+
+        log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
+    else:
+        log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
+
+    # Setting 'Application Mode'    
     log.debug('INIT : Checking app mode.')
     if app.config['ENABLE_LOCAL_MODE']:
         log.debug('LOCAL MODE ENABLED')
-
-        email = app.config['ADMIN_EMAIL']
-        admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
-
-        if admin_user is None:
-            admin_user = Users(email=email,
-                               name=app.config['ADMIN_NAME'],
-                               password=app.config['ADMIN_PWD'],
-                               account_type=AccountType.admin)
-
-            db.session.add(admin_user)
-            db.session.commit()
-
-            log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
-
-        else:
-            log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
 
         try:
             if g.user is not None:
@@ -130,20 +129,6 @@ def init_app() -> bool:
 
     else:
         log.debug('PUBLIC MODE ENABLED')
-
-        email = app.config['ADMIN_EMAIL']
-        admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
-
-        if admin_user is None:
-            admin_user = Users(email=email,
-                               name=app.config['ADMIN_NAME'],
-                               password=app.config['ADMIN_PWD'],
-                               account_type=AccountType.admin)
-
-            db.session.add(admin_user)
-            db.session.commit()
-
-            log.debug('Created admin account for : {email}, ID : {id}'.format(email=email, id=admin_user.id))
 
     return True
 
