@@ -86,6 +86,8 @@ def init_app() -> bool:
     """
 
     # Setting 'Application Mode'
+    from mod_auth.models import Users, AccountType
+    
     log.debug('INIT : Checking app mode.')
     if app.config['ENABLE_LOCAL_MODE']:
         log.debug('LOCAL MODE ENABLED')
