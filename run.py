@@ -85,7 +85,7 @@ def init_app() -> bool:
             True if successful, False otherwise.
     """
 
-
+    log.debug('INIT : Creating admin account.')
     from mod_auth.models import Users, AccountType
     email = app.config['ADMIN_EMAIL']
     admin_user = Users.query.filter(Users.email == app.config['ADMIN_EMAIL']).first()
