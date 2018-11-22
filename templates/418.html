@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="mt-10"></div>
+    <h1>Error 418 - Nuclear Apolcalypse</h1>
+    <p>You can:
+        <ul>
+            <li>Make sure you didn't press the big red button.</li>
+            <li>Grab a gas mask cause' it's gonna be a wild one. Do this if you pressed the button.</li>
+            <li>Not navigate to 418.html and instead go somewhere like <a href="404.html">here</a>.</li>
+        </ul>
+    </p>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+console.log("I wonder.. if I can crash the server.");
+console.log("Can I steal the users mind?");
+console.log("[Do ahem()]");
+
+function ahem() {
+    console.log("Oh.. uh..");
+    console.log("You shouldn't be here.");
+    console.log("It's my job to.. to.. I guess.. keep you out of here.");
+    console.log("Eh, it's fine, actually.");
+    console.log("I'm gonna play my game where stuff is unavailable.");
+    console.log("Cya.");
+    console.log("[Do cya()]");
+}
+function cya() {
+    console.log("||Achievement Get: Manners||");
+    console.log("||Say \"Cya\" to the Hacker.");
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="mt-10"></div>
+    <h1>Error 401 - Unauthorized</h1>
+    <p>You can:
+        <ul>
+            <li>Make sure you have the proper authentication to access this page</li>
+            <li>If you do, let us know <a href="https://github.com/saurabhshri/ccextractor-web/issues/new">here</a>.</li>
+            <li>Find an easter egg. I don't know.. you do you. (Quick tip though: to start, press enter).</li>
+        </ul>
+    </p>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('keypress', function(ev){
+        if(ev.keyCode === 38) {
+            if(ev.keyCode === 38) {
+                if(ev.keyCode === 40) {
+                    if(ev.keyCode === 40) {
+                        if(ev.keyCode === 37) {
+                            if(ev.keyCode === 39) {
+                                if(ev.keyCode === 37) {
+                                    if(ev.keyCode === 39) {
+                                        if(ev.keyCode === 65) {
+                                            if(ev.keyCode === 67) {
+                                                if(ev.keyCode === 13) {
+                                                    console.log("Good job, gamer. Have a cookie!");
+                                                    console.log("Oh.. and maybe check this out.");
+                                                    console.log("[Do showme()]");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    function showme() {
+        window.location.href='418.html';
+    }
+</script>
+
+{% endblock %}

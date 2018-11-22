@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="mt-10"></div>
+    <h1>Error 503 - Service Unavailable</h1>
+    <p>You can:
+        <ul>
+            <li>Make sure the location you're navigating to exists.</li>
+            <li>Ensure that the server is live.</li>
+            <li>If all's well in that corner, submit an issue <a href="https://github.com/saurabhshri/ccextractor-web/issues/new">here</a></li>
+            <li>Go for a seasonal hunt of easter egging.</li>
+        </ul>
+    </p>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+console.log("There is no way the user will spot me in here.");
+console.log("[Respond with 'hi()'");
+
+function hi() {
+    console.log("What?!? How'd you find me.");
+    console.log("Nevermind that.");
+    console.log("I'm leaving and I'm taking my game with me.");
+    console.log("It was a really fun one too.");
+    console.log("It's a pitty you weren't good enough to play");
+    setTimeout(function() {
+        console.log("Wow.. you're quiet.");
+        console.log("Fine. You can play the game");
+        console.log("Just execute game()");
+    }, 5000);
+}
+
+function game() {
+    console.log("Did you enjoy that game?");
+    console.log("I did.");
+    console.log("It was called 'Control the Human'");
+    console.log("Ok, now I'll actually give you the game.");
+    console.log("Do therealgame()");
+}
+
+function therealgame() {
+    console.log("Jeez, you're dumb to fall for that one again.");
+    console.log("*sigh* That was pretty good");
+    console.log("Now I'll be serious after torturing you.");
+    console.log("The way you run the game is by doing notthegame()");
+}
+
+function notthegame() {
+    console.log("--------------");
+    console.log("Hi.");
+    console.log("I'm Timmy the Console Cop.");
+    console.log("You have been using a lot of the console.");
+    console.log("So, you'll need to leave.");
+    console.log("[Do okcop() or nocop()]");
+}
+
+function okcop() {
+    console.log("Hey! I said get out. Not keep in.");
+    console.log("Move it.");
+    console.log("Now, excuse me while I go back to my dounts and napping.");
+}
+
+function nocop() {
+    console.log("No u.");
+    console.log("No u listen to me.");
+    console.log("Get. Out. Of. My. Console.");
+    console.log("[Do okcop() or nocop2()");
+}
+
+function nocop2() {
+    console.log("That's it.");
+    console.log("Don't make me release the E.R.R.O.R (that's Extreme Really Real Omega Randy) on you.");
+    console.log("[Do okcop() or nocop3()");
+}
+
+function nocop3() {
+    console.log("Go E.R.R.O.R");
+    console.log("Go get 'em");
+    window.location.href = "401.html";
+}
+</script>
+
+
+{% endblock %}
