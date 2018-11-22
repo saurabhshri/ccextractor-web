@@ -210,4 +210,4 @@ def logout():
     user_log.debug('[User: {user_id}] logged out from IP: {ip}'.format(user_id=g.user.id, ip=request.remote_addr))
     session.pop('user_id', None)
     flash('You have been logged out', 'success')
-    return redirect(url_for('.login'))
+    return redirect(url_for('mod_landing.index'))
