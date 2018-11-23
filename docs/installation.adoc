@@ -41,7 +41,7 @@ Configured using `ENABLE_LOCAL_MODE`. Set it to`True` for _Local Mode_ and `Fals
 ==== Public Mode
 
 - To use when deploying the app on public server, where different people can access the app.
-- No default account is created.
+- Also creates an Admin User, with credentials from secret config (instance/config.py)
 - Each user creates their own account and all operations are under their account.
 - Admin account can be created by granting 'Role' as 'admin'.
 
