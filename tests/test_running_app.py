@@ -8,7 +8,7 @@ Link     : https://github.com/saurabhshri
 """
 import unittest, requests
 
-from run import app, init_app
+from run import app
 from mod_auth.models import AccountType, Users
 
 class TestRunningApp(unittest.TestCase):
