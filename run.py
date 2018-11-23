@@ -95,7 +95,7 @@ def init_app() -> bool:
                            name=app.config['ADMIN_NAME'],
                            password=app.config['ADMIN_PWD'],
                            account_type=AccountType.admin)
-
+        print('---------------\n-\n--\n---\n---\n-----------------------------------------------------------')
         db.session.add(admin_user)
         db.session.commit()
 
