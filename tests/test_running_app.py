@@ -23,5 +23,6 @@ class TestRunningApp(unittest.TestCase):
         """
         Test that an admin user is created on initializing app
         """  
-        user = Users.query.filter(Users.account_type == AccountType.admin).first()
-        self.assertNotEqual(user, None)
+        with app.test_client() as c:
+	        user = Users.query.filter(Users.account_type == AccountType.admin).first()
+	        self.assertNotEqual(user, None)
