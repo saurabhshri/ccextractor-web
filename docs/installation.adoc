@@ -33,7 +33,6 @@ Configured using `ENABLE_LOCAL_MODE`. Set it to`True` for _Local Mode_ and `Fals
 ==== Local Mode
 
 - To use when deploying the app on local/private server for personal/single/isolated use.
-- Creates an Admin User, with credentials from secret config (instance/config.py)
 - By default logs in as this admin user.
 - All the operations (upload, processing, deletion etc. are done through this account.
 - There still exist the capability to create (and login as) other users.
@@ -41,7 +40,6 @@ Configured using `ENABLE_LOCAL_MODE`. Set it to`True` for _Local Mode_ and `Fals
 ==== Public Mode
 
 - To use when deploying the app on public server, where different people can access the app.
-- Also creates an Admin User, with credentials from secret config (instance/config.py)
 - Each user creates their own account and all operations are under their account.
 - Admin account can be created by granting 'Role' as 'admin'.
 
