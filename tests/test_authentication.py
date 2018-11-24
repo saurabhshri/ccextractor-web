@@ -162,18 +162,6 @@ class TestProfile(unittest.TestCase):
 
 
 def login_helper(client, email, password, submit='Login'):
-    with app.app_context():
-        admin_user = Users.query.filter(
-            Users.email == app.config['ADMIN_EMAIL']).first()
-
-        if admin_user is None:
-            admin_user = Users(email=app.config['ADMIN_EMAIL'],
-                               name=app.config['ADMIN_NAME'],
-                               password=app.config['ADMIN_PWD'],
-                               account_type=AccountType.admin)
-
-            db.session.add(admin_user)
-            db.session.commit()
     return client.post('/login', data=dict(email=email,
                                            password=password, submit=submit), follow_redirects=True)
 
