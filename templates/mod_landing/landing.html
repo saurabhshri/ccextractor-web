@@ -5,10 +5,16 @@
         <div class="jumbotron">
             <h1 class="display-5">CCExtractor Web</h1>
             <p class="lead">A web interface for extracting subtitles from videos</p><hr/>
+            {% if details.user %}
+            <div>
+                <a class="btn btn-primary" href="{{ url_for('mod_dashboard.dashboard') }}" role="button">Go to User Dashboard</a>
+            </div>
+            {% else %}
             <div>
                 <a class="btn btn-primary" href="{{ url_for('mod_auth.login') }}" role="button">Login</a>
                 <span style="margin-left: 8px">or <a href="{{ url_for('mod_auth.signup') }}">create an account</a></span>
             </div>
+            {% endif %}
         </div>
         <div class="row">
             <div class="col-md-8">
