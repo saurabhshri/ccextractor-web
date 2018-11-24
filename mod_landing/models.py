@@ -16,6 +16,6 @@ class LandingPageStatistics():
     files_completed_count = 0
 
     def __init__(self):
-        self.users = Users.query.all(),
-        self.files_pending =  ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).all(),
-        self.files_completed =  ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).all()
+        self.user_count = len(Users.query.all())
+        self.files_pending_count = len(ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.pending)).all())
+        self.files_completed_count = len(ProcessQueue.query.filter((ProcessQueue.status == ProcessStauts.completed)).all())
