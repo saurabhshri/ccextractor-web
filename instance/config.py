@@ -163,7 +163,7 @@ ENABLE_LOCAL_MODE = False
     Name:       ADMIN_NAME
                 ADMIN_EMAIL
                 ADMIN_PWD
-    Summary:    Creates an admin User, with these credentials. All the operations (upload, processing,
+    Summary:    Creates an admin User, with these credentials. In 'local' mode, all the operations (upload, processing,
                 deletion etc. are done through this account. For more details about this, please refer to 
                 the README file.
     Required:   Yes
