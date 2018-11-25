@@ -68,6 +68,11 @@ class LayoutHelper():
         else:
             self.entries['menu'] = [
                 {
+                    'display_name': 'Home',
+                    'url': url_for('mod_landing.index'),
+                    'icon': 'fa fa-fw fa-home'
+                },
+                {
                     'display_name': 'Login',
                     'url': url_for('mod_auth.login'),
                     'icon': 'fa fa-fw fa-sign-in'
