@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="display-5">CCExtractor Web</h1>
+            <p class="lead">A web interface for extracting subtitles from videos</p><hr/>
+            {% if details.user %}
+            <div>
+                <a class="btn btn-primary" href="{{ url_for('mod_dashboard.dashboard') }}" role="button">Go to User Dashboard</a>
+            </div>
+            {% else %}
+            <div>
+                <a class="btn btn-primary" href="{{ url_for('mod_auth.login') }}" role="button">Login</a>
+                <span style="margin-left: 8px">or <a href="{{ url_for('mod_auth.signup') }}">create an account</a></span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-info-circle"></i> About</div>
+                    <div class="card-body">
+                        <div>
+                            <b>Q: What is CCExtractor? What is CCExtractor Web?</b><br/>
+                            <p>A: CCExtractor is a tool that extracts subtitles from video files. Originally written as a desktop program, CCExtractor can now be run any device with a network connection through CCExtractor Web (you are here!).</p>
+                        </div>
+                        <div>
+                            <b>Q: How do I get started?</b><br/>
+                            <p>A: Simple! <a href="{{ url_for('mod_auth.signup') }}">Create an account</a> or <a href="{{ url_for('mod_auth.login') }}">login</a> to access the dashboard and upload video files for processing. A full guide for using CCExtractor Web can be found <a href="https://github.com/saurabhshri/ccextractor-web/blob/development/docs/usage.adoc">here</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="card">
+                    <div class="card-header"><i class="fa fa-bar-chart"></i> Statistics</div>
+                    <div class="card-body">
+                        <div><span class="h4">{{ statistics.user_count }}</span> <span>users</span></div>
+                        <div><span class="h4">{{ statistics.files_pending_count }}</span> <span>jobs queued</span></div>
+                        <div><span class="h4">{{ statistics.files_completed_count }}</span> <span>jobs processed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
