@@ -262,7 +262,7 @@ def internal_server_error_handler(e):
     return render_template('500.html', layout=layout.get_entries()), 500
 
 @app.errorhandler(503)
-def unauthorized_handler(e):
+def service_unavailable_handler(e):
     if g.user is not None:
         details = DetailsForTemplate(g.user.id, admin_dashboard=False)
         layout = LayoutHelper(logged_in=True, details=details)
