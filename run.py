@@ -273,3 +273,31 @@ def service_unavailable_handler(e):
 if __name__ == '__main__':
     log.debug("Running App.")
     app.run(host='0.0.0.0')
+
+@app.route('/401')
+def errorrs():
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('401.html', layout=layout.get_entries()), 401
+  
+@app.route('/418')
+def errorrs():
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('401.html', layout=layout.get_entries()), 418
+  
+@app.route('/503')
+def errorrs():
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('401.html', layout=layout.get_entries()), 503
+
