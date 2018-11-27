@@ -240,6 +240,14 @@ def page_not_found_handler(e):
         layout = LayoutHelper(logged_in=False)
     return render_template('404.html', layout=layout.get_entries()), 404
 
+@app.errorhandler(401)
+def unauthorized_handler(e):
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('401.html', layout=layout.get_entries()), 401
 
 @app.errorhandler(500)
 def internal_server_error_handler(e):
@@ -252,6 +260,15 @@ def internal_server_error_handler(e):
     else:
         layout = LayoutHelper(logged_in=False)
     return render_template('500.html', layout=layout.get_entries()), 500
+
+@app.errorhandler(503)
+def unauthorized_handler(e):
+    if g.user is not None:
+        details = DetailsForTemplate(g.user.id, admin_dashboard=False)
+        layout = LayoutHelper(logged_in=True, details=details)
+    else:
+        layout = LayoutHelper(logged_in=False)
+    return render_template('503.html', layout=layout.get_entries()), 503
 
 if __name__ == '__main__':
     log.debug("Running App.")
