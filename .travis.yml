@@ -33,7 +33,7 @@ before_install:
   - sudo apt-get -y install libvirt-dev
 
 script:
-  - coverage --omit=tests/* run -m unittest discover
+  - coverage run --omit=tests/* -m unittest discover
 
 after_success:
   - codecov
