@@ -11,6 +11,7 @@ import unittest
 from run import app
 from mail import send_simple_message, get_api_url
 
+
 class TestEmail(unittest.TestCase):
     def setUp(self):
         pass

@@ -10,13 +10,14 @@ import enum
 import pytz
 
 from flask import url_for
-from datetime import datetime, timezone
+from datetime import datetime
 from tzlocal import get_localzone
 
 from database import db
 
 from mod_auth.controller import generate_verification_code
 from mod_auth.models import Users, AccountType
+
 
 class ProcessStauts(enum.Enum):
     pending = 'pending'
@@ -25,10 +26,12 @@ class ProcessStauts(enum.Enum):
     error = 'error'
     missing_file = 'file not found'
 
+
 class Platforms(enum.Enum):
     linux = 'linux'
     windows = 'windows'
     mac = 'mac'
+
 
 class UploadedFiles(db.Model):
     __tablename__ = 'uploaded_files'
@@ -110,11 +113,11 @@ class ProcessQueue(db.Model):
 
         if ccextractor_version is None:
             if platform is Platforms.linux:
-                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.linux_executable_path != None).order_by('-id').first()
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.linux_executable_path is not None).order_by('-id').first()
             elif platform is Platforms.windows:
-                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.windows_executable_path != None).order_by('-id').first()
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.windows_executable_path is not None).order_by('-id').first()
             else:
-                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.mac_executable_path != None).order_by('-id').first()
+                ccextractor_version = CCExtractorVersions.query.filter(CCExtractorVersions.mac_executable_path is not None).order_by('-id').first()
             self.ccexractor_version = ccextractor_version.version
         else:
             self.ccexractor_version = ccextractor_version
@@ -136,6 +139,7 @@ class ProcessQueue(db.Model):
         """
         self.queue_timestamp = pytz.utc.localize(self.queue_timestamp, is_dst=None)
 
+
 class CCExtractorVersions(db.Model):
     __tablename__ = 'ccextractor_versions'
     id = db.Column(db.Integer, primary_key=True)
@@ -154,6 +158,7 @@ class CCExtractorVersions(db.Model):
 
     def __repr__(self):
         return '<CExtractorVersion {id}>'.format(id=self.id)
+
 
 class CCExtractorParameters(db.Model):
     __tablename__ = 'ccextractor_parameters'
@@ -186,7 +191,7 @@ class DetailsForTemplate():
         self.kvm_enabled = app.config['ENABLE_KVM']
 
         if self.kvm_enabled:
-            from mod_kvm.models import KVM, KVM_Status
+            from mod_kvm.models import KVM
             self.kvm = KVM.query.all()
 
         if self.user.account_type == AccountType.admin:

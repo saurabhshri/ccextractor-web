@@ -39,6 +39,7 @@ def before_app_request():
     user_id = session.get('user_id', 0)
     g.user = Users.query.filter(Users.id == user_id).first()
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -50,6 +51,7 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
 
 def check_account_type(account_types=None, parent_route=None):
     def access_decorator(f):
@@ -103,7 +105,8 @@ def generate_verification_code(data):
     key_bytes = bytes(key, 'latin-1')
     data_bytes = bytes(data, 'latin-1')
 
-    return hmac.new(key_bytes, data_bytes , hashlib.sha256).hexdigest()
+    return hmac.new(key_bytes, data_bytes, hashlib.sha256).hexdigest()
+
 
 def send_verification_mail(email, verification_code, expires):
 
@@ -114,6 +117,7 @@ def send_verification_mail(email, verification_code, expires):
     body = render_template('mod_auth/verification_mail.html', url=verification_url, email=email,
                            verification_code=verification_code, expires=expires)
     return send_simple_message(email, subject, str(body))
+
 
 @mod_auth.route('/verify/<string:email>/<string:received_verification_code>/<int:expires>', methods=['GET', 'POST'])
 def verify_account(email, received_verification_code, expires):
@@ -163,6 +167,7 @@ def send_signup_confirmation_mail(email):
     subject = "Account creation successful!"
     body = render_template('mod_auth/signup_confirmation.html')
     return send_simple_message(email, subject, str(body))
+
 
 @mod_auth.route('/login', methods=['GET', 'POST'])
 def login():

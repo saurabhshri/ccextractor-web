@@ -25,9 +25,10 @@ class AccountType(enum.Enum):
 
 
 file_access = db.Table('file_access',
-    db.Column('file_id', db.Integer, db.ForeignKey('uploaded_files.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
-)
+                       db.Column('file_id', db.Integer, db.ForeignKey('uploaded_files.id')),
+                       db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+                       )
+
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -64,7 +65,6 @@ class Users(db.Model):
 
     def __repr__(self):
         return '<User {username}>'.format(username=self.username)
-
 
     """
     @property
@@ -118,8 +118,9 @@ class Users(db.Model):
         """
         self.sign_up_timestamp = pytz.utc.localize(self.sign_up_timestamp, is_dst=None)
 
+
 def generate_username(email):
-    #TODO : Disallow a set of usernames such as 'admin'
+    # TODO : Disallow a set of usernames such as 'admin'
     base_username = username = email.split('@')[0]
     count_suffix = 1
     while True:

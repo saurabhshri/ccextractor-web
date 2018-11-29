@@ -7,7 +7,7 @@ Link     : https://github.com/saurabhshri
 
 """
 from datetime import datetime, timezone
-from flask import url_for, g
+from flask import url_for
 
 
 class LayoutHelper():
@@ -50,7 +50,7 @@ class LayoutHelper():
                                 'url': details.user_dashboard_url,
                                 'icon': 'fa fa-fw fa-user'
                             })
-                except AttributeError as e:
+                except AttributeError:
                     pass
 
             else:
@@ -62,7 +62,7 @@ class LayoutHelper():
                                 'url': details.admin_dashboard_url,
                                 'icon': 'fa fa-fw fa-lock'
                             })
-                except AttributeError as e:
+                except AttributeError:
                     pass
 
         else:

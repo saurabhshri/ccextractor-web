@@ -8,7 +8,7 @@ Link     : https://github.com/saurabhshri
 """
 
 import json
-import argparse
+
 
 class ParseJob():
     def __init__(self, job_file):
@@ -27,6 +27,7 @@ class ParseJob():
 
     def get_job_config(self):
         return self.job_config
+
 
 class ParseParameters():
     def __init__(self, argv):
@@ -47,6 +48,7 @@ class ParseParameters():
     def get_raw_parameters(self):
         return self.paramters
 
+
 class ParseCCExtractorParameters():
     def __init__(self, params):
         params = json.loads(params)
@@ -56,5 +58,3 @@ class ParseCCExtractorParameters():
             self.params_list.append(key)
             if value:
                 self.params_list.append(value)
-
-
