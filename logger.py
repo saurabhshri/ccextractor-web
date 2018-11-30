@@ -22,7 +22,6 @@ class Logger:
         self.console_level = logging.getLevelName(console_level)
         self.file_level = logging.getLevelName(file_level)
 
-
         if format is None:
             format = '[%(asctime)s] [%(name)s] [%(levelname)s] [%(pathname)s#L%(lineno)d]\t| "%(message)s"'
         format = logging.Formatter(format)

@@ -16,7 +16,7 @@ class Config(object):
 
     """
         Name:       ROOT_URL
-        Summary:    Enter the root url (domain) of the application. This will serve as the base URL. All the app 
+        Summary:    Enter the root url (domain) of the application. This will serve as the base URL. All the app
                     endpoints routes will be with respect to this, including mail links.
         Required:   Yes
         Tip:        Do not append '/' at the end of the URL.
@@ -79,6 +79,7 @@ class Config(object):
     """
     MEDIAINFO_LIB_PATH = "/usr/local/lib/libmediainfo.dylib"
 
+
 class DevelopmentConfig(Config):
     """
     This class contains the sepcific configuration for Development environment along with common configuration.
@@ -86,12 +87,14 @@ class DevelopmentConfig(Config):
 
     DEBUG = True
 
+
 class ProductionConfig(Config):
     """
     This class contains the sepcific configuration for Production environment along with common configuration.
     """
 
     DEBUG = False
+
 
 class LocalServerConfig(Config):
     """

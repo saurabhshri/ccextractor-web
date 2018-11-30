@@ -10,7 +10,7 @@ Link     : https://github.com/saurabhshri
 import datetime
 import json
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, flash, redirect, url_for
 
 from database import db
 
@@ -106,6 +106,7 @@ def check_kvm_status(kvm_name):
 
     return redirect(url_for('mod_dashboard.admin'))
 
+
 def update_kvm_status(kvm_name):
     kvm = KVM.query.filter(KVM.name == kvm_name).first()
     if kvm is None:
@@ -134,4 +135,3 @@ def update_kvm_status(kvm_name):
 
     resp = json.dumps(resp)
     return resp
-

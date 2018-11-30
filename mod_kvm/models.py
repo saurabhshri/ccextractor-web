@@ -24,9 +24,10 @@ from config_parser import general_config
 
 
 kvm_logger = Logger(log_level=general_config['LOG_LEVEL'],
-                     dir=general_config['LOG_FILE_DIR'],
-                     filename="kvm")
+                    dir=general_config['LOG_FILE_DIR'],
+                    filename="kvm")
 kvm_log = kvm_logger.get_logger("kvm")
+
 
 class KVM_Status(enum.Enum):
     running = 'running'
@@ -38,6 +39,7 @@ class KVM_Status(enum.Enum):
     unknown = 'unknown'
     not_found = 'not_found'
 
+
 class KVM_cmds(enum.Enum):
     start = 'start'
     shutdown = 'shutdown'
@@ -46,7 +48,8 @@ class KVM_cmds(enum.Enum):
     suspend = 'suspend'
     resume = 'resume'
     reboot = 'reboot'
-    maintain = 'maintain' #suspend + db shows maintainance
+    maintain = 'maintain'  # suspend + db shows maintainance
+
 
 class KVM(db.Model):
     __tablename__ = 'kvm'
@@ -81,6 +84,7 @@ class KVM(db.Model):
         Localize the timestamp to utc
         """
         self.start_timestamp = pytz.utc.localize(self.start_timestamp, is_dst=None)
+
 
 class VM():
     def __init__(self, name):

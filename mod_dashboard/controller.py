@@ -11,7 +11,7 @@ import shutil
 import json
 import hashlib
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response, g, send_from_directory
+from flask import Blueprint, render_template, request, flash, redirect, url_for, g, send_from_directory
 
 from mod_dashboard.models import UploadedFiles, ProcessQueue, CCExtractorVersions, Platforms, CCExtractorParameters, DetailsForTemplate
 from mod_dashboard.forms import UploadForm, NewCCExtractorVersionForm, NewJobForm, NewCCExtractorParameterForm
@@ -26,6 +26,7 @@ mod_dashboard = Blueprint("mod_dashboard", __name__)
 
 
 BUF_SIZE = 65536  # reading file in 64kb chunks
+
 
 @mod_dashboard.route('/upload', methods=['GET', 'POST'])
 @mod_dashboard.route('/dashboard', methods=['GET', 'POST'])
@@ -67,7 +68,6 @@ def dashboard():
                     flash('Invalid file uploaded, No video track found.', 'error')
                     return redirect(url_for('mod_dashboard.dashboard'))
 
-
             file_hash = create_file_hash(temp_path)
 
             if file_exist(file_hash):
@@ -98,7 +98,7 @@ def dashboard():
                 file_db.user.append(g.user)
                 db.session.commit()
 
-                #TODO: Process video to get media info and store in an xml file
+                # TODO: Process video to get media info and store in an xml file
 
                 os.rename(temp_path, os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename))
                 log.debug('File moved to video repository : {path}'.format(path=os.path.join(app.config['VIDEO_REPOSITORY'], file_db.filename)))
@@ -119,7 +119,7 @@ def dashboard():
 
             file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
 
-            #TODO:Process parameters before adding to queue
+            # TODO:Process parameters before adding to queue
             resp = json.loads(parse_ccextractor_parameters(form.parameters.data))
             if resp['status'] == 'success':
                 parameters = json.dumps(resp['parameters'])
@@ -258,6 +258,7 @@ def user_queue():
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
 
+
 @mod_dashboard.route('/admin-dashboard/files', methods=['GET', 'POST'])
 @login_required
 @check_account_type(account_types=[AccountType.admin])
@@ -274,6 +275,7 @@ def admin_queue():
     details = DetailsForTemplate(g.user.id, admin_dashboard=True)
     layout = LayoutHelper(logged_in=True, details=details)
     return render_template('mod_dashboard/queue.html', layout=layout.get_entries(), details=details)
+
 
 @mod_dashboard.route('/admin-dashboard/users', methods=['GET', 'POST'])
 @login_required
@@ -385,7 +387,6 @@ def manage_parameter(function, id):
             flash('Parameter deleted!', 'success')
             log.debug('Deleted parameter: {param_id} by user : {user_id}'.format(param_id=parameter.id, user_id=g.user.id))
 
-
         return redirect(request.referrer)
 
     log.debug('Invalid parameter manipulation request: {function} for parameter:{parameter_id} by user: {user_id}'.format(function=function, param_id=id, user_id=g.user.id))
@@ -437,7 +438,7 @@ def progress():
             log.error('[Job Number: {queued_file_id}] > Invalid token for progress report. Token : {token}'.format(queued_file_id=queued_file.id, token=request.form['token']))
             return "Invalid Token"
 
-    log.error('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token= request.form['token']))
+    log.error('Invalid request for progress report. Job No.: {job_no} Token : {token}'.format(job_no=job_number, token=request.form['token']))
     return "Invalid Request"
 
 
@@ -468,7 +469,7 @@ def update_cmd_json(parameter, type="new"):
     with open(cmd_json_file) as cmd:
         commands = json.load(cmd)
 
-    index = 0;
+    index = 0
     for param in commands['commands']:
         if parameter.parameter in param['parameter']:
             if type == 'new':
@@ -480,7 +481,7 @@ def update_cmd_json(parameter, type="new"):
                 del commands['commands'][index]
                 log.debug('Removing parameter: {param} from JSON file'.format(param=param))
 
-        index += 1;
+        index += 1
 
     if type != 'delete':
         new_command = {"data": parameter.parameter,
@@ -507,12 +508,14 @@ def create_file_hash(path):
             hash.update(data)
     return hash.hexdigest()
 
+
 def file_exist(file_hash):
     file = UploadedFiles.query.filter(UploadedFiles.hash == file_hash).first()
     if file is None:
         return False
     else:
         return True
+
 
 def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, parameters, remarks, output_file_extension='srt'):
     from flask import current_app as app
@@ -591,6 +594,7 @@ def add_file_to_queue(added_by_user, filename, ccextractor_version, platform, pa
     else:
         return {'status': 'duplicate', 'job_number': queued_file.id}
 
+
 def parse_ccextractor_parameters(params):
     from flask import current_app as app
     params = params.split()
@@ -607,7 +611,7 @@ def parse_ccextractor_parameters(params):
     param_count = 0
     is_value = False
 
-    #TODO: Optimise the whole process, prepare lists and output extension while parsing
+    # TODO: Optimise the whole process, prepare lists and output extension while parsing
     for param in params:
         param_count += 1
 
@@ -668,7 +672,7 @@ def parse_ccextractor_parameters(params):
             output_file_extension = key[5:]
 
         elif key in ['-xml', '-srt', '-dvdraw', '-sami', '-smi', '-webvtt', '--transcript', '-txt', '--timedtranscript',
-                   '-ttxt', '-null']:
+                     '-ttxt', '-null']:
             output_file_extension = key[1:]
 
     resp = {'status': status,

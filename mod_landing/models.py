@@ -10,6 +10,7 @@ Link     : https://github.com/saurabhshri
 from mod_dashboard.models import ProcessQueue, ProcessStauts
 from mod_auth.models import Users
 
+
 class LandingPageStatistics():
     user_count = 0
     files_pending_count = 0

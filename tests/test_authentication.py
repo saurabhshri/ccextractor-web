@@ -10,8 +10,6 @@ import unittest
 import time
 from run import app
 from tests.template_test_helper import captured_templates
-from database import db
-from mod_auth.models import Users, AccountType
 from mod_auth.controller import generate_verification_code, send_verification_mail, send_signup_confirmation_mail
 
 
@@ -198,8 +196,7 @@ class TestFilesAdmin(unittest.TestCase):
 
     def test_can_access_uploaded_files_list_page(self):
         client = app.test_client()
-        r = login_helper(
-            client, app.config['ADMIN_EMAIL'], app.config['ADMIN_PWD'])
+        login_helper(client, app.config['ADMIN_EMAIL'], app.config['ADMIN_PWD'])
 
         response = client.get("/admin-dashboard/files")
         self.assertEqual(response.status_code, 200)
@@ -227,6 +224,7 @@ class TestErrorHandlers(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertIn(
             b'<h1>Error 404 - Page not found</h1>', response.data)
+
     def test_404_page_with_dashboard_links_is_shown_when_logged_in(self):
         client = app.test_client()
         login_helper(

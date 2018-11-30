@@ -24,7 +24,7 @@ from mod_dashboard.models import DetailsForTemplate
 app = Flask(__name__, instance_relative_config=True)
 
 app.config.from_mapping(general_config)
-app.config.from_pyfile('config.py') # secret configurations : 'instance/config.py'
+app.config.from_pyfile('config.py')  # secret configurations : 'instance/config.py'
 
 # creating logger object
 logger = Logger(log_level=app.config['LOG_LEVEL'],
@@ -48,6 +48,7 @@ if app.config['ENABLE_KVM']:
     app.register_blueprint(mod_kvm)
 
 log.debug("Blueprints registered.")
+
 
 def init_app() -> bool:
     """
@@ -102,7 +103,7 @@ def init_app() -> bool:
     else:
         log.debug('Failed to create admin account for : {email}, account already exists.'.format(email=email))
 
-    # Setting 'Application Mode'    
+    # Setting 'Application Mode'
     log.debug('INIT : Checking app mode.')
     if app.config['ENABLE_LOCAL_MODE']:
         log.debug('LOCAL MODE ENABLED')
@@ -116,7 +117,7 @@ def init_app() -> bool:
                 else:
                     log.debug('Failed to login using admin account for : {email}, {id} already logged in.'.format(email=email, id=g.user.id))
 
-        except Exception as e:
+        except Exception:
             log.debug('No account found in session, adding admin account to session.')
             session['user_id'] = admin_user.id
 
@@ -130,6 +131,7 @@ def init_app() -> bool:
         log.debug('PUBLIC MODE ENABLED')
 
     return True
+
 
 @app.template_filter()
 def timesince(dt, default="just now", precision=0):
@@ -193,6 +195,7 @@ def timesince(dt, default="just now", precision=0):
 
     return default
 
+
 @app.before_first_request
 def before_first_request():
     """
@@ -227,6 +230,7 @@ def before_first_request():
     os.makedirs(os.path.dirname(os.path.join(app.config['LOGS_DIR'])), exist_ok=True)
     os.makedirs(os.path.dirname(os.path.join(app.config['OUTPUT_DIR'])), exist_ok=True)
 
+
 @app.errorhandler(404)
 def page_not_found_handler(e):
     """
@@ -251,6 +255,7 @@ def internal_server_error_handler(e):
     else:
         layout = LayoutHelper(logged_in=False)
     return render_template('500.html', layout=layout.get_entries()), 500
+
 
 if __name__ == '__main__':
     log.debug("Running App.")

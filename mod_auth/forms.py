@@ -27,10 +27,12 @@ def valid_password(form, field):
             (min_pwd_len=min_pwd_len, max_pwd_len=max_pwd_len, char=pass_size)
         )
 
+
 class SignupEmailForm(FlaskForm):
     email = EmailField('Email', [DataRequired(message='Email address is not filled in.'),
                                  Email(message='Entered value is not a valid email address.')])
     submit = SubmitField('Register')
+
 
 class SignupForm(FlaskForm):
     name = StringField('Name', [DataRequired(message='Name is not filled in.')])
@@ -42,6 +44,7 @@ class SignupForm(FlaskForm):
     def validate_password_repeat(form, field):
         if field.data != form.password.data:
             raise ValidationError('The password needs to match the new password.')
+
 
 class LoginForm(FlaskForm):
     email = EmailField('Email', [DataRequired(message='Email address is not filled in.'),
