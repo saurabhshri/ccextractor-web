@@ -1,4 +1,4 @@
-# 📡 CCExtractor-Web image:https://travis-ci.org/saurabhshri/ccextractor-web.svg?branch=master["Linux/macOS Build Status", link="https://travis-ci.org/saurabhshri/ccextractor-web"] image:https://codecov.io/gh/saurabhshri/ccextractor-web/branch/master/graph/badge.svg["Linux/macOS Build Status", link="https://codecov.io/gh/saurabhshri/ccextractor-web/tree/development"]
+# 📡 CCExtractor-Web image:https://travis-ci.org/saurabhshri/ccextractor-web.svg?branch=master["Linux/macOS Build Status", link="https://travis-ci.org/saurabhshri/ccextractor-web"] image:https://codecov.io/gh/saurabhshri/ccextractor-web/branch/development/graph/badge.svg["Linux/macOS Build Status", link="https://codecov.io/gh/saurabhshri/ccextractor-web/tree/development"]
 
 A web application for subtitle extraction through CCExtractor. Being developed under GSoC 2018 with CCExtractor.
 
