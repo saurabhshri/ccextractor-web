@@ -12,7 +12,6 @@ import time
 import subprocess
 import config
 import requests
-import json
 import shutil
 
 from parsers import ParseJob, ParseParameters, ParseCCExtractorParameters
@@ -24,6 +23,7 @@ logger = Logger(log_level=config.LOG_LEVEL,
 log = logger.get_logger("daemon")
 
 parameters = ParseParameters(sys.argv)
+
 
 def get_cmd(job_config):
     video_file_path = parameters.job_dir + job_config.filename
@@ -38,13 +38,15 @@ def get_cmd(job_config):
     log.debug('Job: {job_no} >> CCX command : {cmd}".'.format(job_no=job_config.job_number, cmd=ccx_params.params_list))
     return ccx_params.params_list
 
-def report_progress(job_config, status = None, return_code = None):
+
+def report_progress(job_config, status=None, return_code=None):
     payload = {'job_number': job_config.job_number,
                'token': job_config.token,
                'report_type': 'queue_status',
                'return_code': return_code,
                'status': status}
     return requests.post(parameters.report_url, data=payload)
+
 
 def upload_log_file(job_config, filename, file_exist='yes'):
     payload = {'job_number': job_config.job_number,
@@ -55,6 +57,7 @@ def upload_log_file(job_config, filename, file_exist='yes'):
 
     return requests.post(parameters.report_url, files=files, data=payload)
 
+
 def upload_output_file(job_config, filename, file_exist='yes'):
     payload = {'job_number': job_config.job_number,
                'token': job_config.token,
@@ -62,6 +65,7 @@ def upload_output_file(job_config, filename, file_exist='yes'):
                'file_exist': file_exist}
     files = {'file': open(filename, encoding='utf-8')}
     return requests.post(parameters.report_url, files=files, data=payload)
+
 
 while True:
     job_list = [f for f in os.listdir(parameters.job_dir) if f.endswith(".json")]
@@ -137,11 +141,9 @@ while True:
             else:
                 log.debug('Job: {job_no} >> logfile status uploaded. Response Code : {code}".'.format(job_no=job_config.job_number, code=rv.status_code))
 
-
         output_file = '{path}{name}.{output_file_extension}'.format(path=parameters.output_dir,
                                                                     name=job_config.job_number,
                                                                     output_file_extension=job_config.output_file_extension)
-
 
         if os.path.exists(output_file):
             log.info('Job: {job_no} >> Uploading output file.'.format(job_no=job_config.job_number))
@@ -172,4 +174,3 @@ while True:
     else:
         log.info('Ready to process next job.')
         time.sleep(config.RETRY_TIME)
-

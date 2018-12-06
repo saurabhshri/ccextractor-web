@@ -19,8 +19,10 @@ mail_logger = Logger(log_level=general_config['LOG_LEVEL'],
                      console_level='DEBUG')
 mail_log = mail_logger.get_logger("mail")
 
+
 def get_api_url(domain):
     return "https://api.mailgun.net/v3/{domain}/messages".format(domain=domain)
+
 
 def send_simple_message(receiver, subject, body):
     api_key = app.config['MAILGUN_PVT_API_KEY']
@@ -37,15 +39,15 @@ def send_simple_message(receiver, subject, body):
 
     if response.status_code is not 200:
         mail_log.debug('\n[{response}] \nTO : {to}, \nfrom : {sender}, \nsubject : {subject}, \ntext: {text}'.format(response=response,
-                                                                                                                        to=receiver,
-                                                                                                                        sender=sender,
-                                                                                                                        subject=subject,
-                                                                                                                        text=body))
+                                                                                                                     to=receiver,
+                                                                                                                     sender=sender,
+                                                                                                                     subject=subject,
+                                                                                                                     text=body))
     else:
         mail_log.info('\n[{response}] \nTO : {to}, \nfrom : {sender}, \nsubject : {subject}, \ntext: {text}'.format(response=response,
-                                                                                                     to=receiver,
-                                                                                                     sender=sender,
-                                                                                                     subject=subject,
-                                                                                                     text=body))
+                                                                                                                    to=receiver,
+                                                                                                                    sender=sender,
+                                                                                                                    subject=subject,
+                                                                                                                    text=body))
 
     return response

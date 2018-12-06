@@ -48,7 +48,7 @@ SECRET_CONFIG_READING_TEST = 'It\'s a magical place.'
     Summary:    Enter the mailgun API key and the registered domain. Used for sending emails.
     Required:   Yes
     Tip:        Here are the articles to help you find the API key and add domain
-            
+
                 https://help.mailgun.com/hc/en-us/articles/203380100-Where-can-I-find-my-API-key-and-SMTP-credentials-
                 https://help.mailgun.com/hc/en-us/articles/203637190-How-do-I-add-a-domain-
 """
@@ -75,7 +75,7 @@ TEMP_UPLOAD_FOLDER = 'files/temp/'
 
 """
     Name:       VIDEO_REPOSITORY
-    Summary:    Enter the path to the directory where the video files should be stored. The uploaded files, upon 
+    Summary:    Enter the path to the directory where the video files should be stored. The uploaded files, upon
                 validation are kept in this directory. Files are copied to JOB directory from here.
     Required:   Yes
     Tip:        If full path is not provided, it'll use the path relative to the application root directory.
@@ -85,7 +85,7 @@ VIDEO_REPOSITORY = 'files/repository/'
 
 """
     Name:       LOGS_DIR
-    Summary:    Enter the path to the directory where the daemon uploads the job log files. When 'viewing' or 
+    Summary:    Enter the path to the directory where the daemon uploads the job log files. When 'viewing' or
                 'downloading' the log files, they are served from this directory.
     Required:   Yes
     Tip:        If full path is not provided, it'll use the path relative to the application root directory.
@@ -95,7 +95,7 @@ LOGS_DIR = 'files/logs/'
 
 """
     Name:       OUTPUT_DIR
-    Summary:    Enter the path to the directory where the daemon uploads the job output files. When 'viewing' or 
+    Summary:    Enter the path to the directory where the daemon uploads the job output files. When 'viewing' or
                 'downloading' the output files, they are served from this directory.
     Required:   Yes
     Tip:        If full path is not provided, it'll use the path relative to the application root directory.
@@ -116,10 +116,10 @@ ENABLE_KVM = True
 """
     Name:       KVM_LINUX_NAME
                 LINUX_JOBS_DIR
-    Summary:    Enter the name of linux KVM (this name will be used to perform operation on the VM) and path to the 
+    Summary:    Enter the name of linux KVM (this name will be used to perform operation on the VM) and path to the
                 nfs mount shared with Linux KVM.
     Required:   Only if ENABLE_KVM = True and Linux platform is to be made available.
-    Tip:        If full path is not provided, it'll use the path relative to the application root directory. 
+    Tip:        If full path is not provided, it'll use the path relative to the application root directory.
 """
 KVM_LINUX_NAME = 'ubuntu'
 LINUX_JOBS_DIR = 'files/mount/jobs/'
@@ -128,10 +128,10 @@ LINUX_JOBS_DIR = 'files/mount/jobs/'
 """
     Name:       KVM_WINDOWS_NAME
                 WINDOWS_JOBS_DIR
-    Summary:    Enter the name of windows KVM (this name will be used to perform operation on the VM) and path to the 
+    Summary:    Enter the name of windows KVM (this name will be used to perform operation on the VM) and path to the
                 nfs mount shared with Windows KVM.
     Required:   Only if ENABLE_KVM = True and Windows platform is to be made available.
-    Tip:        If full path is not provided, it'll use the path relative to the application root directory. 
+    Tip:        If full path is not provided, it'll use the path relative to the application root directory.
 """
 KVM_WINDOWS_NAME = ''
 WINDOWS_JOBS_DIR = ''
@@ -140,10 +140,10 @@ WINDOWS_JOBS_DIR = ''
 """
     Name:       KVM_MAC_NAME
                 MAC_JOBS_DIR
-    Summary:    Enter the name of macOS KVM (this name will be used to perform operation on the VM) and path to the 
+    Summary:    Enter the name of macOS KVM (this name will be used to perform operation on the VM) and path to the
                 nfs mount shared with macOS KVM.
     Required:   Only if ENABLE_KVM = True and macOS platform is to be made available.
-    Tip:        If full path is not provided, it'll use the path relative to the application root directory. 
+    Tip:        If full path is not provided, it'll use the path relative to the application root directory.
 """
 KVM_MAC_NAME = ''
 MAC_JOBS_DIR = ''
@@ -151,7 +151,7 @@ MAC_JOBS_DIR = ''
 
 """
     Name:       ENABLE_LOCAL_MODE
-    Summary:    Determines if the application is to be set-up in 'local' mode or 'public' mode. For more details about 
+    Summary:    Determines if the application is to be set-up in 'local' mode or 'public' mode. For more details about
                 this, please refer to the README file.
     Required:   Yes
     Tip:        Set it to either True or False
@@ -164,7 +164,7 @@ ENABLE_LOCAL_MODE = False
                 ADMIN_EMAIL
                 ADMIN_PWD
     Summary:    Creates an admin User, with these credentials. In 'local' mode, all the operations (upload, processing,
-                deletion etc. are done through this account. For more details about this, please refer to 
+                deletion etc. are done through this account. For more details about this, please refer to
                 the README file.
     Required:   Yes
     Tip:        Set it to either True or False
