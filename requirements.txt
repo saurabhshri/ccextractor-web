@@ -15,5 +15,5 @@ blinker
 libvirt-python
 requests
 pymediainfo
-flask-migrate
-flask-script
+Flask-Migrate
+Flask-Script
