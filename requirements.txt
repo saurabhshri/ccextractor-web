@@ -16,3 +16,4 @@ libvirt-python
 requests
 pymediainfo
 flask-migrate
+flask-script
