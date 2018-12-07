@@ -15,6 +15,9 @@ from database import db
 from logger import Logger
 from config_parser import general_config
 
+from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
+
 from mod_landing.controller import mod_landing
 from mod_auth.controller import mod_auth
 from mod_dashboard.controller import mod_dashboard
@@ -37,6 +40,11 @@ log.debug("Logger created.")
 
 db.init_app(app)
 log.debug("flask-sqlaclchemy (db) object created.")
+
+# Setting up migration 
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 
 # Registering blueprint for all modules
@@ -258,5 +266,6 @@ def internal_server_error_handler(e):
 
 
 if __name__ == '__main__':
+    manager.run()
     log.debug("Running App.")
     app.run(host='0.0.0.0')

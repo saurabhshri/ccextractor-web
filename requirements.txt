@@ -15,3 +15,4 @@ blinker
 libvirt-python
 requests
 pymediainfo
+flask-migrate
